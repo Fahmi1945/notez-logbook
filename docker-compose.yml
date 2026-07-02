@@ -36,7 +36,7 @@ services:
       - POSTGRES_PASSWORD=notez123 # Harus SAMA dengan PASSWD di atas
       - POSTGRES_DB=notez_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - gitea
     volumes:
