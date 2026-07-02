@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Simpan berkas ini di dalam folder prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Ubah provider sesuai database yang Anda gunakan (contoh: "mysql" atau "postgresql")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMERATIONS ---
+// Nama Enum tetap PascalCase karena di TypeScript ini akan menjadi tipe data (Type)
+enum Role {
+  user
+  mentor
+}
+
+enum MentorshipStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum LogbookStatus {
+  draft
+  submitted
+  approved
+  rejected
+}
+
+enum FeedbackAction {
+  approved
+  rejected
+}
+
+// --- MODELS ---
+// Nama Model tetap PascalCase (User, Mentorship) untuk standar Type TypeScript,
+// tetapi nama tabel di-mapping ke jamak snake_case menggunakan @@map.
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(100)
+  email         String     @unique @db.VarChar(150)
+  password_hash String   @db.VarChar(255)
+  role          Role
+  created_at    DateTime @default(now())
+
+  // Relasi Prisma (Juga menggunakan snake_case)
+  logbook_entries      LogbookEntry[]
+  feedbacks_given      Feedback[]
+  notifications        Notification[]
+  mentorships_sent     Mentorship[]   @relation("UserMentorship")
+  mentorships_received Mentorship[]   @relation("MentorMentorship")
+
+  @@map("users")
+}
+
+model Mentorship {
+  id          Int              @id @default(autoincrement())
+  user_id     Int              
+  mentor_id   Int              
+  status      MentorshipStatus @default(pending)
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt 
+  information String?          @db.VarChar(255)
+
+  // Relasi
+  user          User           @relation("UserMentorship", fields: [user_id], references: [id], onDelete: Cascade)
+  mentor        User           @relation("MentorMentorship", fields: [mentor_id], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@map("mentorships")
+}
+
+model LogbookEntry {
+  id                Int           @id @default(autoincrement())
+  user_id           Int           
+  activity_date     DateTime      @db.Date 
+  title             String        @db.VarChar(200)
+  description       String        @db.Text
+  obstacles         String?       @db.Text
+  status            LogbookStatus @default(draft)
+  status_changed_at DateTime      @updatedAt 
+  created_at        DateTime      @default(now()) 
+
+  // Relasi
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  attachments   Attachment[]
+  feedbacks     Feedback[]
+  notifications Notification[]
+
+  @@map("logbook_entries")
+}
+
+model Attachment {
+  id          Int      @id @default(autoincrement())
+  entry_id    Int      
+  file_name   String   @db.VarChar(255) 
+  file_path   String   @db.VarChar(500) 
+  uploaded_at DateTime @default(now()) 
+
+  // Relasi
+  logbook_entry LogbookEntry @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+
+  @@map("attachments")
+}
+
+model Feedback {
+  id          Int            @id @default(autoincrement())
+  entry_id    Int            
+  mentor_id   Int            
+  comment     String         @db.Text
+  action      FeedbackAction
+  created_at  DateTime       @default(now()) 
+
+  // Relasi
+  logbook_entry LogbookEntry @relation(fields: [entry_id], references: [id], onDelete: Cascade)
+  mentor        User         @relation(fields: [mentor_id], references: [id], onDelete: Cascade)
+
+  @@map("feedbacks")
+}
+
+model Notification {
+  id             Int      @id @default(autoincrement())
+  user_id        Int      
+  message        String   @db.VarChar(500)
+  is_read        Boolean  @default(false) 
+  is_read_date   DateTime @default(now()) @db.Date 
+  mentorships_id Int?     
+  logbook_id     Int?     
+  created_at     DateTime @default(now()) 
+
+  // Relasi (Exclusive Arcs)
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  mentorship    Mentorship?   @relation(fields: [mentorships_id], references: [id], onDelete: Cascade)
+  logbook_entry LogbookEntry? @relation(fields: [logbook_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

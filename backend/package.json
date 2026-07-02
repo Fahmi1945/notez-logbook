@@ -9,6 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "express": "^5.2.1",
     "express-generator": "^4.16.1",
     "pg-promise": "^12.7.0"
