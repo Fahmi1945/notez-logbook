@@ -20,14 +20,14 @@ async function startServer() {
   try {
     // Tes koneksi database
     await prisma.$connect();
-    console.log("✅ Berhasil terhubung ke database Prisma!");
+    console.log(" Berhasil terhubung ke database Prisma!");
     
     // Nyalakan server
     app.listen(PORT, () => {
-      console.log(`🚀 Server backend berjalan di http://localhost:${PORT}`);
+      console.log(` Server backend berjalan di http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("❌ Gagal terhubung ke database:");
+    console.error(" Gagal terhubung ke database:");
     console.error(error);
   }
 }

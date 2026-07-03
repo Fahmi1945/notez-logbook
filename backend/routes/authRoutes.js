@@ -2,27 +2,23 @@
 const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
+const {ipLimiter, emailLimiter} = require('../middleware/rateLimiter');
 const { register, login } = require('../controllers/authController');
+const authController = require('../controllers/authController');
 
-const authLimiter = rateLimit({
-  windowMs: 30 * 60 * 1000,  // 30 menit
-  max: 5,                    // maks 5 percobaan
-  message: {
-    success: false,
-    message: 'Terlalu banyak percobaan login. Coba lagi dalam 30 menit.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Urutan penting: cek IP dulu, baru cek email
+router.post('/login', ipLimiter, emailLimiter, authController.login);
+
+router.post('/register', ipLimiter, emailLimiter, authController.register);
 
 const app = express();
 
 // Middleware agar bisa membaca JSON dari request body Next.js nanti
 app.use(express.json()); 
 
-app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/login', (ipLimiter, emailLimiter));
 
-app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/register', ipLimiter);
 
 // Endpoint untuk register
 app.post('/api/auth/register', register);

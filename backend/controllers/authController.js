@@ -28,7 +28,7 @@ const register = async (req, res) => {
     }
 
     // 5. Hash password sebelum disimpan
-    const saltRounds = 10;
+    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // 6. Simpan ke database
@@ -48,7 +48,7 @@ const register = async (req, res) => {
         email: newUser.email,
         role: newUser.role
       }
-    });
+    }); 
 
   } catch (error) {
     console.error('Error saat registrasi:', error);
