@@ -25,7 +25,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://100.125.27.63:3333/api/auth/register", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // Mengirimkan role ke API
@@ -59,13 +59,33 @@ export default function RegisterPage() {
         {/* KOLOM KIRI */}
         <div className="hidden md:flex flex-col justify-between w-1/2 bg-gradient-to-br from-brand-primary to-brand-dark p-10 text-white relative">
           <div className="absolute -bottom-40 -left-5 w-64 h-64 bg-brand-accent/30 rounded-full blur-[70px] pointer-events-none"></div>
+
+          <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/30 rounded-full blur-[80px] pointer-events-none"></div>
+
+          <div className="absolute bottom-10 left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+ 
           <div className="relative z-10">
             <h1 className="text-3xl font-heading font-bold leading-snug">
               Mulai Perjalanan<br />Magang Anda!
             </h1>
-            <p className="mt-5 text-sm text-white/80 leading-relaxed font-body max-w-sm">
-              Buat akun NOTEZ. sekarang dan mulailah mengelola logbook magang Anda dengan lebih rapi dan efisien.
+            <p className="mt-5 mr-18 text-sm text-white/80 leading-relaxed font-body max-w-sm">
+              Buat akun NOTEZ. <br />sekarang dan mulailah mengelola logbook magang Anda dengan lebih rapi dan efisien.
             </p>
+          </div>
+          
+          {/* Bagian Testimonial/User Info */}
+          <div className="flex items-center space-x-3 relative z-10">
+            <div className="flex">
+              <div className="w-8 h-8 rounded-full bg-brand-accent flex items-center justify-center text-xs font-bold border-2 border-brand-primary shadow-sm">
+                BS
+              </div>
+              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold border-2 border-brand-primary -ml-2 shadow-sm">
+                FA
+              </div>
+            </div>
+            <span className="text-xs font-medium text-white/90">
+              Digunakan oleh +1.000 Mahasiswa
+            </span>
           </div>
         </div>
 
