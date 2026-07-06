@@ -1,5 +1,5 @@
-const rateLimit = require('express-rate-limit');
-const { ipKeyGenerator } = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
+const { ipKeyGenerator } = require("express-rate-limit");
 
 // ── Limiter 1: blokir per IP ──────────────────────────────
 const ipLimiter = rateLimit({
@@ -8,13 +8,14 @@ const ipLimiter = rateLimit({
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => ipKeyGenerator(req),
+  // keyGenerator: (req) => ipKeyGenerator(req),
   handler: (req, res) => {
     res.status(429).json({
       status: 429,
-      message: "Terlalu banyak percobaan login dari perangkat ini. Silakan coba lagi setelah 30 menit."
+      message:
+        "Terlalu banyak percobaan login dari perangkat ini. Silakan coba lagi setelah 30 menit.",
     });
-  }
+  },
 });
 
 // ── Limiter 2: blokir per email ───────────────────────────
@@ -25,16 +26,16 @@ const emailLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const email = req.body?.email ?? 'unknown';
+    const email = req.body?.email ?? "unknown";
     return `email_${email}`; // prefix agar tidak konflik dengan key IP
   },
   handler: (req, res) => {
-    const email = req.body?.email ?? 'ini';
-    res.status(429).json({
-      status: 429,
-      message: `Akun ${email} telah disuspend sementara karena terlalu banyak percobaan login gagal. Silakan coba lagi setelah 30 menit.`
+    const email = req.body?.email ?? "ini";
+    res.status(430).json({
+      status: 430,
+      message: `Akun ${email} telah disuspend sementara karena terlalu banyak percobaan login gagal. Silakan coba lagi setelah 30 menit.`,
     });
-  }
+  },
 });
 
 module.exports = { ipLimiter, emailLimiter };
