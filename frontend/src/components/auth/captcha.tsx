@@ -55,7 +55,7 @@ export default function Captcha({ onValidate }: CaptchaProps) {
       <button
         type="button"
         onClick={generateNumbers}
-        className="px-3 py-2.5 h-[42px] bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm transition-colors border border-gray-200 flex items-center justify-center"
+        className="px-3 py-2.5 h-10.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm transition-colors border border-gray-200 flex items-center justify-center"
         title="Ganti angka"
       >
         <ArrowsClockwise className="w-5 h-5" weight="bold" />
