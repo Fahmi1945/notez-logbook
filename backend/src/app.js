@@ -9,16 +9,18 @@ const prisma = new PrismaClient();
 // Mengambil PORT dari .env jika ada, jika tidak pakai 3002
 const PORT = process.env.PORT || 3002; 
 
+app.set('trust proxy', 1); // Jika server berada di belakang proxy (misal Nginx), ini penting untuk rate limiter
+
 // Middleware WAJIB agar bisa membaca format JSON
 app.use(express.json());
 
 // Menggunakan routing untuk semua endpoint yang berawalan '/auth'
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // Fungsi untuk menyalakan server dan mengecek database
 async function startServer() {
   try {
-    // Tes koneksi database
+    // Tes koneksi databasenh
     await prisma.$connect();
     console.log(" Berhasil terhubung ke database Prisma!");
     
