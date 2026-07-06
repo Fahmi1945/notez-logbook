@@ -2,14 +2,14 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Fungsi untuk mencari user berdasarkan email
+// Fungsi FIND BY EMAIL
 const findUserByEmail = async (email) => {
   return await prisma.user.findUnique({
     where: { email },
   });
 };
 
-// Fungsi untuk menyimpan user baru ke database
+// Fungsi CREATE USER
 const createUser = async (data) => {
   return await prisma.user.create({
     data: {
