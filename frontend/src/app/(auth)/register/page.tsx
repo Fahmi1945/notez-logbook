@@ -18,15 +18,6 @@ export default function RegisterPage() {
           </h2>
         </div>
 
-        {/* Sapaan Teks
-        <div className="mb-5">
-          <h3 className="text-xl font-bold text-gray-900 mb-1">Buat Akun Baru</h3>
-          <p className="text-[13px] text-gray-500">
-            Lengkapi data diri Anda di bawah ini untuk bergabung.
-          </p>
-        </div> */}
-
-        {/* Panggil Form Registrasi */}
         <RegisterForm />
 
         {/* Link ke Login */}

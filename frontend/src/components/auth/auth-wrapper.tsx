@@ -11,7 +11,7 @@ export default function AuthWrapper({ heading, description, children }: AuthWrap
     <div className="flex w-full max-w-[780px] bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden min-h-[550px]">
       
       {/* KOLOM KIRI - Branding UI yang Menerima Props Dinamis */}
-      <div className="hidden md:flex flex-col justify-between w-1/2 bg-brand-primary p-10 text-white relative overflow-hidden">
+      <div className="hidden md:flex flex-col justify-between w-1/2 bg-linear-to-br from-brand-primary to-brand-dark p-10 text-white relative overflow-hidden">
           <div className="absolute -bottom-40 -left-5 w-64 h-64 bg-brand-accent/30 rounded-full blur-[70px] pointer-events-none"></div>
 
           <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/30 rounded-full blur-[80px] pointer-events-none"></div>
