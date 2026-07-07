@@ -16,10 +16,7 @@ const registerUser = async (req, res) => {
         message: "Field name, email, password, dan role wajib diisi.",
       });
     }
-
-    // Gunakan fungsi dari model
     const existingUser = await findUserByEmail(email);
-
     if (existingUser) {
       return res.status(409).json({
         error: "EMAIL_CONFLICT",
@@ -30,7 +27,6 @@ const registerUser = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Gunakan fungsi dari model
     const newUser = await createUser({
       name: name,
       email: email,
@@ -69,7 +65,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Gunakan fungsi dari model
     const user = await findUserByEmail(email);
 
     if (!user) {
