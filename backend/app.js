@@ -36,6 +36,9 @@ app.use("/api/auth", authRoutes);
 // Routing logbook
 app.use("/api/logbook", logbookRoutes);
 
+// Routing mentorship
+app.use("/api/mentorship", mentorshipRoutes);
+
 async function startServer() {
   try {
     await prisma.$connect();

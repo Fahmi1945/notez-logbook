@@ -1,4 +1,4 @@
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
 // ── Limiter 1: Blokir per IP (Otomatis menggunakan bawaan library) ──
 const ipLimiter = rateLimit({
@@ -25,9 +25,8 @@ const emailLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const email = req.body?.email ?? 'unknown';
-    console.log(`📧 [Email Limiter] Mendeteksi Email: ${email}`);
-    return `email_${email}`; 
+    const email = req.body?.email ?? "unknown";
+    return `email_${email}`;
   },
   handler: (req, res) => {
     const email = req.body?.email ?? "ini";
