@@ -2,33 +2,40 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  // Ambil token dari Cookies
+  const token = request.cookies.get('token')?.value;
   const { pathname } = request.nextUrl;
+
+  // Daftar halaman Auth
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
   
-  // Ambil token dari cookie (nama sesuai BSD)
-  const token = request.cookies.get('notez_session')?.value;
+  // Daftar halaman yang wajib login (Dashboard User & Mentor)
+  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/mentor') || pathname.startsWith('/logbook');
 
-  // 1. Jika mencoba akses halaman protected tanpa token, lempar ke /login
-  if (!token && (pathname.startsWith('/dashboard') || pathname.startsWith('/logbook') || pathname.startsWith('/mentor'))) {
-    const url = new URL('/login', request.url);
-    url.searchParams.set('next', pathname); // Simpan URL asal untuk redirect setelah login
-    return NextResponse.redirect(url);
-  }
-
-  // 2. Jika sudah punya token tapi mencoba akses /login atau /register, lempar ke /dashboard
-  if (token && (pathname.startsWith('/login') || pathname.startsWith('/register'))) {
+  // SKENARIO 1: Jika sudah login tapi mencoba buka halaman Login/Register
+  if (isAuthPage && token) {
+    // Tendang kembali ke dashboard
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
+  // SKENARIO 2: Jika belum login tapi mencoba buka halaman terproteksi
+  if (isProtectedRoute && !token) {
+    // Tendang ke halaman Login
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // SKENARIO 3: Aman, silakan lewat
   return NextResponse.next();
 }
 
-// Tentukan route mana saja yang akan diawasi oleh middleware ini
+// Tentukan rute mana saja yang harus diawasi oleh satpam ini
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/logbook/:path*',
-    '/mentor/:path*',
-    '/login',
-    '/register'
+    '/login', 
+    '/register', 
+    '/dashboard/:path*', 
+    '/logbook/:path*', 
+    '/mentor/:path*', 
+    '/profile/:path*'
   ],
 };
