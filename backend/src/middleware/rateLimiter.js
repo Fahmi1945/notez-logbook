@@ -31,8 +31,8 @@ const emailLimiter = rateLimit({
   },
   handler: (req, res) => {
     const email = req.body?.email ?? "ini";
-    res.status(430).json({
-      status: 430,
+    res.status(423).json({
+      status: 423,
       message: `Akun ${email} telah disuspend sementara karena terlalu banyak percobaan login gagal. Silakan coba lagi setelah 30 menit.`,
     });
   },
