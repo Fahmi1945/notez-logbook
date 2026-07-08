@@ -9,6 +9,21 @@ const findUserByEmail = async (email) => {
   });
 };
 
+// Fungsi mengambil data semua mentor
+const findMentors = async () => {
+  return await prisma.user.findMany({
+    where: { 
+      role: "mentor" 
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true
+    }
+  });
+};
+
 // Fungsi CREATE USER
 const createUser = async (data) => {
   return await prisma.user.create({
@@ -21,4 +36,4 @@ const createUser = async (data) => {
   });
 };
 
-module.exports = { findUserByEmail, createUser };
+module.exports = { findUserByEmail, createUser, findMentors, };

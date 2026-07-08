@@ -2,6 +2,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/authRoutes");
+const mentorshipRoutes = require("./src/routes/mentorshipRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
@@ -15,7 +16,7 @@ app.use(
 );
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
 
@@ -31,6 +32,9 @@ app.get("/", (req, res) => {
 
 // Routing authentication
 app.use("/api/auth", authRoutes);
+
+// Routing mentorship
+app.use("/api", mentorshipRoutes);
 
 // PERANGKAP 404: Menangkap semua request yang alamatnya salah
 app.use((req, res) => {

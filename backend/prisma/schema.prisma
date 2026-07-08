@@ -59,6 +59,10 @@ model User {
   mentorships_sent     Mentorship[]   @relation("UserMentorship")
   mentorships_received Mentorship[]   @relation("MentorMentorship")
 
+  // Relasi request ke mentor
+  requestsSent     MentorshipRequest[] @relation("StudentRequests")
+  requestsReceived MentorshipRequest[] @relation("MentorRequests")
+
   @@map("users")
 }
 
@@ -144,3 +148,4 @@ model Notification {
 
   @@map("notifications")
 }
+
