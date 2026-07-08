@@ -3,6 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/authRoutes");
 const logbookRoutes = require("./src/routes/logbookRoutes");
+const mentorshipRoutes = require("./src/routes/mentorshipRoutes");
 
 const app = express();
 app.use(
