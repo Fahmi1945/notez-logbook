@@ -1,14 +1,13 @@
-const rateLimit = require("express-rate-limit");
-const { ipKeyGenerator } = require("express-rate-limit");
+const rateLimit = require('express-rate-limit');
 
-// ── Limiter 1: blokir per IP ──────────────────────────────
+// ── Limiter 1: Blokir per IP (Otomatis menggunakan bawaan library) ──
 const ipLimiter = rateLimit({
   windowMs: 30 * 60 * 1000,
   max: 5,
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
-  // keyGenerator: (req) => ipKeyGenerator(req),
+  // keyGenerator kita HAPUS. Biarkan library melacak req.ip secara default.
   handler: (req, res) => {
     res.status(429).json({
       status: 429,
@@ -18,7 +17,7 @@ const ipLimiter = rateLimit({
   },
 });
 
-// ── Limiter 2: blokir per email ───────────────────────────
+// ── Limiter 2: Blokir per email ───────────────────────────
 const emailLimiter = rateLimit({
   windowMs: 30 * 60 * 1000,
   max: 5,
@@ -26,8 +25,9 @@ const emailLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const email = req.body?.email ?? "unknown";
-    return `email_${email}`; // prefix agar tidak konflik dengan key IP
+    const email = req.body?.email ?? 'unknown';
+    console.log(`📧 [Email Limiter] Mendeteksi Email: ${email}`);
+    return `email_${email}`; 
   },
   handler: (req, res) => {
     const email = req.body?.email ?? "ini";

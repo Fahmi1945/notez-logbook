@@ -59,6 +59,10 @@ model User {
   mentorships_sent     Mentorship[]   @relation("UserMentorship")
   mentorships_received Mentorship[]   @relation("MentorMentorship")
 
+  // Relasi request ke mentor
+  requestsSent     MentorshipRequest[] @relation("StudentRequests")
+  requestsReceived MentorshipRequest[] @relation("MentorRequests")
+
   @@map("users")
 }
 
@@ -139,8 +143,9 @@ model Notification {
 
   // Relasi (Exclusive Arcs)
   user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  mentorship    Mentorship?   @relation(fields: [mentorships_id], references: [id], onDelete: Cascade)
+  mentorship    Mentorship?   @relation(fields: [mentorships_i} references: [id], onDelete: Cascade)
   logbook_entry LogbookEntry? @relation(fields: [logbook_id], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
+
