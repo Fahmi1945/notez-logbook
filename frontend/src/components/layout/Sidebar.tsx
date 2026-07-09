@@ -7,36 +7,49 @@ import {
   House, 
   BookBookmark, 
   UsersThree, 
+  SquaresFour, 
+  BookOpen, 
+  Users, 
   SignOut 
 } from "@phosphor-icons/react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/store/auth-store"; // Gunakan Zustand untuk cek role
 
+// Pembuat inisial 2 huruf untuk Avatar
 const getInitials = (name?: string) => {
   if (!name) return "U";
   const words = name.trim().split(" ");
-  if (words.length >= 2) {
-    return `${words[0][0]}${words[1][0]}`.toUpperCase();
-  }
+  if (words.length >= 2) return `${words[0][0]}${words[1][0]}`.toUpperCase();
   return words[0].substring(0, 2).toUpperCase();
 };
 
-export function UserSidebar() {
+export function Sidebar() { // Ubah nama menjadi Sidebar (umum)
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuthStore(); // Ambil user dan fungsi logout
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user-data");
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    logout();
     window.location.href = "/login";
   };
 
-  // Navigasi khusus User sesuai ARSITEKTUR.md
-  const navLinks = [
+  // 1. Menu Khusus MAHASISWA (User)
+  const USER_LINKS = [
     { name: "Dashboard", href: "/dashboard", icon: House },
     { name: "Logbook Saya", href: "/logbook", icon: BookBookmark },
     { name: "Mentorship", href: "/mentorship", icon: UsersThree },
   ];
+
+  // 2. Menu Khusus MENTOR 
+  const MENTOR_LINKS = [
+    { name: "Dashboard", href: "/mentor/dashboard", icon: SquaresFour },
+    { name: "Review Logbook", href: "/mentor/review", icon: BookOpen },
+    { name: "Daftar Mahasiswa", href: "/mentor/students", icon: Users },
+  ];
+
+  // 3. LOGIKA PENENTU: Cek role, lalu pilih daftar menu yang tepat
+  const navLinks = user?.role === "mentor" ? MENTOR_LINKS : USER_LINKS;
+  const roleLabel = user?.role === "mentor" ? "Mentor Pembimbing" : "Mahasiswa Magang";
 
   return (
     <aside className="flex flex-col w-64 bg-linear-to-br from-brand-primary to-brand-dark text-white relative shadow-xl z-20 h-full">
@@ -67,10 +80,7 @@ export function UserSidebar() {
                   : "text-white/80 hover:bg-white/5 hover:text-white"
               }`}
             >
-              <Icon 
-                className="w-5 h-5" 
-                weight={isActive ? "fill" : "regular"} 
-              />
+              <Icon className="w-5 h-5" weight={isActive ? "fill" : "regular"} />
               <span className="text-sm tracking-wide">{link.name}</span>
             </Link>
           );
@@ -89,7 +99,7 @@ export function UserSidebar() {
                 {user?.name || "Memuat..."}
               </span>
               <span className="text-[11px] text-white/60 truncate">
-                Mahasiswa Magang
+                {roleLabel} {/* Label otomatis berubah */}
               </span>
             </div>
           </div>

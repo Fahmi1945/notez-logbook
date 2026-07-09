@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserSidebar } from "@/components/layout/Sidebar"; // Pastikan path ini sesuai dengan file sidebar-mu
+import { Sidebar } from "@/components/layout/Sidebar"; // Pastikan path ini sesuai dengan file sidebar-mu
 import { Navbar } from "@/components/layout/Navbar";
 import {Footer} from "@/components/layout/Footer"; // Jika ada Footer, import di sini
 
@@ -19,7 +19,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <UserSidebar />
+        <Sidebar />
       </div>
 
       {/* Overlay Gelap untuk Mobile (jika sidebar terbuka, klik luar untuk menutup) */}

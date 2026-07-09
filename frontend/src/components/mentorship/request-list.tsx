@@ -2,14 +2,21 @@
 
 import React from "react";
 import { Clock, CheckCircle, XCircle } from "@phosphor-icons/react";
+import { MentorshipHistory } from "@/types/mentorship";
 
-// Variabel data history dipindah ke sini
-const REQUEST_HISTORY = [
-  { id: 101, mentorName: "Siti Aminah, M.Kom.", date: "15 Okt 2026", status: "rejected" },
-  { id: 102, mentorName: "Budi Santoso, S.Kom., M.T.", date: "16 Okt 2026", status: "pending" },
-];
+interface RequestListProps {
+  // Saya tambahkan 'any' di sini untuk berjaga-jaga jika tipe MentorshipHistory 
+  // di folder types kamu belum diubah ke format camelCase.
+  history: any[]; 
+}
 
-export function RequestList() {
+const formatDate = (dateString: string) => {
+  if (!dateString) return "-";
+  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
+}
+
+export function RequestList({ history }: RequestListProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
@@ -22,13 +29,16 @@ export function RequestList() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {REQUEST_HISTORY.map((req) => (
-              <tr key={req.id} className="hover:bg-gray-50 transition-colors">
+            {history.map((req) => (
+              // 1. PERBAIKAN KEY: Menggunakan req.requestId dari JSON backend
+              <tr key={req.requestId} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {req.date}
+                  {/* 2. PERBAIKAN TANGGAL: Menggunakan req.createdAt */}
+                  {formatDate(req.createdAt)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {req.mentorName}
+                  {/* 3. PERBAIKAN NAMA: Menggunakan req.mentorName */}
+                  {req.mentorName || "Nama mentor tidak tersedia"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {req.status === "pending" && (
@@ -36,7 +46,7 @@ export function RequestList() {
                       <Clock className="w-3.5 h-3.5" /> Menunggu Review
                     </span>
                   )}
-                  {req.status === "approved" && (
+                  {req.status === "accepted" && (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                       <CheckCircle className="w-3.5 h-3.5" /> Diterima
                     </span>
@@ -49,6 +59,15 @@ export function RequestList() {
                 </td>
               </tr>
             ))}
+            
+            {/* Tampilan jika data kosong */}
+            {history.length === 0 && (
+              <tr>
+                <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                  Belum ada riwayat pengajuan bimbingan.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

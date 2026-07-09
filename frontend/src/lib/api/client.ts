@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Akan mengambil URL dari .env, kalau gagal baru lari ke localhost
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+const baseURL = process.env.NEXT_PUBLIC_API_URL
 
 export const apiClient = axios.create({
   baseURL,
