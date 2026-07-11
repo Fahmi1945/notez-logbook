@@ -65,14 +65,36 @@ const getQueueList = async (mentorId) => {
   });
 };
 
-// // fungsi mengupdate status request
-// const updateRequestStatus = async (requestId, newStatus) => {
-//   return await prisma.mentorship.update({
-//     where: { id: parseInt(requestId) },
-//     data: { 
-//       status: newStatus // newStatus ini nanti akan diisi "ACCEPTED" atau "REJECTED" oleh Controller
-//     },
-//   });
-// };
+// Mengubah status mentorship (accepted/rejected) berdasarkan requestId
+const updateMentorshipStatus = async (requestId, newStatus, information) => {
+  return await prisma.mentorship.update({
+    where: { id: parseInt(requestId) },
+    data: { 
+      status: newStatus,
+      information: information 
+    },
+  });
+};
 
-module.exports = { createMentorship, findPendingRequest, getMyRequestedMentors, getQueueList };
+const getAllStudentsByMentor = async (mentorId) => {
+  return await prisma.mentorship.findMany({
+    where: {
+      mentor_id: parseInt(mentorId),
+      // Kita HAPUS filter status: "accepted" agar semua status (pending, accepted, rejected) ikut tertarik!
+    },
+    include: {
+      user: { // Tetap menarik data profil mahasiswa
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      }
+    },
+    orderBy: {
+      id: 'desc' // Diurutkan dari yang paling baru mengajukan
+    }
+  });
+};
+
+module.exports = { createMentorship, findPendingRequest, getMyRequestedMentors, getQueueList, updateMentorshipStatus, getAllStudentsByMentor };

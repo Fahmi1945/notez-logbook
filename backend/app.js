@@ -1,8 +1,9 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
-const authRoutes = require("./src/routes/authRoutes");
-const mentorshipRoutes = require("./src/routes/mentorshipRoutes");
+const authRoutes = require("./src/routes/auth/authRoutes");
+const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
+const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
@@ -32,6 +33,9 @@ app.get("/", (req, res) => {
 
 // Routing authentication
 app.use("/api/auth", authRoutes);
+
+// Routing tim mahasiswa (mentor)
+app.use("/api", timMahasiswaRoutes);
 
 // Routing mentorship
 app.use("/api", mentorshipRoutes);
