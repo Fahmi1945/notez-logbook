@@ -1,10 +1,12 @@
 const express = require("express");
+require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/authRoutes");
+const logbookRoutes = require("./src/routes/logbookRoutes");
+const mentorshipRoutes = require("./src/routes/mentorshipRoutes");
 
 const app = express();
-// app.set("trust proxy", true);
 app.use(
   cors({
     origin: "*",
@@ -32,17 +34,11 @@ app.get("/", (req, res) => {
 // Routing authentication
 app.use("/api/auth", authRoutes);
 
-// PERANGKAP 404: Menangkap semua request yang alamatnya salah
-app.use((req, res) => {
-  console.log(`❌ ALARM: Frontend mencoba mengakses rute yang salah!`);
-  console.log(`Metode: ${req.method}`);
-  console.log(`URL yang diakses: ${req.originalUrl}`);
+// Routing mentorship
+app.use("/api", mentorshipRoutes);
 
-  res.status(404).json({
-    error: "NOT_FOUND",
-    message: `Rute ${req.method} ${req.originalUrl} tidak ada di server backend ini.`,
-  });
-});
+// Routing logbook
+app.use("/api/logbook", logbookRoutes);
 
 async function startServer() {
   try {
