@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Envelope, LockSimple } from "@phosphor-icons/react";
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
-import Captcha from "@/components/auth/captcha"; // 1. Import Captcha
+import { Button } from "@/components/ui/Button";
+import Captcha from "@/components/auth/captcha";
 import { useAuth } from "@/hooks/use-auth";
 import { loginSchema } from "@/lib/validators/auth.schema";
 
@@ -74,7 +74,7 @@ export default function LoginForm() {
         {errors.captcha && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.captcha}</p>}
       </div>
       <div className="flex justify-end mt-2">
-        <Link href="/forgot-password" className="text-[11px] font-bold text-[#2B549A] hover:underline">
+        <Link href="/forgot-password" className="text-[11px] font-bold text-brand-primary hover:underline">
         Lupa password?
         </Link>
       </div>
@@ -85,8 +85,8 @@ export default function LoginForm() {
         // Tombol sedikit redup jika captcha belum valid
         className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors mt-2 ${
           isCaptchaValid 
-            ? "bg-[#2B549A] hover:bg-[#1E3E73] text-white" 
-            : "bg-[#2B549A]/70 text-white/80 cursor-not-allowed"
+            ? "bg-brand-primary hover:bg-brand-dark text-white" 
+            : "bg-brand-primary/70 text-white/80 cursor-not-allowed"
         }`}
       >
         Masuk

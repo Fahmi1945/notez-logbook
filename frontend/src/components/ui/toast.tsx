@@ -9,7 +9,7 @@ export default function Toast() {
   const bgColors = {
     success: "bg-green-500",
     error: "bg-red-500",
-    info: "bg-[#2B549A]",
+    info: "bg-brand-primary",
   };
 
   return (
