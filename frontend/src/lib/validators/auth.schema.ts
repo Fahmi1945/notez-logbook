@@ -39,7 +39,5 @@ export const registerSchema = z.object({
         path: ["confirmPassword"], // Menentukan field mana yang akan menerima pesan error ini
     });
 
-// 3. Export Type (Keajaiban Zod untuk TypeScript)
-// Alih-alih membuat interface manual, kita suruh Zod membuatkannya untuk kita!
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
