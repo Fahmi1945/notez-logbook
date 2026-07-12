@@ -8,7 +8,7 @@ const verifyToken = (req, res, next) => {
       message: "Akses ditolak"
     });
   }
-  
+
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -17,7 +17,7 @@ const verifyToken = (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       error: "INVALID_TOKEN",
-      message: "Session telah habis, silahkan login kembali"
+      message: "Session telah habis, silahkan login kembali",
     });
   }
 };

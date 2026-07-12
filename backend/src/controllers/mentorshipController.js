@@ -1,16 +1,24 @@
 require("dotenv").config();
 
 const { findMentors } = require("../models/userModel");
-const { createMentorship, findPendingRequest, getMyRequestedMentors, getQueueList } = require("../models/mentorship");
+const {
+  createMentorship,
+  findPendingRequest,
+  getMyRequestedMentors,
+  getQueueList,
+} = require("../models/mentorship");
 
 // Fungsi request ke mentorship
 const requestMentorship = async (req, res) => {
   try {
-    const userId = 1;
+    const userId = req.user.id;
     const mentorId = req.params.id;
 
-    // simpan data request ke database melalui fungsi di model  
-    const newRequest = await createMentorship(parseInt(userId), parseInt(mentorId));
+    // simpan data request ke database melalui fungsi di model
+    const newRequest = await createMentorship(
+      parseInt(userId),
+      parseInt(mentorId),
+    );
 
     // Respons Berhasil
     return res.status(200).json({
@@ -20,11 +28,18 @@ const requestMentorship = async (req, res) => {
         requestId: newRequest.id,
         userId: newRequest.userId,
         mentorId: newRequest.mentorId,
-        status: newRequest.status
-      }
+        status: newRequest.status,
+      },
     });
-
   } catch (error) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        status: "error",
+        message:
+          "Anda sudah pernah mengajukan request bimbingan ke mentor ini sebelumnya.",
+      });
+    }
+
     console.error("Error di requestMentorship:", error);
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
@@ -41,9 +56,8 @@ const getMentorsList = async (req, res) => {
     return res.status(200).json({
       status: "success",
       message: "Berhasil mengambil daftar mentor.",
-      data: mentorship
+      data: mentorship,
     });
-
   } catch (error) {
     console.error("Error di getMentorsList:", error);
     return res.status(500).json({
@@ -56,63 +70,70 @@ const getMentorsList = async (req, res) => {
 // Fungsi untuk mengambil riwayat request mentorship milik mahasiswa
 const getMentorshipHistory = async (req, res) => {
   try {
-    // Kita tangkap DUA KEMUNGKINAN dari URL
-    const { userId, mentorId } = req.query;
+    // 1. Ambil ID dan ROLE secara aman dari Token JWT via middleware verifyToken
+    const currentUserId = req.user.id;
+    const currentUserRole = req.user.role.toUpperCase(); // Antisipasi jika ada perbedaan casing (user vs USER)
 
-    if (userId) {
-      const history = await getMyRequestedMentors(userId);
-      const formattedData = history.map(item => ({
+    // 2. JIKA YANG LOGIN ADALAH MAHASISWA (USER / STUDENT)
+    if (currentUserRole === "USER") {
+      // Panggil model untuk mengambil riwayat request berdasarkan ID mahasiswa tersebut
+      const history = await getMyRequestedMentors(currentUserId);
+
+      const formattedData = history.map((item) => ({
         requestId: item.id,
-        status: item.status, // Tampilan di frontend akan bereaksi dengan status ini (Pending/Accepted/Rejected)
+        status: item.status, // Pending/Accepted/Rejected
         information: item.information,
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         mentorId: item.mentor.id,
-        mentorName: item.mentor.name // Mahasiswa melihat nama mentor
+        mentorName: item.mentor.name,
       }));
 
       return res.status(200).json({
         status: "success",
         role: "USER",
-        message: "Berhasil mengambil riwayat request milik mahasiswa.",
-        data: formattedData
+        message: "Berhasil mengambil riwayat request milik Anda.",
+        data: formattedData,
       });
     }
 
-    if (mentorId) {
-      const queue = await getQueueList(mentorId);
-      const formattedData = queue.map(item => ({
+    // 3. JIKA YANG LOGIN ADALAH MENTOR
+    if (currentUserRole === "MENTOR") {
+      // Panggil model untuk mengambil antrean mahasiswa berdasarkan ID mentor tersebut
+      const queue = await getQueueList(currentUserId);
+
+      const formattedData = queue.map((item) => ({
         requestId: item.id,
-        status: item.status, 
+        status: item.status,
         information: item.information,
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         studentId: item.user.id,
-        studentName: item.user.name // Mentor melihat nama mahasiswa yang antre
+        studentName: item.user.name,
       }));
 
       return res.status(200).json({
         status: "success",
         role: "MENTOR",
         message: "Berhasil mengambil daftar antrean mahasiswa masuk.",
-        data: formattedData
+        data: formattedData,
       });
     }
 
-    return res.status(400).json({ 
-      error: "BAD_REQUEST", 
-      message: "Sertakan parameter ?userId=angka ATAU ?mentorId=angka di URL." 
+    // 4. JIKA ROLE TIDAK DIKENALI
+    return res.status(403).json({
+      error: "FORBIDDEN",
+      message:
+        "Role Anda tidak memiliki akses untuk melihat riwayat mentorship.",
     });
-
   } catch (error) {
     console.error("Error di getMentorshipHistory:", error);
-    return res.status(500).json({ 
-      error: "INTERNAL_SERVER_ERROR", 
-      message: "Terjadi kesalahan server." 
+    return res.status(500).json({
+      error: "INTERNAL_SERVER_ERROR",
+      message: "Terjadi kesalahan server saat mengambil riwayat.",
     });
   }
 };
-
 // fungsi update status request mentorship
 // const updateStatus = async (req, res) => {
 //   try {
@@ -142,6 +163,4 @@ const getMentorshipHistory = async (req, res) => {
 //     });
 //   }
 // };
-
-
 module.exports = { requestMentorship, getMentorsList, getMentorshipHistory };

@@ -2,7 +2,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 // 1. Import fungsi dari model yang sudah Anda buat
-const { findUserByEmail, createUser } = require("../models/userModel"); 
+const { findUserByEmail, createUser } = require("../models/userModel");
 
 // Register handler
 const registerUser = async (req, res) => {
@@ -57,7 +57,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({
         error: "VALIDATION_ERROR",
@@ -76,7 +76,7 @@ const loginUser = async (req, res) => {
 
     // 2. PERBAIKAN LOGIKA: Cek password dulu sebelum membuat JWT
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         error: "INVALID_CREDENTIALS",
@@ -90,7 +90,7 @@ const loginUser = async (req, res) => {
       id: user.id,
       role: user.role,
     };
-    
+
     const token = jwt.sign(payload, secretKey, { expiresIn: "24h" });
     const expired_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 

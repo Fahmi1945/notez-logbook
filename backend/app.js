@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/authRoutes");
@@ -33,11 +34,11 @@ app.get("/", (req, res) => {
 // Routing authentication
 app.use("/api/auth", authRoutes);
 
+// Routing mentorship
+app.use("/api", mentorshipRoutes);
+
 // Routing logbook
 app.use("/api/logbook", logbookRoutes);
-
-// Routing mentorship
-app.use("/api/mentorship", mentorshipRoutes);
 
 async function startServer() {
   try {
