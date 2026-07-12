@@ -1,8 +1,9 @@
 {
   "name": "notez",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -14,6 +15,7 @@
     "express": "^5.2.1",
     "express-generator": "^4.16.1",
     "express-rate-limit": "^8.5.2",
+    "jsonwebtoken": "^9.0.3",
     "pg-promise": "^12.7.0"
   },
   "devDependencies": {

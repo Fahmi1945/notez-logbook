@@ -9,7 +9,7 @@ COPY . .
 
 # 4. JALUR KERAS: Hapus paksa node_modules bawaan Windows (jika ikut masuk), 
 # lalu install ulang secara bersih agar sesuai dengan sistem Linux Alpine
-RUN rm -rf node_modules package-lock.json
+# RUN rm -rf node_modules package-lock.json
 RUN npm install
 
 # 5. Build aplikasi

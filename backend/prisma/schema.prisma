@@ -64,11 +64,11 @@ model User {
 
 model Mentorship {
   id          Int              @id @default(autoincrement())
-  user_id     Int              
-  mentor_id   Int              
+  user_id     Int
+  mentor_id   Int
   status      MentorshipStatus @default(pending)
   created_at  DateTime         @default(now())
-  updated_at  DateTime         @updatedAt 
+  updated_at  DateTime         @updatedAt
   information String?          @db.VarChar(255)
 
   // Relasi
@@ -76,19 +76,21 @@ model Mentorship {
   mentor        User           @relation("MentorMentorship", fields: [mentor_id], references: [id], onDelete: Cascade)
   notifications Notification[]
 
+  @@unique([user_id, mentor_id])
+
   @@map("mentorships")
 }
 
 model LogbookEntry {
   id                Int           @id @default(autoincrement())
-  user_id           Int           
-  activity_date     DateTime      @db.Date 
+  user_id           Int
+  activity_date     DateTime      @db.Date
   title             String        @db.VarChar(200)
   description       String        @db.Text
   obstacles         String?       @db.Text
   status            LogbookStatus @default(draft)
-  status_changed_at DateTime      @updatedAt 
-  created_at        DateTime      @default(now()) 
+  status_changed_at DateTime      @updatedAt
+  created_at        DateTime      @default(now())
 
   // Relasi
   user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -101,10 +103,10 @@ model LogbookEntry {
 
 model Attachment {
   id          Int      @id @default(autoincrement())
-  entry_id    Int      
-  file_name   String   @db.VarChar(255) 
-  file_path   String   @db.VarChar(500) 
-  uploaded_at DateTime @default(now()) 
+  entry_id    Int
+  file_name   String   @db.VarChar(255)
+  file_path   String   @db.VarChar(500)
+  uploaded_at DateTime @default(now())
 
   // Relasi
   logbook_entry LogbookEntry @relation(fields: [entry_id], references: [id], onDelete: Cascade)
@@ -114,11 +116,11 @@ model Attachment {
 
 model Feedback {
   id          Int            @id @default(autoincrement())
-  entry_id    Int            
-  mentor_id   Int            
+  entry_id    Int
+  mentor_id   Int
   comment     String         @db.Text
   action      FeedbackAction
-  created_at  DateTime       @default(now()) 
+  created_at  DateTime       @default(now())
 
   // Relasi
   logbook_entry LogbookEntry @relation(fields: [entry_id], references: [id], onDelete: Cascade)
@@ -129,13 +131,13 @@ model Feedback {
 
 model Notification {
   id             Int      @id @default(autoincrement())
-  user_id        Int      
+  user_id        Int
   message        String   @db.VarChar(500)
-  is_read        Boolean  @default(false) 
-  is_read_date   DateTime @default(now()) @db.Date 
-  mentorships_id Int?     
-  logbook_id     Int?     
-  created_at     DateTime @default(now()) 
+  is_read        Boolean  @default(false)
+  is_read_date   DateTime @default(now()) @db.Date
+  mentorships_id Int?
+  logbook_id     Int?
+  created_at     DateTime @default(now())
 
   // Relasi (Exclusive Arcs)
   user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -143,4 +145,8 @@ model Notification {
   logbook_entry LogbookEntry? @relation(fields: [logbook_id], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 6856514f1c29510ea3baa83ddd283ea84fb9b816

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Envelope, LockSimple } from "@phosphor-icons/react";
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import Captcha from "@/components/auth/captcha";
 import { useAuth } from "@/hooks/use-auth";
 import { loginSchema } from "@/lib/validators/auth.schema";

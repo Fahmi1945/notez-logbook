@@ -3,6 +3,7 @@ import { mentorshipApi } from "@/lib/api/mentorship";
 import { Mentor, MentorshipHistory } from "@/types/mentorship";
 import { useUIStore } from "@/store/ui-store";
 import { useAuthStore } from "@/store/auth-store";
+import { mentorshipRequestSchema } from "@/lib/validators/mentorship.schema"; 
 
 export const useMentorship = (activeTab: "catalog" | "history") => {
   const [mentors, setMentors] = useState<any[]>([]);
@@ -10,7 +11,7 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { showToast } = useUIStore();
-  const { user } = useAuthStore(); // Ambil data user yang sedang login
+  const { user } = useAuthStore(); 
 
   const fetchMentors = useCallback(async () => {
     try {
@@ -61,11 +62,22 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
 
   const applyForMentorship = async (mentorId: number) => {
     try {
-      const res = await mentorshipApi.requestMentorship(mentorId);
+      const validationResult = mentorshipRequestSchema.safeParse({ mentorId });
+
+      if (!validationResult.success) {
+        const errorMessage = validationResult.error.issues[0].message;
+        showToast(errorMessage, "error");
+        throw new Error(errorMessage);
+      }
+
+      const res = await mentorshipApi.requestMentorship(validationResult.data.mentorId);
       showToast(res.message || "Berhasil mengajukan bimbingan!", "success");
+      
     } catch (error: any) {
-      showToast(error.response?.data?.message || "Gagal mengajukan bimbingan", "error");
-      throw error; 
+      // Menangkap error dari Axios atau throw error dari Zod
+      const message = error.response?.data?.message || error.message || "Gagal mengajukan bimbingan";
+      showToast(message, "error");
+      throw error; // Wajib diteruskan agar UI (page.tsx) tahu kalau prosesnya gagal
     }
   };
 

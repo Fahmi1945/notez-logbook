@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar"; // Pastikan path ini sesuai dengan file sidebar-mu
 import { Navbar } from "@/components/layout/Navbar";
-import {Footer} from "@/components/layout/Footer"; // Jika ada Footer, import di sini
+import { Footer } from "@/components/layout/Footer"; // Jika ada Footer, import di sini
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   // State untuk mengontrol Sidebar di tampilan Mobile

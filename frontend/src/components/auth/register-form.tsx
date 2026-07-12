@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { User, Envelope, LockSimple, UserList } from "@phosphor-icons/react";
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
+import {Button} from "@/components/ui/Button";
 import { useAuth } from "@/hooks/use-auth";
 import { registerSchema } from "@/lib/validators/auth.schema";
 
