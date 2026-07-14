@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Impor middleware (Mundur 2 langkah ke folder src/)
-const verifyToken = require("../../middleware/authMiddleware");
+const verifyToken = require("../../middleware/verifyToken");
 // const checkRole = require("../../middleware/roleMiddleware"); // Asumsi nama file role middleware-mu
 
 // Impor controller

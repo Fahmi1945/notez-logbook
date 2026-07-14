@@ -1,12 +1,12 @@
 require("dotenv").config();
 
-const { findMentors } = require("../models/userModel");
+const { findMentors } = require("../../models/userModel");
 const {
   createMentorship,
   findPendingRequest,
   getMyRequestedMentors,
   getQueueList,
-} = require("../models/mentorship");
+} = require("../../models/mentorshipModel");
 
 // Fungsi request ke mentorship
 const requestMentorship = async (req, res) => {
