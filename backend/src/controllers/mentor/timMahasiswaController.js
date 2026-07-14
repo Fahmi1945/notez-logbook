@@ -7,10 +7,10 @@ const handleMentorshipDecision = async (req, res) => {
     const { information } = req.body; // Ambil informasi tambahan dari body request
     
 
-    let action;
+    let action;        
 
     if (req.path.endsWith("/accepted")) {
-      action = "accepted";
+      action = "accepted"; 
     } else if (req.path.endsWith("/rejected")) {
       action = "rejected";
     }
