@@ -2,7 +2,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 // 1. Import fungsi dari model yang sudah Anda buat
-const { findUserByEmail, createUser } = require("../models/userModel");
+const { findUserByEmail, createUser } = require("../../models/userModel");
 
 // Register handler
 const registerUser = async (req, res) => {

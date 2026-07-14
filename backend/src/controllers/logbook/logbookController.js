@@ -4,7 +4,7 @@ const {
   getLogbookDetail,
   updateLogbookEntry,
   deleteLogbookEntry,
-} = require("../models/logbookModel");
+} = require("../../models/logbookModel");
 
 const getMyLogbook = async (req, res) => {
   try {
