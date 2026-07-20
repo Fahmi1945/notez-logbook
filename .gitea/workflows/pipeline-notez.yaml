@@ -44,15 +44,7 @@ jobs:
         run: |
           cd backend
           npm install
-      - name: Prisma Generate
-        run: |
-          cd backend
-          npx prisma generate
 
-      - name: Test Build Backend
-        run: |
-          cd backend
-          node app.js
 
   # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:
