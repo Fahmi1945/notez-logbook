@@ -46,13 +46,20 @@ const requestMentorship = async (req, res) => {
       message: "Request mentorship berhasil dikirim.",
       data: {
         requestId: newRequest.id,
-        userId: newRequest.user_id,
-        mentorId: newRequest.mentor_id,
-        status: newRequest.status
-      }
+        userId: newRequest.userId,
+        mentorId: newRequest.mentorId,
+        status: newRequest.status,
+      },
     });
-
   } catch (error) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        status: "error",
+        message:
+          "Anda sudah pernah mengajukan request bimbingan ke mentor ini sebelumnya.",
+      });
+    }
+
     console.error("Error di requestMentorship:", error);
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
@@ -71,9 +78,8 @@ const getMentorsList = async (req, res) => {
     return res.status(200).json({
       status: "success",
       message: "Berhasil mengambil daftar mentor.",
-      data: mentorship
+      data: mentorship,
     });
-
   } catch (error) {
     console.error("Error di getMentorsList:", error);
     return res.status(500).json({
@@ -88,8 +94,9 @@ const getMentorsList = async (req, res) => {
 // ============================================================================
 const getMentorshipHistory = async (req, res) => {
   try {
-    const loggedInUserId = req.user.id;
-    const loggedInUserRole = req.user.role; 
+    // 1. Ambil ID dan ROLE secara aman dari Token JWT via middleware verifyToken
+    const currentUserId = req.user.id;
+    const currentUserRole = req.user.role.toUpperCase(); // Antisipasi jika ada perbedaan casing (user vs USER)
 
     // 🎓 1. JIKA MAHASISWA YANG AKSES (Melihat semua riwayat pribadinya)
     if (loggedInUserRole === "user") {
@@ -108,8 +115,8 @@ const getMentorshipHistory = async (req, res) => {
       return res.status(200).json({
         status: "success",
         role: "USER",
-        message: "Berhasil mengambil riwayat pengajuan milik mahasiswa.",
-        data: formattedData
+        message: "Berhasil mengambil riwayat request milik Anda.",
+        data: formattedData,
       });
     }
 
@@ -136,18 +143,24 @@ const getMentorshipHistory = async (req, res) => {
       });
     }
 
-    return res.status(403).json({ 
-      error: "FORBIDDEN", 
-      message: "Role akun kamu tidak dikenali." 
+    // 4. JIKA ROLE TIDAK DIKENALI
+    return res.status(403).json({
+      error: "FORBIDDEN",
+      message:
+        "Role Anda tidak memiliki akses untuk melihat riwayat mentorship.",
     });
-
   } catch (error) {
     console.error("Error di getMentorshipHistory:", error);
-    return res.status(500).json({ 
-      error: "INTERNAL_SERVER_ERROR", 
-      message: "Terjadi kesalahan server saat mengambil riwayat." 
+    return res.status(500).json({
+      error: "INTERNAL_SERVER_ERROR",
+      message: "Terjadi kesalahan server saat mengambil riwayat.",
     });
   }
 };
+// fungsi update status request mentorship
+// const updateStatus = async (req, res) => {
+//   try {
+//     const requestId = req.params.id; // Tangkap ID dari URL
+//     const { action } = req.body;      // Tangkap status baru dari body ("ACCEPTED" atau "REJECTED")
 
 module.exports = { requestMentorship, getMentorsList, getMentorshipHistory };

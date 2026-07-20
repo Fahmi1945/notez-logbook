@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Impor middleware 
-const verifyToken = require("../../middleware/authMiddleware");
+const verifyToken = require("../../middleware/verifyToken");
 
 // Impor controller (HANYA CONTROLLER YANG BOLEH ADA DI SINI)
 const { handleMentorshipDecision, getMyTeam } = require("../../controllers/mentor/timMahasiswaController");

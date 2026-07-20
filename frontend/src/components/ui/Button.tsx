@@ -1,34 +1,45 @@
-import { ButtonHTMLAttributes, forwardRef } from "react";
-import { cn } from "@/lib/utils";
-import Spinner from "./spinner";
+import React from "react";
+import { cn, Spinner } from "./spinner"; 
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline" | "danger" | "ghost";
+  size?: "sm" | "md" | "lg";
   isLoading?: boolean;
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, children, disabled, isLoading, ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        // Menonaktifkan tombol jika sedang loading ATAU memang di-set disabled
-        disabled={disabled || isLoading} 
-        className={cn(
-          "flex items-center justify-center gap-2", // Mengatur posisi teks dan spinner sejajar
-          "disabled:opacity-70 disabled:cursor-not-allowed transition-all",
-          className
-        )}
-        {...props}
-      >
-        {/* Tampilkan spinner hanya saat isLoading true */}
-        {isLoading && <Spinner className="w-4 h-4" />}
-        
-        {/* Teks bawaan tombol (misal: "Masuk") */}
-        {children}
-      </button>
-    );
-  }
-);
+export function Button({
+  className,
+  variant = "primary",
+  size = "md",
+  isLoading = false,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
+  const baseStyles = "inline-flex items-center justify-center font-semibold transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap";
+  
+  const variants = {
+    primary: "bg-brand-primary text-white hover:bg-brand-dark shadow-sm focus:ring-brand-primary",
+    secondary: "bg-blue-50 text-brand-primary hover:bg-blue-100 focus:ring-brand-primary",
+    outline: "border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-brand-primary",
+    danger: "bg-rose-500 text-white hover:bg-rose-600 focus:ring-rose-500 shadow-sm",
+    ghost: "bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-500",
+  };
 
-Button.displayName = "Button";
-export default Button;
+  const sizes = {
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base",
+  };
+
+  return (
+    <button
+      className={cn(baseStyles, variants[variant], sizes[size], className)}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {isLoading && <Spinner size="sm" className="mr-2" />}
+      {children}
+    </button>
+  );
+}
