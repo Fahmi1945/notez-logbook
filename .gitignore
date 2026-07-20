@@ -1,3 +1,6 @@
 gitea/
 postgres/
 backend/node_modules/
+
+runner-data/
+.gitea/
