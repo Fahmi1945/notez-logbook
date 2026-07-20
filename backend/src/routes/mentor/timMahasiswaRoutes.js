@@ -1,18 +1,18 @@
 const express = require("express");
 const router = express.Router();
 
-// Impor middleware (Mundur 2 langkah ke folder src/)
+// Impor middleware 
 const verifyToken = require("../../middleware/verifyToken");
-// const checkRole = require("../../middleware/roleMiddleware"); // Asumsi nama file role middleware-mu
 
-// Impor controller
+// Impor controller (HANYA CONTROLLER YANG BOLEH ADA DI SINI)
 const { handleMentorshipDecision, getMyTeam } = require("../../controllers/mentor/timMahasiswaController");
 
+// Berlaku untuk semua rute di bawahnya
 router.use(verifyToken);
-// router.use(checkRole("mentor")); // Hanya mengizinkan role mentor lolos
 
+// Rute untuk Mentor (Aksi & Lihat Tim)
 router.post("/mentorship/:requestId/accepted", handleMentorshipDecision);
 router.post("/mentorship/:requestId/rejected", handleMentorshipDecision);
-// router.get("/mentorship/history", getMyTeam);
+router.get("/mentor/tim", getMyTeam);
 
 module.exports = router;

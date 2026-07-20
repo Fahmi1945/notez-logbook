@@ -1,18 +1,43 @@
-const { updateMentorshipStatus, getAllStudentsByMentor } = require("../../models/mentorshipModel");
+// 1. Panggil Prisma untuk keperluan menghitung total logbook
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-//Fungsi untuk Menyetujui atau Menolak Request Mahasiswa
+// 2. Sesuaikan import dengan fungsi Model terbaru yang kita buat tadi
+const { updateMentorshipStatus, getMentorActiveTeam, getMentorshipById } = require("../../models/mentorshipModel");
+
+
+// Fungsi untuk Menyetujui atau Menolak Request Mahasiswa
+
 const handleMentorshipDecision = async (req, res) => {
   try {
     const { requestId } = req.params;
-    const { information } = req.body; // Ambil informasi tambahan dari body request
+    const { information } = req.body; 
     
+    // ✨ LOGIKA ANTI-SPAM (Pengecekan Status)
+    const existingRequest = await getMentorshipById(requestId);
+    
+    if (!existingRequest) {
+      return res.status(404).json({
+        error: "NOT_FOUND",
+        message: "Data pengajuan bimbingan tidak ditemukan."
+      });
+    }
 
-    let action;        
+    if (existingRequest.status !== "pending") {
+      return res.status(409).json({
+        error: "CONFLICT",
+        message: `Oops! Pengajuan ini sudah diproses dan berstatus '${existingRequest.status}'.`
+      });
+    }
+    // ✨ BATAS LOGIKA ANTI-SPAM
 
+    let action; 
     if (req.path.endsWith("/accepted")) {
-      action = "accepted"; 
+      action = "accepted";
     } else if (req.path.endsWith("/rejected")) {
       action = "rejected";
+    } else {
+      return res.status(400).json({ error: "BAD_REQUEST", message: "URL tidak valid." });
     }
 
     // Eksekusi update status di database
@@ -30,49 +55,44 @@ const handleMentorshipDecision = async (req, res) => {
   }
 };
 
-// Fungsi untuk Melihat Daftar Semua User/Mahasiswa dalam Tim Mentor
+
+// Fungsi untuk Melihat Daftar Semua Mahasiswa Aktif dalam Tim Mentor
+
 const getMyTeam = async (req, res) => {
   try {
-
     const mentorId = req.user.id;
 
-    const team = await getAllStudentsByMentor(mentorId);
+    // 3. Gunakan fungsi getMentorActiveTeam agar HANYA menarik yang 'accepted'
+    const activeTeam = await getMentorActiveTeam(mentorId);
 
-//  const getMyTeam = async (req, res) => {
-//   try {
-//     const mentorId = req.user.id;
-//     const team = await getAllStudentsByMentor(mentorId);
+    // 4. Kita aktifkan kembali Promise.all untuk menghitung logbook asli!
+    const formattedTeam = await Promise.all(activeTeam.map(async (item) => {
+      
+      // Hitung logbook asli dari database
+      const total = await prisma.logbookEntry.count({ 
+        where: { user_id: item.user.id } 
+      });
 
-//     // Kita gunakan Promise.all agar database selesai menghitung dulu sebelum lanjut
-//     const formattedTeam = await Promise.all(team.map(async (item) => {
-//       // 1. Hitung total logbook
-//       const total = await prisma.logbook.count({ 
-//         where: { user_id: item.user.id } 
-//       });
+      const pending = await prisma.logbookEntry.count({ 
+        where: { user_id: item.user.id, status: 'draft' } 
+      });
 
-//       // 2. Hitung yang masih pending (menunggu review)
-//       const pending = await prisma.logbook.count({ 
-//         where: { user_id: item.user.id, status: 'pending' } 
-//       });
-
-//       // 3. PASANG CCTV DI TERMINAL (Backend)
-//       console.log(`DEBUG: Mahasiswa ${item.user.name} | Total: ${total} | Pending: ${pending}`);
-
-    const formattedTeam = team.map(item => ({
-      requestId: item.id,
-      studentId: item.user.id,
-      studentName: item.user.name,
-      studentEmail: item.user.email,
-      status: item.status,
-      information : item.information,
-      updatedAt: item.updated_at,
-      totalEntries: item.status === 'accepted' ? 10 : 0,
-      waitingReview: item.status === 'accepted' ? 2 : 0
+      return {
+        requestId: item.id,
+        studentId: item.user.id,
+        studentName: item.user.name,
+        studentEmail: item.user.email,
+        status: item.status, // Pasti akan selalu 'accepted'
+        information: item.information,
+        updatedAt: item.updated_at,
+        totalEntries: total,     // Angka asli dari database
+        waitingReview: pending   // Angka asli dari database
+      };
     }));
 
     return res.status(200).json({
       status: "success",
-      message: "Berhasil mengambil daftar tim mahasiswa bimbingan.",
+      message: "Berhasil mengambil daftar tim mahasiswa bimbingan aktif.",
       data: formattedTeam
     });
   } catch (error) {

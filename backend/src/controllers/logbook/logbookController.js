@@ -63,12 +63,12 @@ const createLogbook = async (req, res) => {
   }
 };
 
-//DETAIL
+//detail logbook
 const getLogbook = async (req, res) => {
   try {
     const userId = req.user.id;
     const logbookId = req.params.id;
-    const logbook = await getLogbookById(logbookId, userId);
+    const logbook = await getLogbookDetail(logbookId, userId);
 
     if (!logbook) {
       return res.status(404).json({
@@ -145,7 +145,7 @@ const deleteLogbook = async (req, res) => {
       });
     }
 
-    const deleted = await deleteLogbookEntry(logbookId, userId);
+    const deleted = await deleteLogbookEntry(logbookId);
     if (!deleted) {
       return res.status(500).json({
         success: false,
