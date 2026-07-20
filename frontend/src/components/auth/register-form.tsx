@@ -53,7 +53,7 @@ export default function RegisterForm() {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-        {errors.name && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.name}</p>}
+        {errors.name && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.name}</p>}
       </div>
 
       {/* Input Alamat Email */}
@@ -66,7 +66,7 @@ export default function RegisterForm() {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
-        {errors.email && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.email}</p>}
+        {errors.email && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.email}</p>}
       </div>
 
       {/* Pilihan Peran (Role) */}
@@ -76,7 +76,7 @@ export default function RegisterForm() {
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <UserList className="w-5 h-5 text-gray-400" weight="regular" />
+            <UserList className="w-5 h-5 text-brand-primary/70" weight="regular" />
           </div>
           <select
             value={formData.role}
@@ -87,7 +87,7 @@ export default function RegisterForm() {
             <option value="mentor">Mentor</option>
           </select>
         </div>
-        {errors.role && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.role}</p>}
+        {errors.role && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.role}</p>}
       </div>
 
       {/* Input Password */}
@@ -100,7 +100,7 @@ export default function RegisterForm() {
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
         />
-        {errors.password && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.password}</p>}
+        {errors.password && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.password}</p>}
       </div>
 
       {/* Input Konfirmasi Password */}
@@ -113,7 +113,7 @@ export default function RegisterForm() {
           value={formData.confirmPassword}
           onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
         />
-        {errors.confirmPassword && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.confirmPassword}</p>}
+        {errors.confirmPassword && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.confirmPassword}</p>}
       </div>
 
       {/* Tombol Submit Aktif Penuh */}

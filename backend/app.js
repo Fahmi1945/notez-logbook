@@ -2,6 +2,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/auth/authRoutes");
+const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
 
@@ -9,7 +10,7 @@ const app = express();
 // app.set("trust proxy", true);
 app.use(
   cors({
-    origin: "*",
+    origin: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -39,6 +40,9 @@ app.use("/api", timMahasiswaRoutes);
 
 // Routing mentorship
 app.use("/api", mentorshipRoutes);
+
+// Routing logbook
+app.use("/api/logbook", logbookRoutes);
 
 // PERANGKAP 404: Menangkap semua request yang alamatnya salah
 app.use((req, res) => {

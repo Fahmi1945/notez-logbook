@@ -9,12 +9,13 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export function Badge({ status, children, className, ...props }: BadgeProps) {
+  // Warna disesuaikan dengan Palet Opsi 1: Modern Emerald & Rose
   const statusConfig: Record<BadgeStatus, { color: string; label: string }> = {
-    draft: { color: "bg-gray-100 text-gray-700 border-gray-200", label: "Draft" },
-    submitted: { color: "bg-blue-100 text-blue-700 border-blue-200", label: "Diserahkan" },
-    pending: { color: "bg-amber-100 text-amber-700 border-amber-200", label: "Menunggu" },
-    approved: { color: "bg-emerald-100 text-emerald-700 border-emerald-200", label: "Disetujui" },
-    rejected: { color: "bg-rose-100 text-rose-700 border-rose-200", label: "Ditolak" },
+    draft: { color: "bg-slate-50 text-slate-700 border-slate-200", label: "Draft" },
+    submitted: { color: "bg-violet-50 text-violet-700 border-violet-200", label: "Diserahkan" },
+    pending: { color: "bg-amber-50 text-amber-700 border-amber-200", label: "Menunggu" }, 
+    approved: { color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Disetujui" },
+    rejected: { color: "bg-rose-50 text-rose-700 border-rose-200", label: "Ditolak" },
   };
 
   return (
