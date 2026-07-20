@@ -5,7 +5,7 @@ const {
   getLogbook, 
   updateLogbook, 
   deleteLogbook 
-} = require("../../controllers/logbookController.js");
+} = require("../../controllers/logbook/logbookController.js");
 const verifyToken = require("../../middleware/verifyToken.js");
 
 const router = express.Router();
