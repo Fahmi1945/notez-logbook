@@ -1,27 +1,46 @@
 require("dotenv").config();
 
 const { findMentors } = require("../../models/userModel");
-const { createMentorship, findPendingRequest, getMyRequestedMentors, getQueueList, getAllStudentsByMentor } = require("../../models/mentorshipModel");
+const { 
+  createMentorship, 
+  checkExistingRequest,     // ✨ Menggunakan fungsi Anti-Spam baru
+  getMyRequestedMentors, 
+  getMentorRequestsHistory  // ✨ Menggunakan fungsi filter khusus Mentor
+} = require("../../models/mentorshipModel");
 
-// Fungsi request ke mentorship
+// ============================================================================
+// Fungsi request ke mentorship (Dilengkapi Anti-Spam Sempurna)
+// ============================================================================
 const requestMentorship = async (req, res) => {
   try {
-    const userId = req.user.id; // Tangkap ID mahasiswa dari token yang sudah diverifikasi
+    const userId = req.user.id; 
     const mentorId = req.params.id;
 
-    const existingRequest = await findPendingRequest(userId, mentorId);
+    // ✨ CEK APAKAH SUDAH PERNAH REQUEST (APA PUN STATUSNYA)
+    const existingRequest = await checkExistingRequest(userId, mentorId);
 
     if (existingRequest) {
-      return res.status(409).json({
-        error: "CONFLICT",
-        message: "Sabar ya! Kamu sudah mengajukan request ke mentor ini dan masih menunggu persetujuan."
-      });
+      if (existingRequest.status === "pending") {
+        return res.status(409).json({
+          error: "CONFLICT",
+          message: "Sabar ya! Kamu sudah mengajukan request ke mentor ini dan masih menunggu persetujuan."
+        });
+      } else if (existingRequest.status === "accepted") {
+        return res.status(409).json({
+          error: "CONFLICT",
+          message: "Kamu tidak perlu mengajukan lagi, kamu sudah diterima oleh mentor ini."
+        });
+      } else if (existingRequest.status === "rejected") {
+        return res.status(409).json({
+          error: "CONFLICT",
+          message: "Maaf, pengajuanmu sebelumnya telah ditolak oleh mentor ini. Silakan cari mentor lain."
+        });
+      }
     }
 
-    // simpan data request ke database melalui fungsi di model  
+    // Jika belum pernah ada riwayat sama sekali, simpan data  
     const newRequest = await createMentorship(parseInt(userId), parseInt(mentorId));
 
-    // Respons Berhasil
     return res.status(200).json({
       status: "success",
       message: "Request mentorship berhasil dikirim.",
@@ -42,7 +61,9 @@ const requestMentorship = async (req, res) => {
   }
 };
 
+// ============================================================================
 // Fungsi untuk mengambil daftar mentor
+// ============================================================================
 const getMentorsList = async (req, res) => {
   try {
     const mentorship = await findMentors();
@@ -62,24 +83,26 @@ const getMentorsList = async (req, res) => {
   }
 };
 
-// Fungsi untuk mengambil riwayat request mentorship milik mahasiswa
+// ============================================================================
+// Fungsi untuk mengambil riwayat request mentorship (Dipisah by Role)
+// ============================================================================
 const getMentorshipHistory = async (req, res) => {
   try {
     const loggedInUserId = req.user.id;
     const loggedInUserRole = req.user.role; 
 
-    // JIKA MAHASISWA YANG AKSES (Hanya melihat riwayat pribadinya)
+    // 🎓 1. JIKA MAHASISWA YANG AKSES (Melihat semua riwayat pribadinya)
     if (loggedInUserRole === "user") {
       const history = await getMyRequestedMentors(loggedInUserId);
       
       const formattedData = history.map(item => ({
         requestId: item.id,
-        status: item.status,           // Untuk menyaring tab 'Pending' atau 'Aktif' di frontend mahasiswa
-        information: item.information, // Melihat pesan balasan/catatan dari mentor
+        status: item.status, 
+        information: item.information, 
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         mentorId: item.mentor.id,
-        mentorName: item.mentor.name,  // Properti khusus Mahasiswa: Melihat nama mentornya
+        mentorName: item.mentor.name, 
       }));
 
       return res.status(200).json({
@@ -90,24 +113,25 @@ const getMentorshipHistory = async (req, res) => {
       });
     }
 
-    // JIKA MENTOR YANG AKSES (Melihat seluruh tim & antrean seperti di gambarmu)
+    // 👨‍🏫 2. JIKA MENTOR YANG AKSES (Hanya melihat yang pending & rejected)
     if (loggedInUserRole === "mentor") {
-      const queue = await getAllStudentsByMentor(loggedInUserId);
+      // ✨ Menggunakan getMentorRequestsHistory
+      const queue = await getMentorRequestsHistory(loggedInUserId);
       
       const formattedData = queue.map(item => ({
         requestId: item.id,
-        status: item.status,           // Untuk menyaring tab 'Antrean' atau 'Tim' di frontend mentor
-        information: item.information, // Catatan yang mentor berikan ke mahasiswa ini
+        status: item.status, 
+        information: item.information, 
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         studentId: item.user.id,
-        studentName: item.user.name,   // Properti khusus Mentor: Melihat nama mahasiswanya
+        studentName: item.user.name, 
       }));
 
       return res.status(200).json({
         status: "success",
         role: "MENTOR",
-        message: "Berhasil mengambil seluruh daftar bimbingan milik mentor.",
+        message: "Berhasil mengambil riwayat request masuk (pending/rejected).",
         data: formattedData
       });
     }
@@ -125,6 +149,5 @@ const getMentorshipHistory = async (req, res) => {
     });
   }
 };
-
 
 module.exports = { requestMentorship, getMentorsList, getMentorshipHistory };
