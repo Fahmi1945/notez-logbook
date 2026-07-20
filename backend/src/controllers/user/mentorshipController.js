@@ -1,26 +1,46 @@
 require("dotenv").config();
 
 const { findMentors } = require("../../models/userModel");
-const {
-  createMentorship,
-  findPendingRequest,
-  getMyRequestedMentors,
-  getQueueList,
+const { 
+  createMentorship, 
+  checkExistingRequest,     // ✨ Menggunakan fungsi Anti-Spam baru
+  getMyRequestedMentors, 
+  getMentorRequestsHistory  // ✨ Menggunakan fungsi filter khusus Mentor
 } = require("../../models/mentorshipModel");
 
-// Fungsi request ke mentorship
+// ============================================================================
+// Fungsi request ke mentorship (Dilengkapi Anti-Spam Sempurna)
+// ============================================================================
 const requestMentorship = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; 
     const mentorId = req.params.id;
 
-    // simpan data request ke database melalui fungsi di model
-    const newRequest = await createMentorship(
-      parseInt(userId),
-      parseInt(mentorId),
-    );
+    // ✨ CEK APAKAH SUDAH PERNAH REQUEST (APA PUN STATUSNYA)
+    const existingRequest = await checkExistingRequest(userId, mentorId);
 
-    // Respons Berhasil
+    if (existingRequest) {
+      if (existingRequest.status === "pending") {
+        return res.status(409).json({
+          error: "CONFLICT",
+          message: "Sabar ya! Kamu sudah mengajukan request ke mentor ini dan masih menunggu persetujuan."
+        });
+      } else if (existingRequest.status === "accepted") {
+        return res.status(409).json({
+          error: "CONFLICT",
+          message: "Kamu tidak perlu mengajukan lagi, kamu sudah diterima oleh mentor ini."
+        });
+      } else if (existingRequest.status === "rejected") {
+        return res.status(409).json({
+          error: "CONFLICT",
+          message: "Maaf, pengajuanmu sebelumnya telah ditolak oleh mentor ini. Silakan cari mentor lain."
+        });
+      }
+    }
+
+    // Jika belum pernah ada riwayat sama sekali, simpan data  
+    const newRequest = await createMentorship(parseInt(userId), parseInt(mentorId));
+
     return res.status(200).json({
       status: "success",
       message: "Request mentorship berhasil dikirim.",
@@ -48,7 +68,9 @@ const requestMentorship = async (req, res) => {
   }
 };
 
+// ============================================================================
 // Fungsi untuk mengambil daftar mentor
+// ============================================================================
 const getMentorsList = async (req, res) => {
   try {
     const mentorship = await findMentors();
@@ -67,26 +89,27 @@ const getMentorsList = async (req, res) => {
   }
 };
 
-// Fungsi untuk mengambil riwayat request mentorship milik mahasiswa
+// ============================================================================
+// Fungsi untuk mengambil riwayat request mentorship (Dipisah by Role)
+// ============================================================================
 const getMentorshipHistory = async (req, res) => {
   try {
     // 1. Ambil ID dan ROLE secara aman dari Token JWT via middleware verifyToken
     const currentUserId = req.user.id;
     const currentUserRole = req.user.role.toUpperCase(); // Antisipasi jika ada perbedaan casing (user vs USER)
 
-    // 2. JIKA YANG LOGIN ADALAH MAHASISWA (USER / STUDENT)
-    if (currentUserRole === "USER") {
-      // Panggil model untuk mengambil riwayat request berdasarkan ID mahasiswa tersebut
-      const history = await getMyRequestedMentors(currentUserId);
-
-      const formattedData = history.map((item) => ({
+    // 🎓 1. JIKA MAHASISWA YANG AKSES (Melihat semua riwayat pribadinya)
+    if (loggedInUserRole === "user") {
+      const history = await getMyRequestedMentors(loggedInUserId);
+      
+      const formattedData = history.map(item => ({
         requestId: item.id,
-        status: item.status, // Pending/Accepted/Rejected
-        information: item.information,
+        status: item.status, 
+        information: item.information, 
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         mentorId: item.mentor.id,
-        mentorName: item.mentor.name,
+        mentorName: item.mentor.name, 
       }));
 
       return res.status(200).json({
@@ -97,26 +120,26 @@ const getMentorshipHistory = async (req, res) => {
       });
     }
 
-    // 3. JIKA YANG LOGIN ADALAH MENTOR
-    if (currentUserRole === "MENTOR") {
-      // Panggil model untuk mengambil antrean mahasiswa berdasarkan ID mentor tersebut
-      const queue = await getQueueList(currentUserId);
-
-      const formattedData = queue.map((item) => ({
+    // 👨‍🏫 2. JIKA MENTOR YANG AKSES (Hanya melihat yang pending & rejected)
+    if (loggedInUserRole === "mentor") {
+      // ✨ Menggunakan getMentorRequestsHistory
+      const queue = await getMentorRequestsHistory(loggedInUserId);
+      
+      const formattedData = queue.map(item => ({
         requestId: item.id,
-        status: item.status,
-        information: item.information,
+        status: item.status, 
+        information: item.information, 
         createdAt: item.created_at,
         updatedAt: item.updated_at,
         studentId: item.user.id,
-        studentName: item.user.name,
+        studentName: item.user.name, 
       }));
 
       return res.status(200).json({
         status: "success",
         role: "MENTOR",
-        message: "Berhasil mengambil daftar antrean mahasiswa masuk.",
-        data: formattedData,
+        message: "Berhasil mengambil riwayat request masuk (pending/rejected).",
+        data: formattedData
       });
     }
 
@@ -140,27 +163,4 @@ const getMentorshipHistory = async (req, res) => {
 //     const requestId = req.params.id; // Tangkap ID dari URL
 //     const { action } = req.body;      // Tangkap status baru dari body ("ACCEPTED" atau "REJECTED")
 
-//     if (!action || (action !== "ACCEPTED" && action !== "REJECTED")) {
-//        return res.status(400).json({
-//          error: "VALIDATION_ERROR",
-//          message: "Status tidak valid. Harus 'ACCEPTED' atau 'REJECTED'."
-//        });
-//     }
-
-//     const updatedRequest = await updateRequestStatus(parseInt(requestId), action);
-
-//     return res.status(200).json({
-//       status: "success",
-//       message: `Status request berhasil diubah menjadi ${action}.`,
-//       data: updatedRequest
-//     });
-
-//   } catch (error) {
-//     console.error("Error di updateStatus:", error);
-//     return res.status(500).json({
-//       error: "INTERNAL_SERVER_ERROR",
-//       message: "Terjadi kesalahan saat mengupdate status request.",
-//     });
-//   }
-// };
 module.exports = { requestMentorship, getMentorsList, getMentorshipHistory };
