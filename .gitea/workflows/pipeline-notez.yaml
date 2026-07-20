@@ -5,9 +5,9 @@ name: Pipeline Utama Notez
 on:
   push:
     branches:
-      - main     # Kondisi: Jalankan HANYA jika ada push ke branch main
+      - main # Kondisi: Jalankan HANYA jika ada push ke branch main
     paths-ignore:
-      - 'README.md' # Kondisi: JANGAN jalan kalau yang diganti cuma file README.md
+      - "README.md" # Kondisi: JANGAN jalan kalau yang diganti cuma file README.md
 
 # 3. DAFTAR TUGAS (Apa saja yang harus dikerjakan?)
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       # FIX: Masuk ke folder frontend dulu sebelum install & build
       - name: Install Frontend Dependency
@@ -44,6 +44,11 @@ jobs:
         run: |
           cd backend
           npm install
+      - name: Prisma Generate
+        run: |
+          cd backend
+          npx prisma generate
+
       - name: Test Build Backend
         run: |
           cd backend
