@@ -1,12 +1,12 @@
 const express = require("express");
-const {
-  getMyLogbook,
-  createLogbook,
-  getLogbook,
-  updateLogbook,
-  deleteLogbook
-} = require("../controllers/logbookController");
-const verifyToken = require("../middleware/verifyToken.js");
+const { 
+  getMyLogbook, 
+  createLogbook, 
+  getLogbook, 
+  updateLogbook, 
+  deleteLogbook 
+} = require("../../controllers/logbookController.js");
+const verifyToken = require("../../middleware/verifyToken.js");
 
 const router = express.Router();
 

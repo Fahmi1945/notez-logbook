@@ -208,14 +208,3 @@ manual, supaya tidak ada path yang "nyasar" saat refactor.
 - Semua token diekspos ulang sebagai warna Tailwind di `tailwind.config.ts`
   (`bg-primary`, `text-status-approved`, dll) supaya dipakai konsisten di
   komponen tanpa menulis HSL manual.
-
-## 6. Yang Sengaja Belum Dikerjakan (di luar scope permintaan ini)
-
-- Form & validasi (login, register, entri logbook, review).
-- Pemanggilan API / data fetching / state management.
-- Komponen UI reusable (Button, Input, Modal, Table, dsb) — folder
-  `src/components/ui/` sudah disiapkan tapi masih kosong.
-- Logic upload lampiran, export PDF, dan captcha aritmatika.
-
-Struktur di atas dirancang supaya semua pekerjaan tersebut tinggal "diisi"
-ke slot yang sudah ada, tanpa perlu mengubah routing atau layout dasar.
