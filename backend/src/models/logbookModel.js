@@ -7,6 +7,9 @@ const getLogbookById = async (user_id) => {
     where: {
       user_id: parseInt(user_id, 10),
     },
+    include: {
+      attachments: true,
+    },
     orderBy: {
       activity_date: "desc",
     },
@@ -17,15 +20,21 @@ const getLogbookById = async (user_id) => {
 const createLogbookEntry = async (data) => {
   return await prisma.logbookEntry.create({
     data: data,
+    include: {
+      attachments: true,
+    },
   });
 };
 
 //DETAIL
 const getLogbookDetail = async (logbookId, userId) => {
-  return await prisma.logbookEntry.findUnique({
+  return await prisma.logbookEntry.findFirst({
     where: {
       id: parseInt(logbookId, 10),
       user_id: parseInt(userId, 10),
+    },
+    include: {
+      attachments: true,
     },
   });
 };
@@ -37,6 +46,9 @@ const updateLogbookEntry = async (logbookId, data) => {
       id: parseInt(logbookId, 10),
     },
     data: data,
+    include: {
+      attachments: true,
+    },
   });
 };
 
@@ -45,6 +57,9 @@ const deleteLogbookEntry = async (logbookId) => {
   return await prisma.logbookEntry.delete({
     where: {
       id: parseInt(logbookId, 10),
+    },
+    include: {
+      attachments: true,
     },
   });
 };
