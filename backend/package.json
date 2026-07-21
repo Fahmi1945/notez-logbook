@@ -13,10 +13,12 @@
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-generator": "^4.16.1",
     "express-rate-limit": "^8.5.2",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
     "pg-promise": "^12.7.0",
     "prisma": "^6.19.3"
   }

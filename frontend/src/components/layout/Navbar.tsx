@@ -20,7 +20,7 @@ export function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
         
         {/* Opsional: Judul Halaman Dinamis atau Breadcrumb bisa ditaruh di sini nantinya */}
         <h1 className="text-lg font-bold font-heading text-brand-dark hidden sm:block">
-          Selamat datang, {user?.name?.split(" ")[0] || "Mahasiswa"}!
+          Selamat datang, {user?.name?.split(" ")[0] || "Memuat"}!
         </h1>
       </div>
 
@@ -30,7 +30,7 @@ export function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
         <button className="relative p-2 text-gray-400 hover:text-brand-primary transition-colors rounded-full hover:bg-brand-soft/50">
           <Bell className="w-6 h-6" weight="regular" />
           {/* Badge merah jika ada notifikasi baru */}
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-status-rejected rounded-full border-2 border-brand-white"></span>
         </button>
 
         {/* Garis Pemisah */}

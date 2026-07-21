@@ -1,12 +1,9 @@
-// 1. Panggil Prisma untuk keperluan menghitung total logbook
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// 2. Sesuaikan import dengan fungsi Model terbaru yang kita buat tadi
 const { updateMentorshipStatus, getMentorActiveTeam, getMentorshipById } = require("../../models/mentorshipModel");
 
 
-// Fungsi untuk Menyetujui atau Menolak Request Mahasiswa
 
 const handleMentorshipDecision = async (req, res) => {
   try {
@@ -40,7 +37,6 @@ const handleMentorshipDecision = async (req, res) => {
       return res.status(400).json({ error: "BAD_REQUEST", message: "URL tidak valid." });
     }
 
-    // Eksekusi update status di database
     const updatedRequest = await updateMentorshipStatus(requestId, action, information);
 
     return res.status(200).json({
@@ -56,16 +52,13 @@ const handleMentorshipDecision = async (req, res) => {
 };
 
 
-// Fungsi untuk Melihat Daftar Semua Mahasiswa Aktif dalam Tim Mentor
 
 const getMyTeam = async (req, res) => {
   try {
     const mentorId = req.user.id;
 
-    // 3. Gunakan fungsi getMentorActiveTeam agar HANYA menarik yang 'accepted'
     const activeTeam = await getMentorActiveTeam(mentorId);
 
-    // 4. Kita aktifkan kembali Promise.all untuk menghitung logbook asli!
     const formattedTeam = await Promise.all(activeTeam.map(async (item) => {
       
       // Hitung logbook asli dari database

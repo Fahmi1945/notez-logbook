@@ -31,7 +31,7 @@ const requestMentorship = async (req, res) => {
       if (existingRequest.status === "pending") {
         return res.status(409).json({
           error: "CONFLICT",
-          message: "Sabar ya! Kamu sudah mengajukan request ke mentor ini dan masih menunggu persetujuan."
+          message: "Kamu sudah mengajukan request ke mentor ini dan masih menunggu persetujuan."
         });
       } else if (existingRequest.status === "accepted") {
         return res.status(409).json({
@@ -119,7 +119,6 @@ const getMentorshipHistory = async (req, res) => {
     const loggedInUserId = req.user.id;
     const loggedInUserRole = req.user.role; // Antisipasi jika ada perbedaan casing (user vs USER)
 
-    // 🎓 1. JIKA MAHASISWA YANG AKSES (Melihat semua riwayat pribadinya)
     if (loggedInUserRole === "user") {
       const history = await getMyRequestedMentors(loggedInUserId);
       
@@ -141,9 +140,7 @@ const getMentorshipHistory = async (req, res) => {
       });
     }
 
-    // 👨‍🏫 2. JIKA MENTOR YANG AKSES (Hanya melihat yang pending & rejected)
     if (loggedInUserRole === "mentor") {
-      // ✨ Menggunakan getMentorRequestsHistory
       const queue = await getMentorRequestsHistory(loggedInUserId);
       
       const formattedData = queue.map(item => ({
@@ -164,7 +161,6 @@ const getMentorshipHistory = async (req, res) => {
       });
     }
 
-    // 4. JIKA ROLE TIDAK DIKENALI
     return res.status(403).json({
       error: "FORBIDDEN",
       message:
@@ -178,10 +174,5 @@ const getMentorshipHistory = async (req, res) => {
     });
   }
 };
-// fungsi update status request mentorship
-// const updateStatus = async (req, res) => {
-//   try {
-//     const requestId = req.params.id; // Tangkap ID dari URL
-//     const { action } = req.body;      // Tangkap status baru dari body ("ACCEPTED" atau "REJECTED")
 
 module.exports = { requestMentorship, getMentorsList, getMentorshipHistory };
