@@ -1,8 +1,9 @@
 {
   "name": "notez",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -15,10 +16,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-generator": "^4.16.1",
-    "express-jwt": "^8.5.1",
-    "pg-promise": "^12.7.0"
-  },
-  "devDependencies": {
+    "express-rate-limit": "^8.5.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "pg-promise": "^12.7.0",
     "prisma": "^6.19.3"
   }
 }

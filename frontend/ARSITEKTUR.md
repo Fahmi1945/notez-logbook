@@ -18,57 +18,137 @@ atau UI final.
 
 ```
 notez-frontend/
-├── .env.example
+├── .env.local.example
+├── .eslintrc.json
+├── .gitignore
+├── README.md
+├── next.config.js
 ├── package.json
-├── next.config.mjs
+├── postcss.config.js
 ├── tailwind.config.ts
-├── postcss.config.mjs
 ├── tsconfig.json
-├── ARSITEKTUR.md
+│
 └── src/
-    ├── middleware.ts                          # Guard auth + RBAC per rute
+    ├── middleware.ts                          # Guard route berbasis token + role
+    │
     ├── app/
-    │   ├── layout.tsx                         # Root layout (<html>/<body>)
-    │   ├── page.tsx                           # "/" -> redirect login/dashboard
-    │   ├── not-found.tsx
-    │   ├── globals.css                        # Tailwind + design tokens
-    │   ├── (auth)/                             # Grup publik, tanpa navbar
-    │   │   ├── layout.tsx                     # Shell terpusat (card)
-    │   │   ├── login/page.tsx                 # /login
-    │   │   └── register/page.tsx              # /register
-    │   └── (protected)/                        # Grup ter-autentikasi
-    │       ├── layout.tsx                     # Cek sesi + render AppShell
-    │       ├── dashboard/page.tsx             # /dashboard
-    │       ├── logbook/                       # khusus role "user"
-    │       │   ├── page.tsx                   # /logbook
-    │       │   ├── new/page.tsx               # /logbook/new
+    │   ├── layout.tsx                         # Root layout (font, ToastContainer)
+    │   ├── page.tsx                            # Redirect "/" → "/login"
+    │   ├── globals.css
+    │   │
+    │   ├── (auth)/                             # Route group — tanpa sidebar
+    │   │   ├── layout.tsx                      # Card login/register terpusat
+    │   │   ├── login/
+    │   │   │   └── page.tsx
+    │   │   └── register/
+    │   │       └── page.tsx
+    │   │
+    │   ├── (user)/                             # Route group — layout sidebar role "user"
+    │   │   ├── layout.tsx                      # Sidebar + Navbar untuk user
+    │   │   ├── dashboard/
+    │   │   │   └── page.tsx
+    │   │   ├── logbook/
+    │   │   │   ├── page.tsx                    # List entri + filter
+    │   │   │   ├── new/
+    │   │   │   │   └── page.tsx                # Form entri baru
+    │   │   │   └── [id]/
+    │   │   │       ├── page.tsx                # Detail entri + submit/hapus/lampiran
+    │   │   │       └── edit/
+    │   │   │           └── page.tsx
+    │   │   ├── mentorship/
+    │   │   │   └── page.tsx                    # Katalog mentor + riwayat request
+    │   │   └── profile/
+    │   │       └── page.tsx
+    │   │
+    │   └── mentor/                             # Prefix URL literal /mentor/* (bukan route group)
+    │       ├── layout.tsx                      # Sidebar + Navbar untuk mentor
+    │       ├── dashboard/
+    │       │   └── page.tsx
+    │       ├── review/
+    │       │   ├── page.tsx                    # Antrean review (status=submitted)
     │       │   └── [id]/
-    │       │       ├── page.tsx               # /logbook/:id
-    │       │       └── edit/page.tsx          # /logbook/:id/edit
-    │       ├── mentorship/page.tsx            # /mentorship (khusus "user")
-    │       ├── mentor/                        # khusus role "mentor"
-    │       │   ├── team/page.tsx              # /mentor/team
-    │       │   ├── requests/page.tsx          # /mentor/requests
-    │       │   └── entries/
-    │       │       ├── page.tsx               # /mentor/entries
-    │       │       └── [id]/page.tsx          # /mentor/entries/:id
-    │       ├── notifications/page.tsx         # /notifications (shared)
-    │       ├── profile/page.tsx               # /profile (shared)
-    │       └── reports/page.tsx               # /reports (shared)
+    │       │       └── page.tsx                # Detail + approve/reject + viewer lampiran
+    │       ├── students/
+    │       │   └── page.tsx                    # Daftar mahasiswa bimbingan
+    │       ├── mentorship/
+    │       │   └── page.tsx                    # Permintaan bimbingan masuk
+    │       └── profile/
+    │           └── page.tsx
+    │
     ├── components/
+    │   ├── ui/                                 # Primitives generik
+    │   │   ├── button.tsx
+    │   │   ├── input.tsx
+    │   │   ├── textarea.tsx
+    │   │   ├── dropdown.tsx
+    │   │   ├── card.tsx
+    │   │   ├── badge.tsx                       # StatusBadge (draft/submitted/approved/rejected)
+    │   │   ├── modal.tsx
+    │   │   ├── spinner.tsx
+    │   │   └── toast.tsx
+    │   │
     │   ├── layout/
-    │   │   ├── AppShell.tsx                   # Navbar + Sidebar + content
-    │   │   ├── Navbar.tsx
-    │   │   └── Sidebar.tsx                    # Menu berbeda per role
-    │   └── ui/                                # (kosong) tempat komponen UI reusable nanti
+    │   │   ├── navbar.tsx
+    │   │   ├── sidebar.tsx                     # Role-aware (menu beda utk user/mentor)
+    │   │   └── notification-bell.tsx
+    │   │
+    │   ├── auth/
+    │   │   ├── login-form.tsx
+    │   │   ├── register-form.tsx
+    │   │   └── captcha.tsx                     # Captcha aritmatika sederhana
+    │   │
+    │   ├── logbook/
+    │   │   ├── entry-form.tsx                  # Form create/edit
+    │   │   ├── entry-card.tsx
+    │   │   ├── entry-list.tsx
+    │   │   ├── entry-filter.tsx                # Filter tanggal + status
+    │   │   └── attachment-upload.tsx           # Drag & drop + validasi tipe/ukuran
+    │   │
+    │   ├── mentorship/
+    │   │   ├── mentor-card.tsx
+    │   │   ├── request-list.tsx
+    │   │   └── request-action.tsx              # Tombol accept/reject mentor
+    │   │
+    │   ├── dashboard/
+    │   │   ├── stat-card.tsx
+    │   │   └── activity-chart.tsx              # Chart batang ringan (tanpa lib eksternal)
+    │   │
+    │   └── review/
+    │       ├── review-form.tsx                 # Approve/reject + catatan wajib saat reject
+    │       └── pdf-viewer.tsx                  # Viewer lampiran via blob (auth header)
+    │
     ├── lib/
-    │   ├── auth/session.ts                    # Verifikasi JWT dari cookie
-    │   └── constants/
-    │       ├── roles.ts                       # ROLES.USER / ROLES.MENTOR
-    │       ├── logbook-status.ts              # draft/submitted/approved/rejected
-    │       └── routes.ts                      # Peta path <-> role <-> endpoint API
-    └── types/
-        └── index.ts                           # Tipe User, LogbookEntry, dll (cermin tabel BSD 4.1)
+    │   ├── api/
+    │   │   ├── client.ts                       # Axios instance + interceptor Bearer Token
+    │   │   ├── auth.ts
+    │   │   ├── entries.ts
+    │   │   ├── mentorship.ts
+    │   │   ├── notifications.ts
+    │   │   └── reports.ts                      # Export PDF (blob download)
+    │   ├── validators/
+    │   │   ├── auth.schema.ts                  # Zod: login, register
+    │   │   ├── entry.schema.ts                 # Zod: entri + review
+    │   │   └── mentorship.schema.ts
+    │   ├── constants.ts                        # Peta API_ENDPOINTS 1:1 dgn BSD bag. 5
+    │   └── utils.ts                             # cn(), formatDate(), isFutureDate()
+    │
+    ├── store/                                  # Zustand
+    │   ├── auth-store.ts
+    │   ├── notification-store.ts
+    │   └── ui-store.ts                         # Toast global
+    │
+    ├── hooks/
+    │   ├── use-auth.ts
+    │   ├── use-entries.ts
+    │   ├── use-mentorship.ts
+    │   └── use-notifications.ts
+    │
+    └── types/                                  # Cermin skema tabel BSD 4.1
+        ├── user.ts
+        ├── entry.ts
+        ├── mentorship.ts
+        ├── notification.ts
+        └── api.ts
 ```
 
 ## 3. Tabel Routing
@@ -128,14 +208,3 @@ manual, supaya tidak ada path yang "nyasar" saat refactor.
 - Semua token diekspos ulang sebagai warna Tailwind di `tailwind.config.ts`
   (`bg-primary`, `text-status-approved`, dll) supaya dipakai konsisten di
   komponen tanpa menulis HSL manual.
-
-## 6. Yang Sengaja Belum Dikerjakan (di luar scope permintaan ini)
-
-- Form & validasi (login, register, entri logbook, review).
-- Pemanggilan API / data fetching / state management.
-- Komponen UI reusable (Button, Input, Modal, Table, dsb) — folder
-  `src/components/ui/` sudah disiapkan tapi masih kosong.
-- Logic upload lampiran, export PDF, dan captcha aritmatika.
-
-Struktur di atas dirancang supaya semua pekerjaan tersebut tinggal "diisi"
-ke slot yang sudah ada, tanpa perlu mengubah routing atau layout dasar.
