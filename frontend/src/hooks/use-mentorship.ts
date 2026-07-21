@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { mentorshipApi } from "@/lib/api/mentorship";
-import { Mentor, MentorshipHistory } from "@/types/mentorship";
 import { useUIStore } from "@/store/ui-store";
 import { useAuthStore } from "@/store/auth-store";
 import { mentorshipRequestSchema } from "@/lib/validators/mentorship.schema"; 

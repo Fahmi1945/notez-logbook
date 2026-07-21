@@ -52,7 +52,7 @@ export default function LoginForm() {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
-        {errors.email && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.email}</p>}
+        {errors.email && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.email}</p>}
       </div>
 
       <div>
@@ -64,14 +64,14 @@ export default function LoginForm() {
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
         />
-        {errors.password && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.password}</p>}
+        {errors.password && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.password}</p>}
         
       </div>
 
       {/* 4. Letakkan Captcha sebelum tombol Submit */}
       <div>
         <Captcha onValidate={(isValid) => setIsCaptchaValid(isValid)} />
-        {errors.captcha && <p className="text-red-500 text-[11px] mt-1 font-medium">{errors.captcha}</p>}
+        {errors.captcha && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.captcha}</p>}
       </div>
       <div className="flex justify-end mt-2">
         <Link href="/forgot-password" className="text-[11px] font-bold text-brand-primary hover:underline">

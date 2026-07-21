@@ -7,8 +7,8 @@ export default function Toast() {
   const { toastMessage, toastType } = useUIStore();
 
   const bgColors = {
-    success: "bg-green-500",
-    error: "bg-red-500",
+    success: "bg-status-approved",
+    error: "bg-status-rejected",
     info: "bg-brand-primary",
   };
 
