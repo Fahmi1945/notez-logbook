@@ -7,7 +7,6 @@ const authRoutes = require("./src/routes/auth/authRoutes");
 const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
-const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
@@ -21,7 +20,7 @@ app.use(
 );
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
 
