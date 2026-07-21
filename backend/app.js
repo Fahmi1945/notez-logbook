@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
@@ -19,7 +20,7 @@ app.use(
 );
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT;
 
 app.use(express.json());
 
