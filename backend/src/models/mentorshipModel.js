@@ -82,5 +82,29 @@ const getMentorshipById = async (requestId) => {
   });
 };
 
+const checkAcceptedMentorship = async (userId) => {
+  return await prisma.mentorship.findFirst({
+    where: {
+      user_id: parseInt(userId),
+      status: 'accepted' // Hanya mencari yang sudah disetujui
+    },
+    include: {
+      // Kita tarik sekalian data mentornya untuk ditampilkan di Frontend
+      mentor: {
+        select: { id: true, name: true, email: true }
+      }
+    }
+  });
+};
+
 // 🔴 PASTIKAN SEMUA FUNGSI DI-EXPORT
-module.exports = { createMentorship, checkExistingRequest, getMyRequestedMentors, getMentorRequestsHistory, getMentorActiveTeam, updateMentorshipStatus, getMentorshipById };
+module.exports = { 
+  createMentorship, 
+  checkExistingRequest, 
+  getMyRequestedMentors, 
+  getMentorRequestsHistory, 
+  getMentorActiveTeam, 
+  updateMentorshipStatus, 
+  getMentorshipById, 
+  checkAcceptedMentorship 
+};
