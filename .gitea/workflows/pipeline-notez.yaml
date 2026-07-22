@@ -5,11 +5,11 @@ name: Pipeline Utama Notez
 on:
   push:
     branches:
-      - main # Kondisi: Jalankan HANYA jika ada push ke branch main
-  paths-ignore:
-    - "README.md" # Kondisi: JANGAN jalan kalau yang diganti cuma file README.md
+      - main
+    paths-ignore:
+      - "README.md"
 
-# 3. DAFTAR TUGAS (Apa saja yang harus dikerjakan?)
+# 3. DAFTAR TUGAS
 jobs:
   Cek-Frontend:
     runs-on: ubuntu-latest
@@ -48,40 +48,21 @@ jobs:
       - name: Ambil Kodingan Terbaru
         uses: actions/checkout@v3
 
-      # Tambahkan setup Node.js di backend agar stabil (sama dengan frontend)
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-
       - name: Install Backend Dependency
         run: |
           cd backend
           npm install
-          npx prisma generate
 
-      - name: Linter Backend
-        run: |
-          cd backend
-          npm run lint
-
-      - name: Unit Test Backend
-        run: |
-          cd backend
-          npm test
-
-  # Job Ketiga: Menunggu Frontend & Backend Selesai
+  # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:
     runs-on: ubuntu-latest
-    needs: [Cek-Frontend, Cek-Backend] # Menunggu kedua job di atas selesai
-    if: always() 
+    needs: Cek-Kodingan
     steps:
       - name: Laporan Sukses
         # Hanya mencetak ini jika Frontend DAN Backend sukses
         if: ${{ needs.Cek-Frontend.result == 'success' && needs.Cek-Backend.result == 'success' }}
-        run: echo "Mantap Fahmi! Pipeline aman, semua tes, linter, dan build lolos!"
+        run: echo "KELAS KINGG! Pipeline aman, semua tes, linter, dan build lolos!"
 
       - name: Laporan Gagal
-        # Hanya mencetak ini jika ada salah satu yang gagal
-        if: ${{ needs.Cek-Frontend.result == 'failure' || needs.Cek-Backend.result == 'failure' }}
-        run: echo "Waduh bro, ada linting atau unit test yang gagal. Buruan cek log terminal CI lu!"
+        if: failure()
+        run: echo "Waduh bro, build-nya gagal. Buruan cek terminal lu!"

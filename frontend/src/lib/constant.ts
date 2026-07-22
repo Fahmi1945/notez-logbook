@@ -1,0 +1,24 @@
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333/api";
+
+/**
+ * Centralized API endpoints for the Notez frontend application.
+ */
+export const API_ENDPOINTS = {
+  AUTH: {
+    LOGIN: "/auth/login",
+    REGISTER: "/auth/register",
+  },
+  LOGBOOK: {
+    BASE: "/logbook",
+    BY_ID: (id: number | string) => `/logbook/${id}`,
+  },
+  MENTORSHIP: {
+    BASE: "/mentorship",
+    HISTORY: "/mentorship/history",
+    REQUEST: (mentorId: number | string) => `/mentorship/request/${mentorId}`,
+    ACCEPT: (requestId: number | string) => `/mentorship/${requestId}/accepted`,
+    REJECT: (requestId: number | string) => `/mentorship/${requestId}/rejected`,
+    GET_ACTIVE_STUDENTS: "/mentor/tim",
+  },
+} as const;
+

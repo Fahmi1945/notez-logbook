@@ -1,67 +1,35 @@
-import Cookies from "js-cookie";
+import { apiClient } from "./client";
 import { LogbookEntry, LogbookFormData, ApiResponse } from "@/types/entry";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// Helper function untuk setup header & token otomatis
-const getHeaders = () => {
-  const token = Cookies.get("token");
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-};
+import { API_ENDPOINTS } from "@/lib/constant";
 
 export const entriesApi = {
   // GET /logbook
   getAll: async (): Promise<ApiResponse<LogbookEntry[]>> => {
-    const response = await fetch(`${API_URL}/logbook`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
-    if (!response.ok) throw new Error("Gagal mengambil data logbook");
-    return response.json();
+    const response = await apiClient.get<ApiResponse<LogbookEntry[]>>(API_ENDPOINTS.LOGBOOK.BASE);
+    return response.data;
   },
 
   // GET /logbook/:id
   getById: async (id: number | string): Promise<ApiResponse<LogbookEntry>> => {
-    const response = await fetch(`${API_URL}/logbook/${id}`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
-    if (!response.ok) throw new Error("Gagal mengambil detail logbook");
-    return response.json();
+    const response = await apiClient.get<ApiResponse<LogbookEntry>>(API_ENDPOINTS.LOGBOOK.BY_ID(id));
+    return response.data;
   },
 
   // POST /logbook
   create: async (data: LogbookFormData): Promise<ApiResponse<LogbookEntry>> => {
-    const response = await fetch(`${API_URL}/logbook`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error("Gagal membuat logbook baru");
-    return response.json();
+    const response = await apiClient.post<ApiResponse<LogbookEntry>>(API_ENDPOINTS.LOGBOOK.BASE, data);
+    return response.data;
   },
 
   // PUT /logbook/:id
   update: async (id: number | string, data: Partial<LogbookFormData>): Promise<ApiResponse<LogbookEntry>> => {
-    const response = await fetch(`${API_URL}/logbook/${id}`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error("Gagal memperbarui logbook");
-    return response.json();
+    const response = await apiClient.put<ApiResponse<LogbookEntry>>(API_ENDPOINTS.LOGBOOK.BY_ID(id), data);
+    return response.data;
   },
 
   // DELETE /logbook/:id
   delete: async (id: number | string): Promise<ApiResponse<null>> => {
-    const response = await fetch(`${API_URL}/logbook/${id}`, {
-      method: "DELETE",
-      headers: getHeaders(),
-    });
-    if (!response.ok) throw new Error("Gagal menghapus logbook");
-    return response.json();
+    const response = await apiClient.delete<ApiResponse<null>>(API_ENDPOINTS.LOGBOOK.BY_ID(id));
+    return response.data;
   },
 };
