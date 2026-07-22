@@ -33,8 +33,9 @@ export default function EditLogbookPage() {
           description: res.data.description,
           obstacles: res.data.obstacles || "",
         });
-      } catch (err: any) {
-        setFetchError(err.message || "Gagal mengambil data logbook.");
+      } catch (err: unknown) {
+        const errorObj = err as { message?: string };
+        setFetchError(errorObj.message || "Gagal mengambil data logbook.");
       } finally {
         setIsFetching(false);
       }
@@ -55,9 +56,10 @@ export default function EditLogbookPage() {
       // Jika sukses, arahkan kembali ke halaman utama logbook
       router.push("/logbook");
       router.refresh(); 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorObj = error as { message?: string };
       setIsSubmitting(false);
-      throw new Error(error.message || "Gagal memperbarui logbook. Silakan coba lagi.");
+      throw new Error(errorObj.message || "Gagal memperbarui logbook. Silakan coba lagi.");
     }
   };
 

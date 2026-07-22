@@ -45,8 +45,9 @@ export default function EntryForm({ initialData, onSubmit, isLoading }: EntryFor
 
     try {
       await onSubmit(formData);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Terjadi kesalahan saat menyimpan data.");
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      setErrorMsg(errorObj.message || "Terjadi kesalahan saat menyimpan data.");
     }
   };
 

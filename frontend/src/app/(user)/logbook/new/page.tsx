@@ -24,10 +24,11 @@ export default function NewLogbookPage() {
       
       // Memaksa Next.js untuk me-refresh cache halaman agar data terbaru langsung muncul
       router.refresh(); 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorObj = error as { message?: string };
       setIsSubmitting(false);
       // Lempar error ke komponen form agar pesan errornya muncul di UI
-      throw new Error(error.message || "Gagal menyimpan logbook. Silakan coba lagi.");
+      throw new Error(errorObj.message || "Gagal menyimpan logbook. Silakan coba lagi.");
     }
   };
 

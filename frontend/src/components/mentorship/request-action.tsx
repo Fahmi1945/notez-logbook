@@ -25,7 +25,7 @@ export function RequestAction({ onApply }: RequestActionProps) {
     try {
       await onApply(); 
       setStatus("pending"); // Kalau sukses, biarkan terkunci
-    } catch (error) {
+    } catch {
       isClickedRef.current = false; // Kalau gagal API-nya, buka lagi gemboknya
       setStatus("idle");
     }

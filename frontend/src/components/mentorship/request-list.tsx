@@ -6,7 +6,8 @@ import { Clock, CheckCircle, XCircle, ChatTeardropText } from "@phosphor-icons/r
 import { MentorshipHistory } from "@/types/mentorship";
 
 interface RequestListProps {
-  history: any[]; 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  history: (MentorshipHistory & Record<string, any>)[]; 
 }
 
 const formatDate = (dateString: string) => {
