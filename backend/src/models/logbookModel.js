@@ -16,6 +16,30 @@ const getLogbookById = async (user_id) => {
   });
 };
 
+const getLogbookByIdAndUser = async (logbookId, userId) => {
+  return await prisma.logbookEntry.findFirst({
+    where: {
+      id: parseInt(logbookId, 10),
+      user_id: parseInt(userId, 10),
+    },
+  });
+};
+
+const updateLogbookStatusToSubmitted = async (logbookId) => {
+  return await prisma.logbookEntry.update({
+    where: {
+      id: parseInt(logbookId, 10),
+    },
+    data: {
+      status: "submitted",
+      status_changed_at: new Date(),
+    },
+    include: {
+      attachments: true,
+    },
+  });
+};
+
 //CREATE
 const createLogbookEntry = async (data) => {
   return await prisma.logbookEntry.create({
@@ -70,4 +94,6 @@ module.exports = {
   getLogbookDetail,
   updateLogbookEntry,
   deleteLogbookEntry,
+  getLogbookByIdAndUser,
+  updateLogbookStatusToSubmitted,
 };

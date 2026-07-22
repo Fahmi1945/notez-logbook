@@ -46,6 +46,9 @@ app.use("/api", mentorshipRoutes);
 // Routing logbook
 app.use("/api/logbook", logbookRoutes);
 
+// Routing mentor logbook
+app.use("/api", mentorLogbookRoutes);
+
 // Routing upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
