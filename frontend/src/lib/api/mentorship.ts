@@ -1,6 +1,6 @@
 // src/lib/api/mentorship.ts
 import { apiClient } from "./client";
-import { Mentor, MentorshipHistory, ActiveStudent } from "@/types/mentorship";
+import { Mentor, ActiveStudent } from "@/types/mentorship";
 import { API_ENDPOINTS } from "@/lib/constant";
 
 export const mentorshipApi = {

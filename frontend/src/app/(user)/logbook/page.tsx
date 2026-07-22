@@ -49,10 +49,20 @@ export default function LogbookPage() {
     return result;
   }, [entries, searchQuery, statusFilter, dateFilter]);	
 
-  // Reset pagination ke halaman 1 kalau user lagi ngetik filter
-  useEffect(() => {
+  const handleSetSearchQuery = (query: string) => {
+    setSearchQuery(query);
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, dateFilter]);
+  };
+
+  const handleSetStatusFilter = (status: string) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
+
+  const handleSetDateFilter = (date: string) => {
+    setDateFilter(date);
+    setCurrentPage(1);
+  };
 
   // Logika memotong data untuk Pagination
   const paginatedEntries = filteredEntries.slice(
@@ -77,11 +87,11 @@ export default function LogbookPage() {
       {/* Komponen Filter */}
       <EntryFilter 
         searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        setSearchQuery={handleSetSearchQuery}
         statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
+        setStatusFilter={handleSetStatusFilter}
         dateFilter={dateFilter}
-        setDateFilter={setDateFilter}
+        setDateFilter={handleSetDateFilter}
       />
 
       {/* Area Konten Utama */}

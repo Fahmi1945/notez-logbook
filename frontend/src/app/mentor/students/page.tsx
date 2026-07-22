@@ -16,21 +16,22 @@ export default function StudentPage() {
     if (activeTab !== "aktif") return;
 
     let isMounted = true;
-    setIsLoading(true);
-    setError(null);
 
-    mentorshipApi
-      .getActiveStudents()
-      .then((data) => {
+    async function loadData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await mentorshipApi.getActiveStudents();
         if (isMounted) setAcceptedStudents(data);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Gagal ambil data mahasiswa aktif:", err);
         if (isMounted) setError("Gagal memuat data mahasiswa aktif.");
-      })
-      .finally(() => {
+      } finally {
         if (isMounted) setIsLoading(false);
-      });
+      }
+    }
+
+    loadData();
 
     return () => {
       isMounted = false;

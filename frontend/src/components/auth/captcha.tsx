@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Input from "@/components/ui/Input";
 import { Calculator, ArrowsClockwise } from "@phosphor-icons/react";
 
@@ -9,8 +9,8 @@ interface CaptchaProps {
 }
 
 export default function Captcha({ onValidate }: CaptchaProps) {
-  const [num1, setNum1] = useState(0);
-  const [num2, setNum2] = useState(0);
+  const [num1, setNum1] = useState(() => Math.floor(Math.random() * 10) + 1);
+  const [num2, setNum2] = useState(() => Math.floor(Math.random() * 10) + 1);
   const [answer, setAnswer] = useState("");
 
   const generateNumbers = () => {
@@ -21,11 +21,6 @@ export default function Captcha({ onValidate }: CaptchaProps) {
     setAnswer("");
     onValidate(false);
   };
-
-  useEffect(() => {
-    generateNumbers();
-
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

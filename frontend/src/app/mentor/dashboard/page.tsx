@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getStoredUser } from "@/lib/auth-session";
 
 const mentorOverviewItems = [
@@ -10,15 +10,7 @@ const mentorOverviewItems = [
 ];
 
 export default function MentorDashboardPage() {
-	const [name, setName] = useState("Mentor");
-
-	useEffect(() => {
-		const storedUser = getStoredUser();
-
-		if (storedUser?.name) {
-			setName(storedUser.name);
-		}
-	}, []);
+	const [name] = useState(() => getStoredUser()?.name || "Mentor");
 
 	return (
 		<section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-6 py-10">

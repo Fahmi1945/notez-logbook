@@ -14,11 +14,11 @@ import { Mentor } from "@/types/mentorship";
 interface MentorListProps {
   mentors: Mentor[];
   onApply: (mentorId: number) => void;
-  submittingId: number | null;
-  requestedIds: number[]; 
+  submittingId?: number | null;
+  requestedIds?: number[]; 
 }
 
-export function MentorList({ mentors, onApply, submittingId, requestedIds = [] }: MentorListProps) {
+export function MentorList({ mentors, onApply }: MentorListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredMentors = mentors.filter(m => 
@@ -43,11 +43,6 @@ export function MentorList({ mentors, onApply, submittingId, requestedIds = [] }
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden divide-y divide-gray-100">
         {filteredMentors.map((mentor) => {
-          // 2. DEKLARASI VARIABEL: Wajib ditaruh di dalam map agar dievaluasi untuk setiap mentor
-          const isThisSubmitting = submittingId === mentor.id;
-          const isAnySubmitting = submittingId !== null;
-          const isRequested = requestedIds.includes(mentor.id);
-
           return (
             <div key={mentor.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-gray-50 transition-colors">
               

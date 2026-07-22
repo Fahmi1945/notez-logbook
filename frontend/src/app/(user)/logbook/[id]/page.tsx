@@ -23,8 +23,9 @@ export default function LogbookDetailPage() {
         setIsLoading(true);
         const res = await entriesApi.getById(id);
         setEntry(res.data);
-      } catch (err: any) {
-        setError(err.message || "Gagal mengambil detail logbook.");
+      } catch (err: unknown) {
+        const errorObj = err as { message?: string };
+        setError(errorObj.message || "Gagal mengambil detail logbook.");
       } finally {
         setIsLoading(false);
       }
