@@ -1,6 +1,6 @@
-// Import fungsi-fungsi dari file model
-const mentorModel = require("../../models/mentorLogbookModel");
+const { getActiveMenteeIds, getLogbooksByMenteeIds, countLogbooksByMenteeIds, checkIsMyMentee, evaluateLogbook, getLogbookById } = require("../../models/mentorLogbookModel");
 
+// Ambil data logbook dari menti yang aktif
 const getMenteeLogbooks = async (req, res) => {
   try {
     const mentorId = req.user.id;
@@ -11,7 +11,7 @@ const getMenteeLogbooks = async (req, res) => {
     const take = Number(limit);
 
     // 1. Panggil Model untuk mencari ID menti
-    const studentIds = await mentorModel.getActiveMenteeIds(mentorId);
+    const studentIds = await getActiveMenteeIds(mentorId);
 
     // Jika tidak ada menti, langsung kembalikan respons kosong
     if (studentIds.length === 0) {
@@ -25,8 +25,8 @@ const getMenteeLogbooks = async (req, res) => {
 
     // 2. Panggil Model untuk mengeksekusi pengambilan data dan hitung total
     const [logbooks, totalData] = await Promise.all([
-      mentorModel.getLogbooksByMenteeIds(studentIds, skip, take),
-      mentorModel.countLogbooksByMenteeIds(studentIds)
+      getLogbooksByMenteeIds(studentIds, skip, take),
+      countLogbooksByMenteeIds(studentIds)
     ]);
 
     // 3. Kembalikan respons sukses ke Front-End
@@ -51,7 +51,8 @@ const getMenteeLogbooks = async (req, res) => {
   }
 };
 
-const evaluateLogbook = async (req, res) => {
+// Evaluasi data logbook oleh mentor
+const evaluatedDataLogbook = async (req, res) => {
   try {
     const mentorId = req.user.id;
     const logbookId = req.params.id;
@@ -73,19 +74,12 @@ const evaluateLogbook = async (req, res) => {
 
     const finalComment = feedback || "Logbook disetujui";
 
-    const logbook = await mentorModel.getLogbookById(logbookId);
+    const logbook = await getLogbookById(logbookId);
 
     if (!logbook) {
       return res.status(404).json({
         error: "LOGBOOK_NOT_FOUND",
         message: "Logbook tidak ditemukan",
-      });
-    }
-
-    if (logbook.mentorId !== mentorId) {
-      return res.status(403).json({
-        error: "FORBIDDEN",
-        message: "Anda tidak memiliki izin untuk mengakses logbook ini",
       });
     }
 
@@ -95,8 +89,7 @@ const evaluateLogbook = async (req, res) => {
         message: "Logbook tidak dapat dinilai karena belum disubmit",
       });
     }
-
-    const isMyMentee = await mentorModel.isMyMentee(mentorId, logbook.menteeId);
+    const isMyMentee = await checkIsMyMentee(mentorId, logbook.user_id);
 
     if (!isMyMentee) {
       return res.status(403).json({
@@ -105,7 +98,7 @@ const evaluateLogbook = async (req, res) => {
       });
     }
 
-    const evaluatedData = await mentorModel.evaluateLogbook(logbookId, status, finalComment);
+    const evaluatedData = await evaluateLogbook(logbookId, mentorId, status, finalComment);
 
     return res.status(200).json({
       status: "success",
@@ -123,5 +116,5 @@ const evaluateLogbook = async (req, res) => {
 
 module.exports = {
   getMenteeLogbooks,
-  evaluateLogbook,
+  evaluatedDataLogbook,
 };

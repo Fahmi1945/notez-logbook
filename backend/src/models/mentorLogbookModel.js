@@ -1,11 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Fungsi untuk mencari ID menti yang aktif
+// Fungsi untuk mencari ID mentee yang aktif
 const getActiveMenteeIds = async (mentorId) => {
   const mentorships = await prisma.mentorship.findMany({
     where: {
-      mentor_id: mentorId,
+      mentor_id: parseInt(mentorId, 10),
       status: "accepted",
     },
     select: { user_id: true },
@@ -53,11 +53,11 @@ const getLogbookById = async (logbookId) => {
   });
 };
 
-const checkIsMyMentee = async (mentorId, userId) => {
+const checkIsMyMentee = async (mentorId, menteeId) => {
   const relation = await prisma.mentorship.findFirst({
     where: {
+      user_id: parseInt(menteeId, 10),
       mentor_id: parseInt(mentorId, 10),
-      user_id: parseInt(userId, 10),
       status: "accepted",
     },
   });
@@ -69,7 +69,7 @@ const evaluateLogbook = async (logbookId, mentorId, status, feedback) => {
     where: { id: parseInt(logbookId, 10) },
     data: {
       status: status,
-      feedback: {
+      feedbacks: {
         create: {
           mentor_id: parseInt(mentorId, 10),
           comment: feedback,
@@ -79,7 +79,7 @@ const evaluateLogbook = async (logbookId, mentorId, status, feedback) => {
     },
     include: {
       feedbacks: true,
-    },    
+    },
   });
 };
 
