@@ -7,6 +7,7 @@ const authRoutes = require("./src/routes/auth/authRoutes");
 const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
+const mentorLogbookRoutes = require("./src/routes/mentor/mentorLogbookRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
@@ -45,6 +46,9 @@ app.use("/api", mentorshipRoutes);
 
 // Routing logbook
 app.use("/api/logbook", logbookRoutes);
+
+// Routing mentor logbook
+app.use("/api", mentorLogbookRoutes);
 
 // Routing upload
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
