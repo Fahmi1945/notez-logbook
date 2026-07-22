@@ -6,6 +6,7 @@
     "dev": "next dev -H 0.0.0.0 -p 4000",
     "build": "next build",
     "start": "next start",
+    "test": "jest",
     "lint": "eslint"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "jest": "^30.4.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
