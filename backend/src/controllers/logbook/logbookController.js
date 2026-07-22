@@ -4,9 +4,12 @@ const {
   getLogbookDetail,
   updateLogbookEntry,
   deleteLogbookEntry,
+  getLogbookByIdAndUser,
+  updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
 const path = require("path");
 const fs = require("fs");
+const { error } = require("console");
 
 const getMyLogbook = async (req, res) => {
   try {
@@ -228,10 +231,54 @@ const deleteLogbook = async (req, res) => {
   }
 };
 
+const submitLogbook = async (req, res) => {
+  try {
+    const logbookId = parseInt(req.params.id);
+    const userId = req.user.id;
+
+    const logbook = await getLogbookByIdAndUser(logbookId, userId);
+    if (!logbook) {
+      return res.status(404).json({
+        success: false,
+        message: "Logbook tidak ditemukan.",
+      });
+    }
+
+    if (logbook.status !== "draft") {
+      return res.status(400).json({
+        success: false,
+        message: "Logbook sudah tidak dalam status draft.",
+      });
+    }
+
+    if (!logbook.title || !logbook.description) {
+      return res.status(400).json({
+        error: "VALIDATION_ERROR",
+        message: "Logbook tidak memiliki judul atau deskripsi.",
+      });
+    }
+
+    const updatedLogbook = await updateLogbookStatusToSubmitted(logbookId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logbook berhasil disubmit dan menunggu evaluasi mentor.",
+      data: updatedLogbook,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: "SERVER_ERROR",
+      message: "Terjadi kesalahan saat submit logbook.",
+    });
+  }
+};
+
 module.exports = {
   getMyLogbook,
   createLogbook,
   getLogbook,
   updateLogbook,
   deleteLogbook,
+  submitLogbook,
 };
