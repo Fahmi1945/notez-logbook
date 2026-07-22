@@ -3,6 +3,7 @@ import { mentorshipApi } from "@/lib/api/mentorship";
 import { useUIStore } from "@/store/ui-store";
 import { useAuthStore } from "@/store/auth-store";
 import { mentorshipRequestSchema } from "@/lib/validators/mentorship.schema"; 
+import { ActiveStudent } from '@/types/mentorship';
 
 export const useMentorship = (activeTab: "catalog" | "history") => {
   const [mentors, setMentors] = useState<any[]>([]);
@@ -76,7 +77,7 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
       // Menangkap error dari Axios atau throw error dari Zod
       const message = error.response?.data?.message || error.message || "Gagal mengajukan bimbingan";
       showToast(message, "error");
-      throw error; // Wajib diteruskan agar UI (page.tsx) tahu kalau prosesnya gagal
+      throw error;
     }
   };
 
@@ -88,3 +89,29 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
     refreshHistory: fetchHistory
   };
 };
+
+export function useActiveStudents() {
+  const [students, setStudents] = useState<ActiveStudent[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStudents = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await mentorshipApi.getActiveStudents();
+      setStudents(data);
+    } catch (err: any) {
+      console.error("Gagal mengambil data mahasiswa aktif:", err);
+      setError(err.response?.data?.message || "Terjadi kesalahan saat memuat data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  return { students, isLoading, error, refetch: fetchStudents };
+}
