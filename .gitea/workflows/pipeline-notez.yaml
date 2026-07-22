@@ -5,11 +5,11 @@ name: Pipeline Utama Notez
 on:
   push:
     branches:
-      - main # Kondisi: Jalankan HANYA jika ada push ke branch main
+      - main
     paths-ignore:
-      - "README.md" # Kondisi: JANGAN jalan kalau yang diganti cuma file README.md
+      - "README.md"
 
-# 3. DAFTAR TUGAS (Apa saja yang harus dikerjakan?)
+# 3. DAFTAR TUGAS
 jobs:
   Cek-Frontend:
     runs-on: ubuntu-latest
@@ -22,11 +22,20 @@ jobs:
         with:
           node-version: "20"
 
-      # FIX: Masuk ke folder frontend dulu sebelum install & build
       - name: Install Frontend Dependency
         run: |
           cd frontend
           npm install
+
+      - name: Linter Frontend
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Unit Test Frontend
+        run: |
+          cd frontend
+          npm test
 
       - name: Test Build Frontend
         run: |
@@ -39,22 +48,21 @@ jobs:
       - name: Ambil Kodingan Terbaru
         uses: actions/checkout@v3
 
-      # Skenario jika backend lu pakai Node.js juga (Sesuaikan command running backend lu)
       - name: Install Backend Dependency
         run: |
           cd backend
           npm install
 
-
   # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:
     runs-on: ubuntu-latest
-    needs: Cek-Kodingan # Kondisi: Menunggu job 'Cek-Kodingan' selesai dulu
+    needs: Cek-Kodingan
     steps:
       - name: Laporan Sukses
-        run: echo "Mantap Fahmi! Pipeline aman, semua tes lolos!"
+        # Hanya mencetak ini jika Frontend DAN Backend sukses
+        if: ${{ needs.Cek-Frontend.result == 'success' && needs.Cek-Backend.result == 'success' }}
+        run: echo "KELAS KINGG! Pipeline aman, semua tes, linter, dan build lolos!"
 
-      # Contoh Kondisi Khusus 'if failure()'
       - name: Laporan Gagal
-        if: failure() # Kondisi: Langkah ini HANYA jalan jika job sebelumnya ERROR
+        if: failure()
         run: echo "Waduh bro, build-nya gagal. Buruan cek terminal lu!"

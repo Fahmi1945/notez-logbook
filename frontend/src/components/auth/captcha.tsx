@@ -19,13 +19,12 @@ export default function Captcha({ onValidate }: CaptchaProps) {
     setNum1(n1);
     setNum2(n2);
     setAnswer("");
-    onValidate(false); // Reset status validasi saat angka diacak ulang
+    onValidate(false);
   };
 
-  // Jalankan generate angka pertama kali saat komponen dimuat
   useEffect(() => {
     generateNumbers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

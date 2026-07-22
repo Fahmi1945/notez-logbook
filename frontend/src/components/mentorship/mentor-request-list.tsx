@@ -5,6 +5,7 @@ import { useMentorRequests } from "@/hooks/use-mentor-request";
 import { Button } from "@/components/ui/Button"; 
 import { Badge } from "@/components/ui/badge"; 
 import { Spinner } from "@/components/ui/spinner"; 
+import { Clock, Check, X } from "@phosphor-icons/react";
 
 export default function MentorRequestList() {
   const { requests, isLoading, handleApproval } = useMentorRequests();
@@ -43,7 +44,7 @@ export default function MentorRequestList() {
   
   if (requests.length === 0) {
     return (
-      <div className="text-center p-8 text-brand-dark bg-white rounded-xl border border-gray-200 mt-4 animate-fade-in-down">
+      <div className="text-center p-8 text-brand-dark bg-white rounded-xl border border-gray-200 mt-4 animate-fade-in-down font-mono">
         Tidak ada permintaan bimbingan saat ini.
       </div>
     );
@@ -61,12 +62,12 @@ export default function MentorRequestList() {
               <th className="px-6 py-4 text-left whitespace-nowrap">AKSI</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 font-mono">
             {requests.map((req) => (
               <tr key={req.requestId} className="hover:bg-brand-white/50 transition-colors">
                 
-                {/* Wajib whitespace-nowrap di <td> Tanggal biar 20 Jul dan 2026 nggak misah */}
-                <td className="px-6 py-4 text-left align-middle font-body text-gray-500 whitespace-nowrap">
+                {/* Tanggal */}
+                <td className="px-6 py-4 text-left align-middle text-gray-500 whitespace-nowrap">
                   {req.createdAt 
                     ? new Date(req.createdAt).toLocaleDateString("id-ID", {
                         day: "2-digit",
@@ -76,40 +77,45 @@ export default function MentorRequestList() {
                     : "-"}
                 </td>
 
-                {/* Kolom Mahasiswa dibiarkan natural tanpa w-full */}
+                {/* Mahasiswa (Nama & Email) */}
                 <td className="px-6 py-4 text-left align-middle">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-50 text-brand-primary flex items-center justify-center font-heading font-bold text-xs">
+                    <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-50 text-brand-primary flex items-center justify-center font-bold text-xs">
                       {req.studentName?.substring(0, 2).toUpperCase() || "NN"}
                     </div>
-                    <span className="font-heading font-semibold text-brand-dark truncate">
-                      {req.studentName}
-                    </span>
+                    <div>
+                      <div className="font-semibold text-brand-dark truncate">
+                        {req.studentName}
+                      </div>
+                    </div>
                   </div>
                 </td>
 
-                {/* Tambahkan whitespace-nowrap di <td> Status */}
+                {/* Status */}
                 <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
-                  <Badge status="pending" className="px-3 py-1 font-body">
-                    ⏳ Perlu Persetujuan
+                  <Badge status="pending" className="px-3 py-1 inline-flex items-center gap-1.5">
+                    <Clock size={14} className="shrink-0 text-amber-600" />
+                    <span>Perlu Persetujuan</span>
                   </Badge>
                 </td>
                 
-                {/* Tambahkan whitespace-nowrap di <td> Aksi */}
+                {/* Aksi */}
                 <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
-                  <div className="flex justify-start gap-2 font-body">
+                  <div className="flex justify-start gap-2">
                     <Button 
                       onClick={() => openModal(req.requestId, "accept", req.studentName)}
-                      className="bg-status-approved hover:bg-green-600 text-white flex items-center gap-1 shadow-sm h-8 px-3 text-xs"
+                      className="bg-status-approved hover:bg-green-600 text-white flex items-center gap-1.5 shadow-sm h-8 px-3 text-xs font-mono"
                     >
-                      ✓ Terima
+                      <Check size={14} />
+                      Terima
                     </Button>
                     <Button 
                       onClick={() => openModal(req.requestId, "reject", req.studentName)}
                       variant="outline"
-                      className="text-status-rejected border-red-200 hover:bg-red-50 flex items-center gap-1 shadow-sm h-8 px-3 text-xs"
+                      className="text-status-rejected border-red-200 hover:bg-red-50 flex items-center gap-1.5 shadow-sm h-8 px-3 text-xs font-mono"
                     >
-                      ✕ Tolak
+                      <X size={14} />
+                      Tolak
                     </Button>
                   </div>
                 </td>
@@ -120,7 +126,7 @@ export default function MentorRequestList() {
         </table>
       </div>
 
-      {/* --- KOMPONEN POP-UP MODAL (Warna Dikembalikan ke Versi Clean) --- */}
+      {/* --- KOMPONEN POP-UP MODAL --- */}
       {modal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-dark/40 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-fade-in-down">

@@ -16,3 +16,16 @@ export interface MentorshipHistory {
   information?: string | null;
   created_at: string;
 }
+
+// types/mentor.ts
+export interface ActiveStudent {
+  requestId: string | number;
+  studentId: string | number;
+  studentName: string;
+  studentEmail: string;
+  status: string;
+  information: string;
+  updatedAt: string;
+  totalEntries: number;
+  waitingReview: number;
+}

@@ -3,17 +3,28 @@ require("dotenv").config();
 const { findMentors } = require("../../models/userModel");
 const { 
   createMentorship, 
-  checkExistingRequest,
+  checkExistingRequest,    
   getMyRequestedMentors, 
-  getMentorRequestsHistory
+  getMentorRequestsHistory,
+  checkAcceptedMentorship  
 } = require("../../models/mentorshipModel");
 
 
+// Fungsi request ke mentorship (Dilengkapi Anti-Spam Sempurna)
 const requestMentorship = async (req, res) => {
   try {
     const userId = req.user.id; 
     const mentorId = req.params.id;
 
+    const hasActiveMentor = await checkAcceptedMentorship(userId);
+    if (hasActiveMentor) {
+      return res.status(403).json({
+        error: "FORBIDDEN",
+        message: "Kamu sudah memiliki mentor aktif. Tidak bisa mengajukan request ke mentor lain!"
+      });
+    }
+
+    //  CEK APAKAH SUDAH PERNAH REQUEST (APA PUN STATUSNYA)
     const existingRequest = await checkExistingRequest(userId, mentorId);
 
     if (existingRequest) {
@@ -65,34 +76,48 @@ const requestMentorship = async (req, res) => {
   }
 };
 
-// ============================================================================
+
+
 // Fungsi untuk mengambil daftar mentor
-// ============================================================================
 const getMentorsList = async (req, res) => {
   try {
-    const mentorship = await findMentors();
+    const userId = req.user.id; // Tangkap ID mahasiswa yang sedang login
+
+    const activeMentorship = await checkAcceptedMentorship(userId);
+
+    // Jika SUDAH DI-ACCEPT
+    if (activeMentorship) {
+      return res.status(200).json({
+        status: "success",
+        message: "Menampilkan mentor aktif Anda.",
+        // Kita bungkus mentornya dalam array [ ] agar frontend (metode .map) tidak error
+        data: [activeMentorship.mentor] 
+      });
+    }
+
+    // Jika BELUM PUNYA MENTOR AKTIF, tampilkan semua mentor yang ada
+    const allMentors = await findMentors();
 
     return res.status(200).json({
       status: "success",
       message: "Berhasil mengambil daftar mentor.",
-      data: mentorship,
+      data: allMentors
     });
+
   } catch (error) {
     console.error("Error di getMentorsList:", error);
-    return res.status(500).json({
-      error: "INTERNAL_SERVER_ERROR",
-      message: "Terjadi kesalahan saat mengambil data mentor.",
-    });
+    return res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
   }
 };
 
-// ============================================================================
+
 // Fungsi untuk mengambil riwayat request mentorship (Dipisah by Role)
-// ============================================================================
+
 const getMentorshipHistory = async (req, res) => {
   try {
-    const currentUserId = req.user.id;
-    const currentUserRole = req.user.role.toUpperCase(); // Antisipasi jika ada perbedaan casing (user vs USER)
+    // 1. Ambil ID dan ROLE secara aman dari Token JWT via middleware verifyToken
+    const loggedInUserId = req.user.id;
+    const loggedInUserRole = req.user.role; // Antisipasi jika ada perbedaan casing (user vs USER)
 
     if (loggedInUserRole === "user") {
       const history = await getMyRequestedMentors(loggedInUserId);
@@ -109,7 +134,7 @@ const getMentorshipHistory = async (req, res) => {
 
       return res.status(200).json({
         status: "success",
-        role: "USER",
+        role: "user",
         message: "Berhasil mengambil riwayat request milik Anda.",
         data: formattedData,
       });
@@ -130,7 +155,7 @@ const getMentorshipHistory = async (req, res) => {
 
       return res.status(200).json({
         status: "success",
-        role: "MENTOR",
+        role: "mentor",
         message: "Berhasil mengambil riwayat request masuk (pending/rejected).",
         data: formattedData
       });

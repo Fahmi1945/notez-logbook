@@ -10,6 +10,7 @@ const handleMentorshipDecision = async (req, res) => {
     const { requestId } = req.params;
     const { information } = req.body; 
     
+    // LOGIKA ANTI-SPAM (Pengecekan Status)
     const existingRequest = await getMentorshipById(requestId);
     
     if (!existingRequest) {
@@ -25,6 +26,7 @@ const handleMentorshipDecision = async (req, res) => {
         message: `Oops! Pengajuan ini sudah diproses dan berstatus '${existingRequest.status}'.`
       });
     }
+    // BATAS LOGIKA ANTI-SPAM
 
     let action; 
     if (req.path.endsWith("/accepted")) {
