@@ -4,7 +4,8 @@ const {
   createLogbook,
   getLogbook,
   updateLogbook,
-  deleteLogbook
+  deleteLogbook,
+  submitLogbook,
 } = require("../../controllers/logbook/logbookController.js");
 const verifyToken = require("../../middleware/verifyToken.js");
 const upload = require("../../middleware/uploadsFile.js");
@@ -21,6 +22,9 @@ router.post("/", upload.single("attachment"), createLogbook);
 
 //UPDATE
 router.put("/:id", upload.single("attachment"), updateLogbook);
+
+//SUBMIT
+router.patch("/:id/submit", verifyToken, submitLogbook);
 
 //DELETE
 router.delete("/:id", deleteLogbook);
