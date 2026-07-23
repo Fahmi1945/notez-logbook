@@ -2,7 +2,7 @@ import { useState } from "react";
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { LoginInput, RegisterInput } from "@/lib/validators/auth.schema";
-import { MESSAGES } from "@/config/constants";
+import { MESSAGES } from "@/config/messages";
 import { useUIStore } from "@/store/ui-store";
 
 export const useAuth = () => {

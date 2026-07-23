@@ -1,5 +1,6 @@
 import React from "react";
-import { cn, Spinner } from "./spinner"; 
+import { Spinner } from "./spinner";
+import { cn } from "@/lib/utils"; 
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "danger" | "ghost";

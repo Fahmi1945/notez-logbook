@@ -2,12 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { mentorshipApi } from "@/lib/api/mentorship";
 import { useUIStore } from "@/store/ui-store";
 import { mentorshipRequestSchema } from "@/lib/validators/mentorship.schema"; 
-import { ActiveStudent, Mentor } from '@/types/mentorship';
+import { ActiveStudent, Mentor, MentorshipHistory } from '@/types/mentorship';
 
 export const useMentorship = (activeTab: "catalog" | "history") => {
   const [mentors, setMentors] = useState<Mentor[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [history, setHistory] = useState<Record<string, any>[]>([]);
+  const [history, setHistory] = useState<MentorshipHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
   const { showToast } = useUIStore();
