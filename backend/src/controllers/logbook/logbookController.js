@@ -9,7 +9,7 @@ const {
 } = require("../../models/logbookModel");
 const path = require("path");
 const fs = require("fs");
-const { error } = require("console");
+// const { error } = require("console");
 
 const getMyLogbook = async (req, res) => {
   try {
