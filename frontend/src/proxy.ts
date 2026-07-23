@@ -11,7 +11,7 @@ interface TokenPayload {
 
 async function verifyToken(token: string): Promise<TokenPayload | null> {
   if (!JWT_SECRET) {
-    console.error('[middleware] JWT_SECRET belum diset di environment variables.');
+    console.error('[proxy] JWT_SECRET belum diset di environment variables.');
     return null;
   }
 
@@ -25,7 +25,7 @@ async function verifyToken(token: string): Promise<TokenPayload | null> {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   const { pathname } = request.nextUrl;
 
