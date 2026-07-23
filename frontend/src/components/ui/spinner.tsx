@@ -1,11 +1,6 @@
 import React from "react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/lib/utils";
 
-// Utility ajaib untuk menggabungkan class Tailwind
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 interface SpinnerProps extends React.SVGProps<SVGSVGElement> {
   size?: "sm" | "md" | "lg";

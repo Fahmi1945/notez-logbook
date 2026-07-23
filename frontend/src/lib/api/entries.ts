@@ -1,6 +1,8 @@
 import { apiClient } from "./client";
-import { LogbookEntry, LogbookFormData, ApiResponse } from "@/types/entry";
-import { API_ENDPOINTS } from "@/lib/constant";
+import { LogbookEntry } from "@/types/entry";
+import { ApiResponse } from "@/types/api";
+import { EntryFormInput } from "@/lib/validators/entry.schema";
+import { API_ENDPOINTS } from "@/lib/constants";
 
 export const entriesApi = {
   // GET /logbook
@@ -15,21 +17,53 @@ export const entriesApi = {
     return response.data;
   },
 
-  // POST /logbook
-  create: async (data: LogbookFormData): Promise<ApiResponse<LogbookEntry>> => {
-    const response = await apiClient.post<ApiResponse<LogbookEntry>>(API_ENDPOINTS.LOGBOOK.BASE, data);
+  // POST /logbook (multipart/form-data for attachments)
+  create: async (data: EntryFormInput, files?: File[]): Promise<ApiResponse<LogbookEntry>> => {
+    const formData = new FormData();
+    formData.append("activity_date", data.activity_date);
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    if (data.obstacles) formData.append("obstacles", data.obstacles);
+    if (files && files.length > 0) {
+      files.forEach((file) => formData.append("attachments", file));
+    }
+    const response = await apiClient.post<ApiResponse<LogbookEntry>>(
+      API_ENDPOINTS.LOGBOOK.BASE,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
     return response.data;
   },
 
-  // PUT /logbook/:id
-  update: async (id: number | string, data: Partial<LogbookFormData>): Promise<ApiResponse<LogbookEntry>> => {
-    const response = await apiClient.put<ApiResponse<LogbookEntry>>(API_ENDPOINTS.LOGBOOK.BY_ID(id), data);
+  // PUT /logbook/:id (multipart/form-data for attachments)
+  update: async (id: number | string, data: Partial<EntryFormInput>, files?: File[]): Promise<ApiResponse<LogbookEntry>> => {
+    const formData = new FormData();
+    if (data.activity_date) formData.append("activity_date", data.activity_date);
+    if (data.title) formData.append("title", data.title);
+    if (data.description) formData.append("description", data.description);
+    if (data.obstacles !== undefined) formData.append("obstacles", data.obstacles ?? "");
+    if (files && files.length > 0) {
+      files.forEach((file) => formData.append("attachments", file));
+    }
+    const response = await apiClient.put<ApiResponse<LogbookEntry>>(
+      API_ENDPOINTS.LOGBOOK.BY_ID(id),
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
     return response.data;
   },
 
   // DELETE /logbook/:id
   delete: async (id: number | string): Promise<ApiResponse<null>> => {
     const response = await apiClient.delete<ApiResponse<null>>(API_ENDPOINTS.LOGBOOK.BY_ID(id));
+    return response.data;
+  },
+
+  // PATCH /logbook/:id/submit
+  submit: async (id: number | string): Promise<ApiResponse<LogbookEntry>> => {
+    const response = await apiClient.patch<ApiResponse<LogbookEntry>>(
+      `${API_ENDPOINTS.LOGBOOK.BY_ID(id)}/submit`
+    );
     return response.data;
   },
 };

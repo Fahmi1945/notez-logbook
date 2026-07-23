@@ -5,8 +5,63 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { entriesApi } from "@/lib/api/entries";
 import { LogbookEntry } from "@/types/entry";
-import { Spinner } from "@/components/ui/spinner"; // Pastikan path ini sesuai
-import { ArrowLeft, CalendarBlank, WarningCircle } from "@phosphor-icons/react";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  ArrowLeft,
+  CalendarBlank,
+  WarningCircle,
+  Paperclip,
+  FilePdf,
+  Image as ImageIcon,
+  CheckCircle,
+  ArrowSquareOut,
+  Pencil,
+} from "@phosphor-icons/react";
+
+const STATUS_CONFIG = {
+  approved: {
+    label: "Approved",
+    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    dot: "bg-emerald-500",
+    icon: "✓",
+  },
+  submitted: {
+    label: "Submitted",
+    className: "bg-violet-50 text-violet-700 border border-violet-200",
+    dot: "bg-violet-500",
+    icon: "⏱",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "bg-rose-50 text-rose-700 border border-rose-200",
+    dot: "bg-rose-500",
+    icon: "✕",
+  },
+  draft: {
+    label: "Draft",
+    className: "bg-slate-50 text-slate-600 border border-slate-200",
+    dot: "bg-slate-400",
+    icon: "📝",
+  },
+};
+
+function StatusBadge({ status }: { status?: string }) {
+  const key = (status || "draft").toLowerCase() as keyof typeof STATUS_CONFIG;
+  const cfg = STATUS_CONFIG[key] ?? STATUS_CONFIG.draft;
+  return (
+    <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold w-max ${cfg.className}`}>
+      <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+      {cfg.label}
+    </span>
+  );
+}
+
+function AttachmentIcon({ fileName }: { fileName: string }) {
+  const isPdf = fileName.toLowerCase().endsWith(".pdf");
+  return isPdf
+    ? <FilePdf size={20} weight="fill" className="text-red-500 shrink-0" />
+    : <ImageIcon size={20} weight="fill" className="text-blue-500 shrink-0" />;
+}
 
 export default function LogbookDetailPage() {
   const params = useParams();
@@ -16,7 +71,6 @@ export default function LogbookDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Ambil data spesifik berdasarkan ID dari URL
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -31,47 +85,27 @@ export default function LogbookDetailPage() {
       }
     };
 
-    if (id) {
-      fetchDetail();
-    }
+    if (id) fetchDetail();
   }, [id]);
 
-  // FIX: Tambahkan opsional parameter (?) dan fallback string kosong ("")
-  // Biar kalau API nge-return status: null, aplikasinya nggak meledak pas kena toLowerCase()
-  const getStatusBadge = (status?: string) => {
-    switch ((status || "").toLowerCase()) {
-      case "approved":
-        return <span className="badge-approved px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1 font-body w-max">✓ Approved</span>;
-      case "submitted":
-      case "pending":
-        return <span className="badge-submitted px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1 font-body w-max">⏱ Submitted</span>;
-      case "rejected":
-        return <span className="badge-rejected px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1 font-body w-max">✕ Rejected</span>;
-      default:
-        return <span className="badge-draft px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1 font-body w-max">📝 Draft</span>;
-    }
-  };
-
-  // State Loading
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
         <Spinner />
-        <p className="text-sm text-gray-500 mt-4 font-body animate-pulse">Memuat detail entri...</p>
+        <p className="text-sm text-gray-400 mt-4 font-body animate-pulse">Memuat detail entri...</p>
       </div>
     );
   }
 
-  // State Error
   if (error || !entry) {
     return (
       <div className="p-6 max-w-4xl mx-auto font-body mt-10">
-        <div className="text-center p-8 bg-red-50 text-red-600 rounded-xl border border-red-200 animate-fade-in-down shadow-sm">
+        <div className="text-center p-10 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200 animate-fade-in-down shadow-sm">
           <p className="font-heading font-bold text-lg mb-2">Terjadi Kesalahan</p>
-          <p className="text-sm mb-6">{error || "Data logbook tidak ditemukan."}</p>
-          <Link 
-            href="/logbook" 
-            className="inline-flex px-6 py-2.5 bg-white border border-red-200 rounded-lg text-sm hover:bg-red-100 transition-colors font-medium text-red-700 shadow-sm"
+          <p className="text-sm mb-6 text-rose-500">{error || "Data logbook tidak ditemukan."}</p>
+          <Link
+            href="/logbook"
+            className="inline-flex px-6 py-2.5 bg-white border border-rose-200 rounded-xl text-sm hover:bg-rose-50 transition-colors font-medium text-rose-700 shadow-sm"
           >
             Kembali ke Daftar
           </Link>
@@ -80,74 +114,149 @@ export default function LogbookDetailPage() {
     );
   }
 
-  // State Sukses (Tampilan Utama)
+  const canEdit = entry.status === "draft" || entry.status === "rejected";
+
   return (
     <div className="p-6 max-w-4xl mx-auto font-body animate-fade-in-down">
-      {/* Header Halaman */}
+      {/* Header */}
       <div className="mb-6">
-        <Link 
-          href="/logbook" 
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-primary mb-4 transition-colors font-medium"
+        <Link
+          href="/logbook"
+          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-brand-primary mb-5 transition-colors font-medium"
         >
           <ArrowLeft size={16} weight="bold" />
           Kembali ke Manajemen Logbook
         </Link>
       </div>
 
-      {/* Card Konten Detail */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        
-        {/* Bagian Kop (Atas) */}
-        <div className="p-6 sm:p-8 border-b border-gray-100 bg-brand-white">
+      {/* Main Card */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        {/* Card Header */}
+        <div className="p-6 sm:p-8 border-b border-gray-100 bg-gradient-to-br from-brand-primary/5 to-transparent">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
-            <div>
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-heading font-bold text-brand-dark mb-4 leading-tight">
-                {/* Fallback juga untuk title berjaga-jaga */}
                 {entry.title || "Tidak ada judul"}
               </h1>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-600 font-medium text-sm shadow-sm">
-                <CalendarBlank size={18} weight="regular" className="text-brand-primary" />
-                {entry.activity_date ? new Date(entry.activity_date).toLocaleDateString("id-ID", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }) : "-"}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-gray-500 font-medium text-sm shadow-sm">
+                <CalendarBlank size={16} weight="regular" className="text-brand-primary" />
+                {entry.activity_date
+                  ? new Date(entry.activity_date).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "-"}
               </div>
             </div>
-            <div className="flex-shrink-0">
-              {/* Ini akan aman memanggil getStatusBadge walaupun entry.status undefined */}
-              {getStatusBadge(entry.status)}
+
+            <div className="flex flex-col items-start sm:items-end gap-3 flex-shrink-0">
+              <StatusBadge status={entry.status} />
+              {canEdit && (
+                <Link
+                  href={`/logbook/${entry.id}/edit`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary/8 text-brand-primary border border-brand-primary/20 rounded-xl text-xs font-semibold hover:bg-brand-primary hover:text-white transition-all"
+                >
+                  <Pencil size={14} weight="bold" />
+                  Edit Entri
+                </Link>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Bagian Isi (Bawah) */}
+        {/* Card Body */}
         <div className="p-6 sm:p-8 space-y-8">
-          
-          {/* Section Deskripsi */}
+          {/* Deskripsi */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-widest flex items-center gap-2">
+              <CheckCircle size={14} weight="fill" className="text-emerald-400" />
               Deskripsi Pekerjaan
             </h3>
-            <div className="p-5 bg-brand-white-bg rounded-lg border border-gray-100 text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <div className="p-5 bg-gray-50/70 rounded-xl border border-gray-100 text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
               {entry.description || "Tidak ada deskripsi."}
             </div>
           </div>
 
-          {/* Section Hambatan (Hanya tampil jika field tidak kosong) */}
+          {/* Hambatan (jika ada) */}
           {entry.obstacles && (
             <div>
-              <h3 className="text-sm font-semibold text-status-rejected mb-3 uppercase tracking-wider flex items-center gap-2">
-                <WarningCircle size={18} weight="fill" />
+              <h3 className="text-xs font-semibold text-rose-400 mb-3 uppercase tracking-widest flex items-center gap-2">
+                <WarningCircle size={14} weight="fill" />
                 Hambatan & Kendala
               </h3>
-              <div className="p-5 bg-red-50 rounded-lg border border-red-100 text-red-700 leading-relaxed whitespace-pre-wrap">
+              <div className="p-5 bg-rose-50 rounded-xl border border-rose-100 text-rose-700 leading-relaxed whitespace-pre-wrap text-sm">
                 {entry.obstacles}
               </div>
             </div>
           )}
 
+          {/* Lampiran (jika ada) */}
+          {entry.attachments && entry.attachments.length > 0 && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-widest flex items-center gap-2">
+                <Paperclip size={14} weight="bold" className="text-brand-accent" />
+                Lampiran ({entry.attachments.length} file)
+              </h3>
+              <ul className="space-y-4">
+                {entry.attachments.map((att) => {
+                  const isImage = att.file_name.toLowerCase().match(/\.(jpg|jpeg|png)$/);
+                  const attachmentUrl = `/api/proxy/attachments/${att.id}`;
+                  
+                  return (
+                    <li key={att.id}>
+                      {isImage ? (
+                        <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm max-w-xl">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={attachmentUrl}
+                            alt={att.file_name}
+                            className="w-full h-auto max-h-96 object-contain bg-checkerboard"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
+                          <div className="absolute bottom-3 left-4 right-12 text-white">
+                            <p className="text-sm font-semibold truncate drop-shadow">{att.file_name}</p>
+                          </div>
+                          <a
+                            href={attachmentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center bg-black/50 text-white hover:bg-black/70 transition-colors shadow-md"
+                            title="Buka gambar di tab baru"
+                          >
+                            <ArrowSquareOut size={14} weight="bold" />
+                          </a>
+                        </div>
+                      ) : (
+                        <a
+                          href={attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-brand-primary/30 hover:bg-brand-primary/3 transition-all group max-w-xl"
+                        >
+                          <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 group-hover:border-brand-primary/20 shrink-0">
+                            <AttachmentIcon fileName={att.file_name} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-brand-dark truncate group-hover:text-brand-primary transition-colors">
+                              {att.file_name}
+                            </p>
+                            <p className="text-[11px] text-gray-400">Klik untuk membuka file PDF</p>
+                          </div>
+                          <ArrowSquareOut
+                            size={16}
+                            weight="regular"
+                            className="text-gray-300 group-hover:text-brand-primary transition-colors shrink-0"
+                          />
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

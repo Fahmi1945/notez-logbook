@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import StudentDetailModal from './student-detail-modal';
 import { ActiveStudent } from '@/types/mentorship';
-import { Button } from "@/components/ui/Button"; 
+import { Button } from "@/components/ui/button"; 
 import { Badge } from "@/components/ui/badge";
 import { Clock, Check } from "@phosphor-icons/react";
 
@@ -84,7 +84,7 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
                 {/* Menunggu Review */}
                 <td className="px-6 py-4 text-center align-middle whitespace-nowrap">
                   {item.waitingReview > 0 ? (
-                    <Badge status="pending" className="px-3 py-1 inline-flex items-center gap-1.5 justify-center">
+                    <Badge status="submitted" className="px-3 py-1 inline-flex items-center gap-1.5 justify-center">
                       <Clock size={14} className="shrink-0 text-amber-600" />
                       <span>{item.waitingReview} Perlu Review</span>
                     </Badge>
@@ -121,4 +121,4 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
     </>
   );
 }
-
+

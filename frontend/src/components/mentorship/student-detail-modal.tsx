@@ -1,6 +1,6 @@
 // src/components/mentorship/student-detail-modal.tsx
 import { ActiveStudent } from '@/types/mentorship';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface StudentDetailModalProps {
@@ -41,7 +41,7 @@ export default function StudentDetailModal({ isOpen, onClose, student }: Student
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Status Tim</p>
-              <Badge status={student.status === "ACTIVE" || student.status === "approved" ? "approved" : "pending"} className="px-3 py-1 font-body">
+              <Badge status={student.status === "ACTIVE" || student.status === "approved" ? "approved" : "submitted"} className="px-3 py-1 font-body">
                 {student.status || "Aktif"}
               </Badge>
             </div>
@@ -72,4 +72,4 @@ export default function StudentDetailModal({ isOpen, onClose, student }: Student
       </div>
     </div>
   );
-}
+}

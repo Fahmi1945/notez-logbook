@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMentorRequests } from "@/hooks/use-mentor-request";
-import { Button } from "@/components/ui/Button"; 
+import { Button } from "@/components/ui/button"; 
 import { Badge } from "@/components/ui/badge"; 
 import { Spinner } from "@/components/ui/spinner"; 
 import { Clock, Check, X } from "@phosphor-icons/react";
@@ -93,7 +93,7 @@ export default function MentorRequestList() {
 
                 {/* Status */}
                 <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
-                  <Badge status="pending" className="px-3 py-1 inline-flex items-center gap-1.5">
+                  <Badge status="submitted" className="px-3 py-1 inline-flex items-center gap-1.5">
                     <Clock size={14} className="shrink-0 text-amber-600" />
                     <span>Perlu Persetujuan</span>
                   </Badge>

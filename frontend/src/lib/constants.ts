@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   LOGBOOK: {
     BASE: "/logbook",
     BY_ID: (id: number | string) => `/logbook/${id}`,
+    ATTACHMENT: (id: number | string) => `/logbook/attachments/${id}`
   },
   MENTORSHIP: {
     BASE: "/mentorship",
