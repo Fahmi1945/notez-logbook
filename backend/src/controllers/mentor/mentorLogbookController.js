@@ -1,19 +1,24 @@
-const { getActiveMenteeIds, getLogbooksByMenteeIds, countLogbooksByMenteeIds, checkIsMyMentee, evaluateLogbook, getLogbookById } = require("../../models/mentorLogbookModel");
+const {
+  getActiveMenteeIds,
+  getLogbooksByMenteeIds,
+  countLogbooksByMenteeIds,
+  checkIsMyMentee,
+  evaluateLogbook,
+  getLogbookById,
+  getLogbookDetailById // <--- Import fungsi baru dari model
+} = require("../../models/mentorLogbookModel");
 
-// Ambil data logbook dari menti yang aktif
+// Ambil data logbook dari menti yang aktif (Endpoint List - Ringan)
 const getMenteeLogbooks = async (req, res) => {
   try {
     const mentorId = req.user.id;
     const { page = 1, limit = 10 } = req.query;
 
-    // Pastikan tipe datanya angka
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    // 1. Panggil Model untuk mencari ID menti
     const studentIds = await getActiveMenteeIds(mentorId);
 
-    // Jika tidak ada menti, langsung kembalikan respons kosong
     if (studentIds.length === 0) {
       return res.status(200).json({
         status: "success",
@@ -23,13 +28,11 @@ const getMenteeLogbooks = async (req, res) => {
       });
     }
 
-    // 2. Panggil Model untuk mengeksekusi pengambilan data dan hitung total
     const [logbooks, totalData] = await Promise.all([
       getLogbooksByMenteeIds(studentIds, skip, take),
       countLogbooksByMenteeIds(studentIds)
     ]);
 
-    // 3. Kembalikan respons sukses ke Front-End
     return res.status(200).json({
       status: "success",
       message: "Berhasil mengambil data logbook menti",
@@ -47,6 +50,52 @@ const getMenteeLogbooks = async (req, res) => {
     return res.status(500).json({
       error: "SERVER_ERROR",
       message: "Terjadi kesalahan internal pada server",
+    });
+  }
+};
+
+// [BARU] - Endpoint Detail Logbook Lengkap
+const getMenteeLogbookDetail = async (req, res) => {
+  try {
+    const mentorId = req.user.id;
+    const logbookId = req.params.id;
+
+    if (isNaN(logbookId)) {
+      return res.status(400).json({
+        error: "BAD_REQUEST",
+        message: "ID Logbook tidak valid.",
+      });
+    }
+
+    // Ambil data lengkap beserta deskripsi, lampiran, dan feedback
+    const logbook = await getLogbookDetailById(logbookId);
+
+    if (!logbook) {
+      return res.status(404).json({
+        error: "LOGBOOK_NOT_FOUND",
+        message: "Detail logbook tidak ditemukan.",
+      });
+    }
+
+    // Granular Access Control: Pastikan yang diakses adalah mentee-nya sendiri
+    const isMyMentee = await checkIsMyMentee(mentorId, logbook.user_id);
+    if (!isMyMentee) {
+      return res.status(403).json({
+        error: "FORBIDDEN",
+        message: "Anda tidak memiliki izin untuk melihat detail logbook mentee ini.",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Berhasil mengambil detail logbook.",
+      data: logbook,
+    });
+  } catch (error) {
+    console.error("Error getMenteeLogbookDetail:", error);
+    return res.status(500).json({
+      error: "SERVER_ERROR",
+      message: "Terjadi kesalahan saat mengambil detail logbook.",
     });
   }
 };
@@ -116,5 +165,6 @@ const evaluatedDataLogbook = async (req, res) => {
 
 module.exports = {
   getMenteeLogbooks,
+  getMenteeLogbookDetail, // <--- Jangan lupa di-export
   evaluatedDataLogbook,
 };
