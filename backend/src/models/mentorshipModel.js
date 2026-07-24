@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // 1. Fungsi untuk menyimpan request baru
@@ -30,7 +30,7 @@ const getMyRequestedMentors = async (userId) => {
         select: { id: true, name: true, email: true }
       }
     },
-    orderBy: { id: 'desc' }
+    orderBy: { id: "desc" }
   });
 };
 
@@ -38,14 +38,14 @@ const getMentorRequestsHistory = async (mentorId) => {
   return await prisma.mentorship.findMany({
     where: {
       mentor_id: parseInt(mentorId),
-      status: { in: ['pending'] } // Hanya pending 
+      status: { in: ["pending"] } // Hanya pending 
     },
     include: {
       user: {
         select: { id: true, name: true, email: true }
       }
     },
-    orderBy: { id: 'desc' }
+    orderBy: { id: "desc" }
   });
 };
 
@@ -53,14 +53,14 @@ const getMentorActiveTeam = async (mentorId) => {
   return await prisma.mentorship.findMany({
     where: {
       mentor_id: parseInt(mentorId),
-      status: 'accepted' // Hanya mahasiswa yang sudah disetujui
+      status: "accepted" // Hanya mahasiswa yang sudah disetujui
     },
     include: {
       user: {
         select: { id: true, name: true, email: true }
       }
     },
-    orderBy: { id: 'desc' }
+    orderBy: { id: "desc" }
   });
 };
 
@@ -86,7 +86,7 @@ const checkAcceptedMentorship = async (userId) => {
   return await prisma.mentorship.findFirst({
     where: {
       user_id: parseInt(userId),
-      status: 'accepted' // Hanya mencari yang sudah disetujui
+      status: "accepted" // Hanya mencari yang sudah disetujui
     },
     include: {
       // Kita tarik sekalian data mentornya untuk ditampilkan di Frontend

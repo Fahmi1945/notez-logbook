@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node app.js",
     "test": "jest",
-    "lint": "npx eslint ."
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "author": "",
   "license": "ISC",
@@ -24,8 +26,10 @@
     "prisma": "^6.19.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "eslint": "^10.7.0",
     "jest": "^30.4.2",
+    "jest-mock-extended": "^4.0.1",
     "supertest": "^7.2.2"
   }
 }
