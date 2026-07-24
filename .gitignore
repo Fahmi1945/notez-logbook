@@ -3,3 +3,4 @@ postgres/
 backend/node_modules/
 
 runner-data/
+coverage/
