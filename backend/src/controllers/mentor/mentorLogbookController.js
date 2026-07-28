@@ -54,8 +54,6 @@ const getMenteeLogbooks = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-=======
 // [BARU] - Endpoint Detail Logbook Lengkap
 const getMenteeLogbookDetail = async (req, res) => {
   try {
