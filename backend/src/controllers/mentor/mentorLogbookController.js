@@ -28,19 +28,11 @@ const getMenteeLogbooks = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    // 2. Panggil Model untuk mengeksekusi pengambilan data dan hitung total
-=======
->>>>>>> feature-ihsan
     const [logbooks, totalData] = await Promise.all([
       getLogbooksByMenteeIds(studentIds, skip, take),
       countLogbooksByMenteeIds(studentIds)
     ]);
 
-<<<<<<< HEAD
-    // 3. Kembalikan respons sukses ke Front-End
-=======
->>>>>>> feature-ihsan
     return res.status(200).json({
       status: "success",
       message: "Berhasil mengambil data logbook menti",
