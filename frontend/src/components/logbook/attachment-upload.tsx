@@ -143,7 +143,7 @@ export default function AttachmentUpload({
             className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-md ${
               !isPdf && displayUrl
                 ? "bg-black/50 text-white hover:bg-black/70"
-                : "bg-white text-gray-500 border border-gray-200 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200"
+                : "bg-brand-white text-gray-500 border border-gray-200 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200"
             }`}
             title="Ganti file"
             aria-label="Hapus file"
@@ -271,7 +271,7 @@ export default function AttachmentUpload({
           w-14 h-14 rounded-full flex items-center justify-center transition-all
           ${isDragging
             ? "bg-brand-primary/15 scale-110"
-            : "bg-white border border-gray-200 shadow-sm group-hover:bg-brand-primary/10 group-hover:border-brand-primary/30 group-hover:scale-105"
+            : "bg-brand-white border border-gray-200 shadow-sm group-hover:bg-brand-primary/10 group-hover:border-brand-primary/30 group-hover:scale-105"
           }
         `}>
           <UploadSimple
@@ -288,7 +288,7 @@ export default function AttachmentUpload({
           <p className="text-xs text-gray-400 mt-1">
             atau <span className="text-brand-primary font-semibold underline decoration-dotted">klik untuk pilih file</span>
           </p>
-          <p className="text-[11px] text-gray-400 mt-2.5 bg-white/80 px-3 py-1 rounded-full border border-gray-100 inline-block">
+          <p className="text-[11px] text-gray-400 mt-2.5 bg-brand-white/80 px-3 py-1 rounded-full border border-gray-100 inline-block">
             JPG · PNG · JPEG · PDF &nbsp;·&nbsp; Maks. {MAX_SIZE_MB}MB &nbsp;·&nbsp; {MAX_FILES} file
           </p>
         </div>

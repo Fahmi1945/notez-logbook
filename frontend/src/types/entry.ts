@@ -15,4 +15,9 @@ export interface LogbookEntry {
   obstacles: string | null;
   status: LogbookStatus;
   attachments?: Attachment[];
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
