@@ -1,26 +1,26 @@
 const express = require("express");
 require("dotenv").config();
-const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/auth/authRoutes");
 const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
+const mentorLogbookRoutes = require("./src/routes/mentor/mentorLogbookRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
 app.use(
   cors({
     origin: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT;
 
 app.use(express.json());
 
@@ -50,12 +50,12 @@ app.use("/api/logbook", logbookRoutes);
 app.use("/api", mentorLogbookRoutes);
 
 // Routing upload
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // PERANGKAP 404: Menangkap semua request yang alamatnya salah
 app.use((req, res) => {
-  console.log(`❌ ALARM: Frontend mencoba mengakses rute yang salah!`);
+  console.log("❌ ALARM: Frontend mencoba mengakses rute yang salah!");
   console.log(`Metode: ${req.method}`);
   console.log(`URL yang diakses: ${req.originalUrl}`);
 
