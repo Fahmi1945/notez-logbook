@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { entriesApi } from "@/lib/api/entries";
 import { LogbookEntry } from "@/types/entry";
-import { Spinner } from "@/components/ui/spinner";
+import LogbookDetailSkeleton from "@/components/logbook/logbook-detail-skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   CalendarBlank,
@@ -17,44 +18,6 @@ import {
   ArrowSquareOut,
   Pencil,
 } from "@phosphor-icons/react";
-
-const STATUS_CONFIG = {
-  approved: {
-    label: "Approved",
-    className: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    dot: "bg-emerald-500",
-    icon: "✓",
-  },
-  submitted: {
-    label: "Submitted",
-    className: "bg-violet-50 text-violet-700 border border-violet-200",
-    dot: "bg-violet-500",
-    icon: "⏱",
-  },
-  rejected: {
-    label: "Rejected",
-    className: "bg-rose-50 text-rose-700 border border-rose-200",
-    dot: "bg-rose-500",
-    icon: "✕",
-  },
-  draft: {
-    label: "Draft",
-    className: "bg-slate-50 text-slate-600 border border-slate-200",
-    dot: "bg-slate-400",
-    icon: "📝",
-  },
-};
-
-function StatusBadge({ status }: { status?: string }) {
-  const key = (status || "draft").toLowerCase() as keyof typeof STATUS_CONFIG;
-  const cfg = STATUS_CONFIG[key] ?? STATUS_CONFIG.draft;
-  return (
-    <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold w-max ${cfg.className}`}>
-      <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-      {cfg.label}
-    </span>
-  );
-}
 
 function AttachmentIcon({ fileName }: { fileName: string }) {
   const isPdf = fileName.toLowerCase().endsWith(".pdf");
@@ -89,12 +52,7 @@ export default function LogbookDetailPage() {
   }, [id]);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <Spinner />
-        <p className="text-sm text-gray-400 mt-4 font-body animate-pulse">Memuat detail entri...</p>
-      </div>
-    );
+    return <LogbookDetailSkeleton />;
   }
 
   if (error || !entry) {
@@ -152,7 +110,7 @@ export default function LogbookDetailPage() {
             </div>
 
             <div className="flex flex-col items-start sm:items-end gap-3 flex-shrink-0">
-              <StatusBadge status={entry.status} />
+              <Badge status={entry.status} />
               {canEdit && (
                 <Link
                   href={`/logbook/${entry.id}/edit`}

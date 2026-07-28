@@ -19,6 +19,19 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+// Mock komponen UI Dropdown agar itemnya dirender langsung untuk keperluan test
+jest.mock("@/components/ui/dropdown", () => ({
+  Dropdown: ({ trigger, children }: { trigger: React.ReactNode; children: React.ReactNode }) => (
+    <div>
+      {trigger}
+      {children}
+    </div>
+  ),
+  DropdownItem: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
+    <button onClick={onClick}>{children}</button>
+  ),
+}));
+
 const makeEntry = (overrides: Partial<LogbookEntry> = {}): LogbookEntry => ({
   id: 1,
   user_id: 10,
@@ -111,34 +124,36 @@ describe("EntryList", () => {
     const links = screen.getAllByRole("link");
     expect(links.length).toBe(2);
     // Ada 1 button delete per view * 2 view = 2 button
-    expect(screen.getAllByRole("button").length).toBe(2);
+    const deleteButtons = screen.getAllByText("Hapus");
+    expect(deleteButtons.length).toBe(2);
   });
 
   it("harus menampilkan tombol Edit & Delete HANYA untuk status rejected", () => {
     render(<EntryList entries={[makeEntry({ id: 1, status: "rejected" })]} onDelete={mockOnDelete} />);
     const links = screen.getAllByRole("link");
     expect(links.length).toBe(2); // Edit saja (2 view)
-    expect(screen.getAllByRole("button").length).toBe(2);
+    const deleteButtons = screen.getAllByText("Hapus");
+    expect(deleteButtons.length).toBe(2);
   });
 
   it("harus TIDAK menampilkan tombol Edit & Delete untuk status approved", () => {
     render(<EntryList entries={[makeEntry({ status: "approved" })]} onDelete={mockOnDelete} />);
     // Tidak ada link (View dihapus) dan tidak ada button delete
     expect(screen.queryAllByRole("link").length).toBe(0);
-    expect(screen.queryAllByRole("button").length).toBe(0);
+    expect(screen.queryAllByText("Hapus").length).toBe(0);
   });
 
   it("harus TIDAK menampilkan tombol Edit & Delete untuk status submitted", () => {
     render(<EntryList entries={[makeEntry({ status: "submitted" })]} onDelete={mockOnDelete} />);
     expect(screen.queryAllByRole("link").length).toBe(0);
-    expect(screen.queryAllByRole("button").length).toBe(0);
+    expect(screen.queryAllByText("Hapus").length).toBe(0);
   });
 
   it("harus memanggil onDelete dengan id yang benar saat tombol delete diklik dan dikonfirmasi", async () => {
     render(<EntryList entries={[makeEntry({ id: 42, status: "draft" })]} onDelete={mockOnDelete} />);
     
     // Klik tombol Hapus (ambil yang pertama dari tampilan desktop)
-    const deleteButtons = screen.getAllByRole("button");
+    const deleteButtons = screen.getAllByText("Hapus");
     fireEvent.click(deleteButtons[0]);
     
     // Dialog konfirmasi muncul, cari tombol "Ya, Hapus"

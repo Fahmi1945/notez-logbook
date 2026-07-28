@@ -5,6 +5,7 @@ import { useMentorRequests } from "@/hooks/use-mentor-request";
 import { Button } from "@/components/ui/button"; 
 import { Badge } from "@/components/ui/badge"; 
 import { Spinner } from "@/components/ui/spinner"; 
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Clock, Check, X } from "@phosphor-icons/react";
 
 export default function MentorRequestList() {
@@ -52,22 +53,22 @@ export default function MentorRequestList() {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-4 animate-fade-in-down">
-        <table className="w-full text-sm text-left text-gray-600">
-          <thead className="bg-brand-white text-brand-dark font-heading font-semibold border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 text-left whitespace-nowrap">TANGGAL</th>
-              <th className="px-6 py-4 text-left">MAHASISWA</th>
-              <th className="px-6 py-4 text-left whitespace-nowrap">STATUS</th>
-              <th className="px-6 py-4 text-left whitespace-nowrap">AKSI</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 font-mono">
+      <div className="mt-4 animate-fade-in-down">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>TANGGAL</TableHead>
+              <TableHead>MAHASISWA</TableHead>
+              <TableHead>STATUS</TableHead>
+              <TableHead>AKSI</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {requests.map((req) => (
-              <tr key={req.requestId} className="hover:bg-brand-white/50 transition-colors">
+              <TableRow key={req.requestId}>
                 
                 {/* Tanggal */}
-                <td className="px-6 py-4 text-left align-middle text-gray-500 whitespace-nowrap">
+                <TableCell className="text-gray-500">
                   {req.createdAt 
                     ? new Date(req.createdAt).toLocaleDateString("id-ID", {
                         day: "2-digit",
@@ -75,10 +76,10 @@ export default function MentorRequestList() {
                         year: "numeric"
                       })
                     : "-"}
-                </td>
+                </TableCell>
 
                 {/* Mahasiswa (Nama & Email) */}
-                <td className="px-6 py-4 text-left align-middle">
+                <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-50 text-brand-primary flex items-center justify-center font-bold text-xs">
                       {req.studentName?.substring(0, 2).toUpperCase() || "NN"}
@@ -89,18 +90,18 @@ export default function MentorRequestList() {
                       </div>
                     </div>
                   </div>
-                </td>
+                </TableCell>
 
                 {/* Status */}
-                <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
+                <TableCell>
                   <Badge status="submitted" className="px-3 py-1 inline-flex items-center gap-1.5">
                     <Clock size={14} className="shrink-0 text-amber-600" />
                     <span>Perlu Persetujuan</span>
                   </Badge>
-                </td>
+                </TableCell>
                 
                 {/* Aksi */}
-                <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
+                <TableCell>
                   <div className="flex justify-start gap-2">
                     <Button 
                       onClick={() => openModal(req.requestId, "accept", req.studentName)}
@@ -118,12 +119,12 @@ export default function MentorRequestList() {
                       Tolak
                     </Button>
                   </div>
-                </td>
+                </TableCell>
 
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* --- KOMPONEN POP-UP MODAL --- */}
