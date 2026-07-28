@@ -100,7 +100,6 @@ const getMenteeLogbookDetail = async (req, res) => {
   }
 };
 
->>>>>>> feature-ihsan
 // Evaluasi data logbook oleh mentor
 const evaluatedDataLogbook = async (req, res) => {
   try {
@@ -166,9 +165,6 @@ const evaluatedDataLogbook = async (req, res) => {
 
 module.exports = {
   getMenteeLogbooks,
-<<<<<<< HEAD
-=======
   getMenteeLogbookDetail, // <--- Jangan lupa di-export
->>>>>>> feature-ihsan
   evaluatedDataLogbook,
 };
