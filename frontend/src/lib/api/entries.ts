@@ -59,11 +59,13 @@ export const entriesApi = {
     return response.data;
   },
 
-  // PATCH /logbook/:id/submit
+  // PATCH /logbook/submit/:id
   submit: async (id: number | string): Promise<ApiResponse<LogbookEntry>> => {
-    const response = await apiClient.patch<ApiResponse<LogbookEntry>>(
-      `${API_ENDPOINTS.LOGBOOK.BY_ID(id)}/submit`
-    );
-    return response.data;
+    const response = await fetch(`/api/proxy/logbook/submit/${id}`, {
+      method: "PATCH",
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Gagal submit logbook.");
+    return data;
   },
 };

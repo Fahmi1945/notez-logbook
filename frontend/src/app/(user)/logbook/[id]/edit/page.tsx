@@ -7,7 +7,7 @@ import { entriesApi } from "@/lib/api/entries";
 import { EntryFormInput } from "@/lib/validators/entry.schema";
 import { ArrowLeft } from "@phosphor-icons/react";
 import Link from "next/link";
-import { Spinner } from "@/components/ui/spinner";
+import LogbookFormSkeleton from "@/components/logbook/logbook-form-skeleton";
 
 export default function EditLogbookPage() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function EditLogbookPage() {
   const [existingAttachmentUrl, setExistingAttachmentUrl] = useState<string | undefined>();
   const [existingFileName, setExistingFileName] = useState<string | undefined>();
   const [isFetching, setIsFetching] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,15 +49,15 @@ export default function EditLogbookPage() {
     if (id) fetchDetail();
   }, [id]);
 
-  const handleSubmit = async (data: EntryFormInput, files: File[]) => {
-    setIsSubmitting(true);
+  const handleSave = async (data: EntryFormInput, files: File[]) => {
+    setIsSaving(true);
     try {
       await entriesApi.update(id, data, files);
       router.push("/logbook");
       router.refresh();
     } catch (error: unknown) {
       const errorObj = error as { message?: string };
-      setIsSubmitting(false);
+      setIsSaving(false);
       throw new Error(errorObj.message || "Gagal memperbarui logbook. Silakan coba lagi.");
     }
   };
@@ -83,10 +83,7 @@ export default function EditLogbookPage() {
       </div>
 
       {isFetching ? (
-        <div className="flex flex-col items-center justify-center p-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
-          <Spinner />
-          <p className="text-sm text-gray-400 mt-4">Memuat data entri...</p>
-        </div>
+        <LogbookFormSkeleton />
       ) : fetchError ? (
         <div className="text-center p-10 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200 animate-fade-in-down">
           <p className="font-semibold mb-2 font-heading">Terjadi Kesalahan</p>
@@ -104,8 +101,8 @@ export default function EditLogbookPage() {
             initialData={initialData}
             existingAttachmentUrl={existingAttachmentUrl}
             existingFileName={existingFileName}
-            onSubmit={handleSubmit}
-            isLoading={isSubmitting}
+            onSave={handleSave}
+            isSaving={isSaving}
           />
         )
       )}

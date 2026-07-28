@@ -14,10 +14,6 @@ interface ConfirmDialogProps {
   isLoading?: boolean;
 }
 
-/**
- * Reusable confirmation dialog dengan animasi dan focus trap.
- * Digunakan untuk aksi destruktif seperti hapus data.
- */
 export function ConfirmDialog({
   isOpen,
   title = "Konfirmasi Hapus",
