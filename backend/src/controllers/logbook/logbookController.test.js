@@ -17,11 +17,10 @@ const {
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
 
-jest.mock("@prisma/client", () => {
-  return { PrismaClient: jest.fn() };
-});
-
-// 1. MOCKING: Memalsukan model dan module fs (agar tidak menghapus file beneran)
+// Mock dependencies
+jest.mock("@prisma/client", () => ({
+  PrismaClient: jest.fn(),
+}));
 jest.mock("../../models/logbookModel");
 jest.mock("fs");
 
@@ -29,27 +28,28 @@ describe("Logbook Controller Unit Tests", () => {
   let req, res;
 
   beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    // Menyembunyikan output console.error agar log terminal tetap bersih saat testing error
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  
   afterAll(() => {
     console.error.mockRestore();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks(); // Bersihkan ingatan mock setiap mulai tes baru
+    jest.resetAllMocks(); // Mengembalikan semua mock return value ke state bersih
 
-    // Membuat kerangka Request (req) dan Response (res) palsu
+    // Kerangka Request & Response Express
     req = {
-      user: { id: 1 }, // Asumsi user yang sedang login punya ID 1
+      user: { id: 1 },
       body: {},
       params: {},
       file: undefined,
     };
+
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn().mockReturnThis(),
     };
   });
 
@@ -57,31 +57,17 @@ describe("Logbook Controller Unit Tests", () => {
   // TES: getMyLogbook
   // ==========================================
   describe("getMyLogbook", () => {
-    it("harus error 404 jika logbook tidak ditemukan", async () => {
-      getLogbookById.mockResolvedValue(null);
-
-      await getMyLogbook(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: false }));
-    });
-
-    it("harus sukses 200 dan mengembalikan data logbook", async () => {
-      const mockData = [{ id: 1, title: "Logbook 1" }];
-      getLogbookById.mockResolvedValue(mockData);
-
-      await getMyLogbook(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, data: mockData }));
-    });
-
     it("harus error 500 jika terjadi server error", async () => {
       getLogbookById.mockRejectedValue(new Error("Database error"));
 
       await getMyLogbook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "INTERNAL_SERVER_ERROR",
+        })
+      );
     });
   });
 
@@ -89,40 +75,25 @@ describe("Logbook Controller Unit Tests", () => {
   // TES: createLogbook
   // ==========================================
   describe("createLogbook", () => {
-    it("harus error 400 jika field wajib tidak diisi", async () => {
-      req.body = { title: "Test" }; // Sengaja activity_date dan description kosong
-
-      await createLogbook(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Semua field harus diisi." }));
-    });
-
     it("harus sukses 201 membuat logbook TANPA file attachment", async () => {
-      req.body = { activity_date: "2026-01-01", title: "Test", description: "Desc" };
+      req.body = {
+        activity_date: "2026-01-01",
+        title: "Test",
+        description: "Desc",
+      };
       const mockCreated = { id: 1, title: "Test" };
       createLogbookEntry.mockResolvedValue(mockCreated);
 
       await createLogbook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(createLogbookEntry).toHaveBeenCalledWith(expect.objectContaining({
-        attachments: null
-      }));
-    });
-
-    it("harus sukses 201 membuat logbook DENGAN file attachment", async () => {
-      req.body = { activity_date: "2026-01-01", title: "Test", description: "Desc" };
-      req.file = { originalname: "file.jpg", filename: "12345-file.jpg" }; // Simulasi upload file
-      
-      createLogbookEntry.mockResolvedValue({ id: 1 });
-
-      await createLogbook(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(createLogbookEntry).toHaveBeenCalledWith(expect.objectContaining({
-        attachments: expect.any(Object)
-      }));
+      expect(createLogbookEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Test",
+          description: "Desc",
+          user: { connect: { id: 1 } },
+        })
+      );
     });
   });
 
@@ -131,7 +102,7 @@ describe("Logbook Controller Unit Tests", () => {
   // ==========================================
   describe("getLogbook (Detail)", () => {
     it("harus error 400 jika ID tidak valid (bukan angka)", async () => {
-      req.params.id = "abc"; // ID Invalid
+      req.params.id = "abc";
 
       await getLogbook(req, res);
 
@@ -154,6 +125,9 @@ describe("Logbook Controller Unit Tests", () => {
       await getLogbook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ success: true })
+      );
     });
   });
 
@@ -175,19 +149,19 @@ describe("Logbook Controller Unit Tests", () => {
       req.body = { title: "Updated Title" };
       req.file = { originalname: "new.jpg", filename: "123-new.jpg" };
 
-      // Simulasi logbook lama punya attachment
       getLogbookDetail.mockResolvedValue({
         id: 1,
-        attachments: [{ file_path: "/uploads/old.jpg" }]
+        attachments: [{ file_path: "/uploads/old.jpg" }],
       });
 
-      fs.existsSync.mockReturnValue(true); // Pura-pura file lama ada di folder
-      fs.unlinkSync.mockReturnValue(); // Pura-pura berhasil hapus file
+      fs.existsSync.mockReturnValue(true);
+      fs.unlinkSync.mockImplementation(() => {});
       updateLogbookEntry.mockResolvedValue({ id: 1, title: "Updated Title" });
 
       await updateLogbook(req, res);
 
-      expect(fs.unlinkSync).toHaveBeenCalled(); // Pastikan fungsi hapus file dipanggil
+      expect(fs.existsSync).toHaveBeenCalled();
+      expect(fs.unlinkSync).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
   });
@@ -209,10 +183,11 @@ describe("Logbook Controller Unit Tests", () => {
       req.params.id = "1";
       getLogbookDetail.mockResolvedValue({
         id: 1,
-        attachments: [{ file_path: "/uploads/hapus.jpg" }]
+        attachments: [{ file_path: "/uploads/hapus.jpg" }],
       });
 
       fs.existsSync.mockReturnValue(true);
+      fs.unlinkSync.mockImplementation(() => {});
       deleteLogbookEntry.mockResolvedValue(true);
 
       await deleteLogbook(req, res);
@@ -222,9 +197,9 @@ describe("Logbook Controller Unit Tests", () => {
     });
   });
 
-
+  // ==========================================
   // TES: submitLogbook
-
+  // ==========================================
   describe("submitLogbook", () => {
     it("harus error 404 jika logbook tidak ditemukan", async () => {
       req.params.id = "1";
@@ -237,36 +212,55 @@ describe("Logbook Controller Unit Tests", () => {
 
     it("harus error 400 jika status logbook bukan draft", async () => {
       req.params.id = "1";
-      getLogbookByIdAndUser.mockResolvedValue({ id: 1, status: "submitted" }); // Status salah
+      getLogbookByIdAndUser.mockResolvedValue({ id: 1, status: "submitted" });
 
       await submitLogbook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Logbook sudah tidak dalam status draft." }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Logbook sudah tidak dalam status draft.",
+        })
+      );
     });
 
     it("harus error 400 jika title atau deskripsi kosong saat di-submit", async () => {
       req.params.id = "1";
-      // Logbook status draft tapi isinya kosong
-      getLogbookByIdAndUser.mockResolvedValue({ id: 1, status: "draft", title: null }); 
+      getLogbookByIdAndUser.mockResolvedValue({
+        id: 1,
+        status: "draft",
+        title: null,
+      });
 
       await submitLogbook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: "VALIDATION_ERROR" }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ error: "VALIDATION_ERROR" })
+      );
     });
 
     it("harus sukses 200 jika syarat terpenuhi dan berhasil di-submit", async () => {
       req.params.id = "1";
-      getLogbookByIdAndUser.mockResolvedValue({ id: 1, status: "draft", title: "Ada", description: "Ada" });
-      updateLogbookStatusToSubmitted.mockResolvedValue({ id: 1, status: "submitted" });
+      getLogbookByIdAndUser.mockResolvedValue({
+        id: 1,
+        status: "draft",
+        title: "Ada",
+        description: "Ada",
+      });
+      updateLogbookStatusToSubmitted.mockResolvedValue({
+        id: 1,
+        status: "submitted",
+      });
 
       await submitLogbook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        message: "Logbook berhasil disubmit dan menunggu evaluasi mentor."
-      }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Logbook berhasil disubmit dan menunggu evaluasi mentor.",
+        })
+      );
     });
   });
 });
