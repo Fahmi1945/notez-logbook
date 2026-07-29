@@ -16,7 +16,6 @@ const {
   getLogbookByIdAndUser,
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
-const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
 
 jest.mock("../../models/mentorshipModel", () => ({
   checkAcceptedMentorship: jest.fn(),
