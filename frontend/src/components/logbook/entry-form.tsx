@@ -132,11 +132,11 @@ export default function EntryForm({
       {/* Card Utama */}
       <Card className="mb-6 border-gray-200">
         {/* Card Header */}
-        <CardHeader className="px-6 sm:px-8 py-5 bg-gradient-to-r from-brand-primary/5 to-transparent">
-          <h2 className="text-base font-heading font-bold text-brand-dark">
+        <CardHeader className="px-6 sm:px-8 py-5 bg-gradient-to-r from-brand-primary to-brand-dark rounded-t-xl shadow-inner">
+          <h2 className="text-base font-heading font-bold text-white">
             {isEdit ? "Edit Informasi Entri" : "Informasi Kegiatan"}
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-brand-soft mt-0.5">
             Isi semua field yang bertanda bintang (*)
           </p>
         </CardHeader>
@@ -156,7 +156,7 @@ export default function EntryForm({
               name="activity_date"
               value={formData.activity_date}
               onChange={handleChange}
-              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all text-gray-700 bg-brand-white-bg ${
+              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition-all text-gray-700 bg-white shadow-sm ${
                 errors.activity_date ? "border-rose-400 bg-rose-50/30" : "border-gray-200 hover:border-gray-300"
               }`}
             />
@@ -179,7 +179,7 @@ export default function EntryForm({
               value={formData.title}
               onChange={handleChange}
               placeholder="Contoh: Implementasi Fitur Upload Dokumen"
-              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all text-gray-700 bg-brand-white-bg placeholder:text-gray-300 ${
+              className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition-all text-gray-700 bg-white placeholder:text-gray-300 shadow-sm ${
                 errors.title ? "border-rose-400 bg-rose-50/30" : "border-gray-200 hover:border-gray-300"
               }`}
             />
@@ -205,7 +205,7 @@ export default function EntryForm({
               onChange={handleChange}
               rows={5}
               placeholder="Ceritakan secara detail apa saja yang kamu kerjakan hari ini, termasuk progres dan hasil yang dicapai..."
-              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all text-gray-700 resize-y bg-brand-white-bg placeholder:text-gray-300 leading-relaxed ${
+              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition-all text-gray-700 resize-y bg-white placeholder:text-gray-300 leading-relaxed shadow-sm ${
                 errors.description ? "border-rose-400 bg-rose-50/30" : "border-gray-200 hover:border-gray-300"
               }`}
             />
@@ -243,7 +243,7 @@ export default function EntryForm({
               onChange={handleChange}
               rows={3}
               placeholder="Apakah ada kendala selama pengerjaan? Kosongkan jika tidak ada."
-              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 transition-all text-gray-700 resize-y bg-brand-white-bg placeholder:text-gray-300 leading-relaxed ${
+              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400 transition-all text-gray-700 resize-y bg-white placeholder:text-gray-300 leading-relaxed shadow-sm ${
                 errors.obstacles ? "border-rose-400 bg-rose-50/30" : "border-gray-200 hover:border-gray-300"
               }`}
             />
@@ -258,13 +258,13 @@ export default function EntryForm({
 
       {/* Card Attachment */}
       <Card className="border-gray-200">
-        <CardHeader className="px-6 sm:px-8 py-5 bg-gradient-to-r from-brand-accent/5 to-transparent">
-          <h2 className="text-base font-heading font-bold text-brand-dark flex items-center gap-2">
-            <Paperclip size={18} className="text-brand-accent" />
+        <CardHeader className="px-6 sm:px-8 py-5 bg-gradient-to-r from-brand-accent to-orange-400 rounded-t-xl shadow-inner">
+          <h2 className="text-base font-heading font-bold text-white flex items-center gap-2">
+            <Paperclip size={18} className="text-white" />
             Lampiran
-            <span className="text-xs font-normal text-gray-400 ml-1">(Opsional)</span>
+            <span className="text-xs font-normal text-white/80 ml-1">(Opsional)</span>
           </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-brand-soft mt-0.5">
             Lampirkan bukti kerja berupa foto atau dokumen PDF
           </p>
         </CardHeader>
