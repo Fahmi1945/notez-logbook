@@ -7,6 +7,11 @@ const {
   getMentorRequestsHistory,
   checkAcceptedMentorship,
 } = require("../../models/mentorshipModel");
+const { createNotificationData } = require("../../models/notificationModel");
+
+jest.mock("../../models/notificationModel", () => ({
+  createNotificationData: jest.fn().mockResolvedValue({ id: 1, message: "Notif sukses" }),
+}));
 
 // 1. MOCKING MODELS
 jest.mock("../../models/userModel");

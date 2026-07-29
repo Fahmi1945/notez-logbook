@@ -16,6 +16,11 @@ const {
   getLogbookByIdAndUser,
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
+const { createNotificationData } = require("../../models/notificationModel");
+
+jest.mock("../../models/notificationModel", () => ({
+  createNotificationData: jest.fn().mockResolvedValue({ id: 1, message: "Notif sukses" }),
+}));
 
 jest.mock("@prisma/client", () => {
   return { PrismaClient: jest.fn() };

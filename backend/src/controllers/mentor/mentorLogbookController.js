@@ -1,4 +1,6 @@
 const { getActiveMenteeIds, getLogbooksByMenteeIds, countLogbooksByMenteeIds, checkIsMyMentee, evaluateLogbook, getLogbookById } = require("../../models/mentorLogbookModel");
+const { createNotificationData } = require("../../models/notificationModel");
+
 
 // Ambil data logbook dari menti yang aktif
 const getMenteeLogbooks = async (req, res) => {
@@ -100,12 +102,25 @@ const evaluatedDataLogbook = async (req, res) => {
 
     const evaluatedData = await evaluateLogbook(logbookId, mentorId, status, finalComment);
 
+    // ✨ FIX: Definisikan dulu targetUserId mengambil dari logbook.user_id
+    const targetUserId = logbook.user_id;
+
+    if (targetUserId) {
+      await createNotificationData({
+        user_id: targetUserId,
+        message: `Logbook Anda telah di-${status} oleh mentor dengan catatan: "${finalComment}"`,
+        logbook_id: Number(logbookId), // Menghubungkan logbook_id sesuai ERD
+      });
+      console.log(`✅ BERHASIL: Notifikasi dikirim ke Mahasiswa ID: ${targetUserId}`);
+    }
+
     return res.status(200).json({
       status: "success",
       message: `Logbook berhasil di-${status} dan feedback telah disimpan`,
       data: evaluatedData,
     });
   } catch (error) {
+    console.error("Error di evaluatedDataLogbook:", error);
     return res.status(500).json({
       status: "error",
       message: "Terjadi kesalahan saat mengevaluasi logbook",
@@ -113,6 +128,7 @@ const evaluatedDataLogbook = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   getMenteeLogbooks,
