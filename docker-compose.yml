@@ -55,6 +55,8 @@ services:
       - gitea
     depends_on:
       - db
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
 
   act_runner:
     image: gitea/act_runner:latest

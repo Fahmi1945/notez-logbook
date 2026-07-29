@@ -1,25 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
 import { mentorshipApi } from "@/lib/api/mentorship";
 import { useUIStore } from "@/store/ui-store";
-import { useAuthStore } from "@/store/auth-store";
 import { mentorshipRequestSchema } from "@/lib/validators/mentorship.schema"; 
-import { ActiveStudent } from '@/types/mentorship';
+import { ActiveStudent, Mentor, MentorshipHistory } from '@/types/mentorship';
 
 export const useMentorship = (activeTab: "catalog" | "history") => {
-  const [mentors, setMentors] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [history, setHistory] = useState<MentorshipHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
   const { showToast } = useUIStore();
-  const { user } = useAuthStore(); 
 
   const fetchMentors = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await mentorshipApi.getMentors();
       setMentors(data || []);
-    } catch (error: any) {
-      showToast(error.response?.data?.message || "Gagal memuat katalog mentor", "error");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      showToast(err.response?.data?.message || "Gagal memuat katalog mentor", "error");
     } finally {
       setIsLoading(false);
     }
@@ -32,33 +31,48 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
 
       setHistory(response.data || []); 
       
-    } catch (error: any) {
-      showToast(error.response?.data?.message || "Gagal memuat riwayat", "error");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      showToast(err.response?.data?.message || "Gagal memuat riwayat", "error");
     } finally {
       setIsLoading(false);
     }
   }, [showToast]);
 
   useEffect(() => {
+    let isMounted = true;
     const loadInitialData = async () => {
       setIsLoading(true);
       try {
         if (activeTab === "catalog") {
-          await fetchMentors();
-          await fetchHistory(); 
+          const mentorsData = await mentorshipApi.getMentors();
+          const historyRes = await mentorshipApi.getHistory();
+          if (isMounted) {
+            setMentors(mentorsData || []);
+            setHistory(historyRes.data || []);
+          }
         } 
         else if (activeTab === "history") {
-          await fetchHistory();
+          const historyRes = await mentorshipApi.getHistory();
+          if (isMounted) {
+            setHistory(historyRes.data || []);
+          }
         }
       } catch (error) {
         console.error("Gagal mengambil data:", error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadInitialData();
-  }, [activeTab, fetchHistory]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab]);
 
   const applyForMentorship = async (mentorId: number) => {
     try {
@@ -73,9 +87,9 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
       const res = await mentorshipApi.requestMentorship(validationResult.data.mentorId);
       showToast(res.message || "Berhasil mengajukan bimbingan!", "success");
       
-    } catch (error: any) {
-      // Menangkap error dari Axios atau throw error dari Zod
-      const message = error.response?.data?.message || error.message || "Gagal mengajukan bimbingan";
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const message = err.response?.data?.message || err.message || "Gagal mengajukan bimbingan";
       showToast(message, "error");
       throw error;
     }
@@ -86,7 +100,8 @@ export const useMentorship = (activeTab: "catalog" | "history") => {
     history,
     isLoading,
     applyForMentorship,
-    refreshHistory: fetchHistory
+    refreshHistory: fetchHistory,
+    fetchMentors,
   };
 };
 
@@ -101,17 +116,37 @@ export function useActiveStudents() {
       setError(null);
       const data = await mentorshipApi.getActiveStudents();
       setStudents(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } };
       console.error("Gagal mengambil data mahasiswa aktif:", err);
-      setError(err.response?.data?.message || "Terjadi kesalahan saat memuat data.");
+      setError(errorObj.response?.data?.message || "Terjadi kesalahan saat memuat data.");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]);
+    let isMounted = true;
+    async function load() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await mentorshipApi.getActiveStudents();
+        if (isMounted) setStudents(data);
+      } catch (err: unknown) {
+        const errorObj = err as { response?: { data?: { message?: string } } };
+        console.error("Gagal mengambil data mahasiswa aktif:", err);
+        if (isMounted) setError(errorObj.response?.data?.message || "Terjadi kesalahan saat memuat data.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return { students, isLoading, error, refetch: fetchStudents };
 }

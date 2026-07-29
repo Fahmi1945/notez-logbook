@@ -13,8 +13,7 @@ export default function MentorshipPage() {
   const [hiddenMentorIds, setHiddenMentorIds] = useState<number[]>([]);
 
   // JURUS DATABASE: Ekstrak semua ID mentor yang sudah ada di riwayat (history)
-  // Pastikan property 'mentor_id' ini sesuai dengan response JSON dari backend-mu!
-  const databaseAppliedIds = history.map((req: any) => req.mentorId); 
+  const databaseAppliedIds = history.map((req) => req.mentor_id);
 
   // GABUNGKAN KEDUANYA: Mentor yang baru saja diklik + Mentor yang sudah ada di database
   const allUnavailableMentorIds = [...hiddenMentorIds, ...databaseAppliedIds];

@@ -1,91 +1,77 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Envelope, LockSimple } from "@phosphor-icons/react";
-import Input from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Captcha from "@/components/auth/captcha";
+import FormField from "@/components/auth/form-field";
 import { useAuth } from "@/hooks/use-auth";
-import { loginSchema } from "@/lib/validators/auth.schema";
+import { loginSchema, LoginInput } from "@/lib/validators/auth.schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function LoginForm() {
   const { login, isLoading } = useAuth();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  
-  // 2. Tambahkan state untuk Captcha
   const [isCaptchaValid, setIsCaptchaValid] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; captcha?: string }>({});
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({}); 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
 
-    // 3. Cek validasi Captcha terlebih dahulu
+  const onSubmit = async (data: LoginInput) => {
     if (!isCaptchaValid) {
-      setErrors((prev) => ({ ...prev, captcha: "Silakan hitung keamanan dengan benar." }));
+      setCaptchaError("Silakan hitung keamanan dengan benar.");
       return;
     }
-
-    const validation = loginSchema.safeParse(formData);
-    
-    if (!validation.success) {
-      const fieldErrors = validation.error.flatten().fieldErrors;
-      setErrors({
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
-      return; 
-    }
-
-    await login(validation.data);
+    setCaptchaError(null);
+    await login(data);
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <FormField
+        label="Alamat Email"
+        type="email"
+        placeholder="email@gmail.com"
+        icon={<Envelope className="w-5 h-5 text-gray-400" weight="regular" />}
+        error={errors.email?.message}
+        {...register("email")}
+      />
+
+      <FormField
+        label="Password"
+        type="password"
+        placeholder="••••••••"
+        icon={<LockSimple className="w-5 h-5 text-gray-400" weight="regular" />}
+        error={errors.password?.message}
+        {...register("password")}
+      />
+
+      {/* Captcha diletakkan sebelum tombol Submit */}
       <div>
-        <Input
-          label="Alamat Email"
-          type="email"
-          placeholder="email@gmail.com"
-          icon={<Envelope className="w-5 h-5 text-gray-400" weight="regular" />}
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        <Captcha
+          onValidate={(isValid) => {
+            setIsCaptchaValid(isValid);
+            if (isValid) setCaptchaError(null);
+          }}
         />
-        {errors.email && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.email}</p>}
+        {captchaError && (
+          <p className="text-status-rejected text-[11px] mt-1 font-medium">{captchaError}</p>
+        )}
       </div>
 
-      <div>
-        <Input
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          icon={<LockSimple className="w-5 h-5 text-gray-400" weight="regular" />}
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        />
-        {errors.password && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.password}</p>}
-        
-      </div>
-
-      {/* 4. Letakkan Captcha sebelum tombol Submit */}
-      <div>
-        <Captcha onValidate={(isValid) => setIsCaptchaValid(isValid)} />
-        {errors.captcha && <p className="text-status-rejected text-[11px] mt-1 font-medium">{errors.captcha}</p>}
-      </div>
-      <div className="flex justify-end mt-2">
-        <Link href="/forgot-password" className="text-[11px] font-bold text-brand-primary hover:underline">
-        Lupa password?
-        </Link>
-      </div>
-
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         isLoading={isLoading}
         // Tombol sedikit redup jika captcha belum valid
         className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors mt-2 ${
-          isCaptchaValid 
-            ? "bg-brand-primary hover:bg-brand-dark text-white" 
+          isCaptchaValid
+            ? "bg-brand-primary hover:bg-brand-dark text-white"
             : "bg-brand-primary/70 text-white/80 cursor-not-allowed"
         }`}
       >

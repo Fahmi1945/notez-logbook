@@ -53,10 +53,26 @@ jobs:
           cd backend
           npm install
 
+      - name: Generate Prisma Client
+        run: |
+          cd backend
+          export DATABASE_URL="mysql://palsu:palsu@localhost:3306/db_palsu" 
+          npx prisma generate
+
+      - name: Linter Backend
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Unit Test Backend
+        run: |
+          cd backend
+          npm test
+
   # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:
     runs-on: ubuntu-latest
-    needs: Cek-Kodingan
+    needs: [Cek-Frontend, Cek-Backend]
     steps:
       - name: Laporan Sukses
         # Hanya mencetak ini jika Frontend DAN Backend sukses

@@ -1,7 +1,8 @@
 import React from "react";
-import { cn } from "./spinner"; // Ambil fungsi cn dari spinner
+import { cn } from "@/lib/utils";
 
-type BadgeStatus = "draft" | "submitted" | "pending" | "approved" | "rejected";
+import { LogbookStatus } from "@/types/entry";
+type BadgeStatus = LogbookStatus;
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   status: BadgeStatus;
@@ -12,10 +13,9 @@ export function Badge({ status, children, className, ...props }: BadgeProps) {
   // Warna disesuaikan dengan Palet Opsi 1: Modern Emerald & Rose
   const statusConfig: Record<BadgeStatus, { color: string; label: string }> = {
     draft: { color: "bg-slate-50 text-slate-700 border-slate-200", label: "Draft" },
-    submitted: { color: "bg-violet-50 text-violet-700 border-violet-200", label: "Diserahkan" },
-    pending: { color: "bg-amber-50 text-amber-700 border-amber-200", label: "Menunggu" }, 
-    approved: { color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Disetujui" },
-    rejected: { color: "bg-rose-50 text-rose-700 border-rose-200", label: "Ditolak" },
+    submitted: { color: "bg-violet-50 text-violet-700 border-violet-200", label: "Submitted" },
+    approved: { color: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Approved" },
+    rejected: { color: "bg-rose-50 text-rose-700 border-rose-200", label: "Rejected" },
   };
 
   return (

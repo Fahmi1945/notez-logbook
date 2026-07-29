@@ -4,8 +4,9 @@
 import { useState } from 'react';
 import StudentDetailModal from './student-detail-modal';
 import { ActiveStudent } from '@/types/mentorship';
-import { Button } from "@/components/ui/Button"; 
+import { Button } from "@/components/ui/button"; 
 import { Badge } from "@/components/ui/badge";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Clock, Check } from "@phosphor-icons/react";
 
 const formatDate = (dateString: string) => {
@@ -36,27 +37,27 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-4 animate-fade-in-down">
-        <table className="w-full text-sm text-left text-gray-600">
-          <thead className="bg-brand-white text-brand-dark font-heading font-semibold border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 text-left whitespace-nowrap">TANGGAL UPDATE</th>
-              <th className="px-6 py-4 text-left">MAHASISWA</th>
-              <th className="px-6 py-4 text-center whitespace-nowrap">TOTAL ENTRI</th>
-              <th className="px-6 py-4 text-center whitespace-nowrap">MENUNGGU REVIEW</th>
-              <th className="px-6 py-4 text-center whitespace-nowrap">AKSI</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 font-mono">
+      <div className="mt-4 animate-fade-in-down">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>TANGGAL UPDATE</TableHead>
+              <TableHead>MAHASISWA</TableHead>
+              <TableHead className="text-center">TOTAL ENTRI</TableHead>
+              <TableHead className="text-center">MENUNGGU REVIEW</TableHead>
+              <TableHead className="text-center">AKSI</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data.map((item) => (
-              <tr key={item.requestId} className="hover:bg-brand-white/50 transition-colors">
+              <TableRow key={item.requestId}>
                 {/* Tanggal Update */}
-                <td className="px-6 py-4 text-left align-middle text-gray-500 whitespace-nowrap">
+                <TableCell className="text-gray-500">
                   {formatDate(item.updatedAt)}
-                </td>
+                </TableCell>
                 
                 {/* Mahasiswa */}
-                <td className="px-6 py-4 text-left align-middle">
+                <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-50 text-brand-primary flex items-center justify-center font-bold text-xs">
                       {item.studentName?.substring(0, 2).toUpperCase() || "NN"}
@@ -72,19 +73,19 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
                       )}
                     </div>
                   </div>
-                </td>
+                </TableCell>
                 
                 {/* Total Entri */}
-                <td className="px-6 py-4 text-center align-middle whitespace-nowrap">
+                <TableCell className="text-center">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
                     {item.totalEntries} Entri
                   </span>
-                </td>
+                </TableCell>
                 
                 {/* Menunggu Review */}
-                <td className="px-6 py-4 text-center align-middle whitespace-nowrap">
+                <TableCell className="text-center">
                   {item.waitingReview > 0 ? (
-                    <Badge status="pending" className="px-3 py-1 inline-flex items-center gap-1.5 justify-center">
+                    <Badge status="submitted" className="px-3 py-1 inline-flex items-center gap-1.5 justify-center">
                       <Clock size={14} className="shrink-0 text-amber-600" />
                       <span>{item.waitingReview} Perlu Review</span>
                     </Badge>
@@ -94,10 +95,10 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
                       <span>Selesai</span>
                     </Badge>
                   )}
-                </td>
+                </TableCell>
                 
                 {/* Aksi */}
-                <td className="px-6 py-4 text-center align-middle whitespace-nowrap">
+                <TableCell className="text-center">
                   <Button 
                     onClick={() => handleViewDetail(item)}
                     variant="primary"
@@ -106,11 +107,11 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
                   >
                     Lihat Detail
                   </Button>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <StudentDetailModal 
@@ -121,4 +122,4 @@ export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) 
     </>
   );
 }
-
+

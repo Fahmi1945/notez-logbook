@@ -1,8 +1,9 @@
 import React from "react";
-import { cn, Spinner } from "./spinner"; 
+import { Spinner } from "./spinner";
+import { cn } from "@/lib/utils"; 
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "danger" | "ghost";
+  variant?: "primary" | "secondary" | "outline" | "danger" | "ghost" | "success";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
 }
@@ -16,13 +17,14 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const baseStyles = "inline-flex items-center justify-center font-semibold transition-all rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap";
+  const baseStyles = "inline-flex items-center justify-center font-semibold transition-all duration-200 active:scale-95 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap";
   
   const variants = {
-    primary: "bg-brand-primary text-white hover:bg-brand-dark shadow-sm focus:ring-brand-primary",
+    primary: "bg-brand-primary text-white hover:bg-brand-dark shadow-md hover:shadow-lg focus:ring-brand-primary",
     secondary: "bg-blue-50 text-brand-primary hover:bg-blue-100 focus:ring-brand-primary",
     outline: "border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-brand-primary",
-    danger: "bg-rose-500 text-white hover:bg-rose-600 focus:ring-rose-500 shadow-sm",
+    danger: "bg-status-rejected text-white hover:opacity-90 focus:ring-rose-500 shadow-sm hover:shadow-md",
+    success: "bg-status-approved text-white hover:opacity-90 focus:ring-green-500 shadow-sm hover:shadow-md",
     ghost: "bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-500",
   };
 

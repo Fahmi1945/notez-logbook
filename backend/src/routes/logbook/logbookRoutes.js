@@ -30,9 +30,6 @@ router.patch("/submit/:id", verifyToken, submitLogbook);
 //SUBMIT
 router.patch("/:id/submit", verifyToken, submitLogbook);
 
-//SUBMIT
-router.patch("/:id/submit", verifyToken, submitLogbook);
-
 //DELETE
 router.delete("/:id", deleteLogbook);
 

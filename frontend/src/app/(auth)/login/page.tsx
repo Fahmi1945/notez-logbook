@@ -22,7 +22,7 @@ export default function LoginPage() {
 
         <LoginForm />
 
-        <p className="text-center text-xs text-gray-500 mt-8">
+        <p className="text-left text-xs text-gray-500 mt-8">
           Belum punya akun?{" "}
           <Link href="/register" className="font-bold text-brand-accent hover:text-orange-600 transition-colors">
             Daftar di sini

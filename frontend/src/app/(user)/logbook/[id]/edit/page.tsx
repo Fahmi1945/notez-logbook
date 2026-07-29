@@ -4,108 +4,105 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import EntryForm from "@/components/logbook/entry-form";
 import { entriesApi } from "@/lib/api/entries";
-import { LogbookFormData } from "@/types/entry";
+import { EntryFormInput } from "@/lib/validators/entry.schema";
 import { ArrowLeft } from "@phosphor-icons/react";
 import Link from "next/link";
-import { Spinner } from "@/components/ui/spinner";
+import LogbookFormSkeleton from "@/components/logbook/logbook-form-skeleton";
 
 export default function EditLogbookPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
 
-  const [initialData, setInitialData] = useState<LogbookFormData | null>(null);
+  const [initialData, setInitialData] = useState<EntryFormInput | null>(null);
+  const [existingAttachmentUrl, setExistingAttachmentUrl] = useState<string | undefined>();
+  const [existingFileName, setExistingFileName] = useState<string | undefined>();
   const [isFetching, setIsFetching] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Ambil data logbook lama saat halaman pertama kali dimuat
   useEffect(() => {
     const fetchDetail = async () => {
       try {
         setIsFetching(true);
         const res = await entriesApi.getById(id);
-        
-        // Sesuaikan format data dari API ke format form
         setInitialData({
           activity_date: res.data.activity_date,
           title: res.data.title,
           description: res.data.description,
           obstacles: res.data.obstacles || "",
         });
-      } catch (err: any) {
-        setFetchError(err.message || "Gagal mengambil data logbook.");
+        // Simpan info lampiran existing jika ada
+        if (res.data.attachments && res.data.attachments.length > 0) {
+          const att = res.data.attachments[0];
+          setExistingAttachmentUrl(`/api/proxy/attachments/${att.id}`);
+          setExistingFileName(att.file_name);
+        }
+      } catch (err: unknown) {
+        const errorObj = err as { message?: string };
+        setFetchError(errorObj.message || "Gagal mengambil data logbook.");
       } finally {
         setIsFetching(false);
       }
     };
 
-    if (id) {
-      fetchDetail();
-    }
+    if (id) fetchDetail();
   }, [id]);
 
-  // Fungsi untuk menangani proses submit (Update data)
-  const handleSubmit = async (data: LogbookFormData) => {
-    setIsSubmitting(true);
+  const handleSave = async (data: EntryFormInput, files: File[]) => {
+    setIsSaving(true);
     try {
-      // Tembak endpoint PUT /logbook/:id
-      await entriesApi.update(id, data);
-      
-      // Jika sukses, arahkan kembali ke halaman utama logbook
+      await entriesApi.update(id, data, files);
       router.push("/logbook");
-      router.refresh(); 
-    } catch (error: any) {
-      setIsSubmitting(false);
-      throw new Error(error.message || "Gagal memperbarui logbook. Silakan coba lagi.");
+      router.refresh();
+    } catch (error: unknown) {
+      const errorObj = error as { message?: string };
+      setIsSaving(false);
+      throw new Error(errorObj.message || "Gagal memperbarui logbook. Silakan coba lagi.");
     }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto font-body">
-      {/* Header Halaman */}
+      {/* Header */}
       <div className="mb-6 animate-fade-in-down">
-        <Link 
-          href="/logbook" 
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-accent mb-4 transition-colors font-medium"
+        <Link
+          href="/logbook"
+          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-brand-primary mb-5 transition-colors font-medium"
         >
           <ArrowLeft size={16} weight="bold" />
           Batal & Kembali
         </Link>
-        
-        <h1 className="text-2xl font-heading font-bold text-brand-dark mb-2">
+
+        <h1 className="text-2xl font-heading font-bold text-brand-dark mb-1">
           Edit Entri Logbook
         </h1>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-400 text-sm">
           Perbarui detail aktivitas bimbinganmu. Pastikan perbaikan sesuai dengan catatan revisi (jika ada).
         </p>
       </div>
 
-      {/* Tampilan Loading saat mengambil data */}
       {isFetching ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl border border-gray-200">
-          <Spinner />
-          <p className="text-sm text-gray-500 mt-4">Memuat data entri...</p>
-        </div>
+        <LogbookFormSkeleton />
       ) : fetchError ? (
-        /* Tampilan Error jika gagal mengambil data (misal ID tidak ditemukan) */
-        <div className="text-center p-8 bg-red-50 text-red-600 rounded-xl border border-red-200 animate-fade-in-down">
-          <p className="font-semibold mb-2">Terjadi Kesalahan</p>
-          <p className="text-sm mb-4">{fetchError}</p>
-          <button 
+        <div className="text-center p-10 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200 animate-fade-in-down">
+          <p className="font-semibold mb-2 font-heading">Terjadi Kesalahan</p>
+          <p className="text-sm mb-5 text-rose-500">{fetchError}</p>
+          <button
             onClick={() => router.push("/logbook")}
-            className="px-4 py-2 bg-white border border-red-200 rounded-lg text-sm hover:bg-red-50"
+            className="px-5 py-2.5 bg-white border border-rose-200 rounded-xl text-sm hover:bg-rose-50 transition-colors font-medium text-rose-600"
           >
             Kembali ke Daftar
           </button>
         </div>
       ) : (
-        /* Render form hanya jika data sudah berhasil diambil */
         initialData && (
-          <EntryForm 
-            initialData={initialData} 
-            onSubmit={handleSubmit} 
-            isLoading={isSubmitting} 
+          <EntryForm
+            initialData={initialData}
+            existingAttachmentUrl={existingAttachmentUrl}
+            existingFileName={existingFileName}
+            onSave={handleSave}
+            isSaving={isSaving}
           />
         )
       )}

@@ -11,6 +11,8 @@ export const API_ENDPOINTS = {
   LOGBOOK: {
     BASE: "/logbook",
     BY_ID: (id: number | string) => `/logbook/${id}`,
+    ATTACHMENT: (id: number | string) => `/logbook/attachments/${id}`,
+    SUBMIT: (id: number | string) => `/logbook/submit/${id}`,
   },
   MENTORSHIP: {
     BASE: "/mentorship",
@@ -19,6 +21,11 @@ export const API_ENDPOINTS = {
     ACCEPT: (requestId: number | string) => `/mentorship/${requestId}/accepted`,
     REJECT: (requestId: number | string) => `/mentorship/${requestId}/rejected`,
     GET_ACTIVE_STUDENTS: "/mentor/tim",
+  },
+    MENTOR_REVIEW: {
+    QUEUE: "/mentor/logbook",
+    BY_ID: (id: number | string) => `/mentor/logbook/${id}`,
+    EVALUATE: (id: number | string) => `/mentor/logbook/${id}/evaluate`,
   },
 } as const;
 

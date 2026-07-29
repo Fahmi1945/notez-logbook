@@ -13,8 +13,9 @@ export function useEntries() {
       setError(null);
       const res = await entriesApi.getAll();
       setEntries(res.data || []);
-    } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan saat memuat data.");
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      setError(errorObj.message || "Terjadi kesalahan saat memuat data.");
     } finally {
       setIsLoading(false);
     }
@@ -25,8 +26,9 @@ export function useEntries() {
       setIsLoading(true);
       await entriesApi.delete(id);
       setEntries((prev) => prev.filter((entry) => entry.id !== id));
-    } catch (err: any) {
-      setError(err.message || "Gagal menghapus entri.");
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      setError(errorObj.message || "Gagal menghapus entri.");
       throw err;
     } finally {
       setIsLoading(false);
