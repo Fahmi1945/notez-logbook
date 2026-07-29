@@ -43,10 +43,10 @@ const handleMentorshipDecision = async (req, res) => {
 
     const targetStudentId = existingRequest.user_id; // Mengambil ID mahasiswa dari data pengajuan
     if (targetStudentId) {
-      const statusIndo = action === 'accepted' ? 'DITERIMA' : 'DITOLAK';
+      const statusIndo = action === "accepted" ? "DITERIMA" : "DITOLAK";
       await createNotificationData({
         user_id: targetStudentId, // Kirim ke Mahasiswa
-        message: `Pengajuan bimbingan Anda telah ${statusIndo} oleh mentor. ${information ? `Catatan: "${information}"` : ''}`,
+        message: `Pengajuan bimbingan Anda telah ${statusIndo} oleh mentor. ${information ? `Catatan: "${information}"` : ""}`,
         mentorships_id: Number(requestId)
       });
       console.log(`✅ BERHASIL: Notifikasi Accept/Reject dikirim ke Mahasiswa ID: ${targetStudentId}`);
