@@ -7,6 +7,7 @@ const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
 const mentorLogbookRoutes = require("./src/routes/mentor/mentorLogbookRoutes");
+const notificationRoutes = require("./src/routes/notification/notificationRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
@@ -20,7 +21,7 @@ app.use(
 );
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
 
@@ -48,6 +49,9 @@ app.use("/api/logbook", logbookRoutes);
 
 // Routing mentor logbook
 app.use("/api", mentorLogbookRoutes);
+
+// Routing notifikasi
+app.use("/api/notifications", notificationRoutes);
 
 // Routing upload
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));

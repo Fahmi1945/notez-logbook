@@ -4,6 +4,8 @@ const prisma = new PrismaClient();
 const { updateMentorshipStatus, getMentorActiveTeam, getMentorshipById } = require("../../models/mentorshipModel");
 
 
+const { createNotificationData } = require("../../models/notificationModel");
+
 
 const handleMentorshipDecision = async (req, res) => {
   try {
@@ -38,6 +40,17 @@ const handleMentorshipDecision = async (req, res) => {
     }
 
     const updatedRequest = await updateMentorshipStatus(requestId, action, information);
+
+    const targetStudentId = existingRequest.user_id; // Mengambil ID mahasiswa dari data pengajuan
+    if (targetStudentId) {
+      const statusIndo = action === 'accepted' ? 'DITERIMA' : 'DITOLAK';
+      await createNotificationData({
+        user_id: targetStudentId, // Kirim ke Mahasiswa
+        message: `Pengajuan bimbingan Anda telah ${statusIndo} oleh mentor. ${information ? `Catatan: "${information}"` : ''}`,
+        mentorships_id: Number(requestId)
+      });
+      console.log(`✅ BERHASIL: Notifikasi Accept/Reject dikirim ke Mahasiswa ID: ${targetStudentId}`);
+    }
 
     return res.status(200).json({
       status: "success",

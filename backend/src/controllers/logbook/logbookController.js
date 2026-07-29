@@ -7,6 +7,9 @@ const {
   getLogbookByIdAndUser,
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
+const { createNotificationData } = require("../../models/notificationModel");
+const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
+
 const path = require("path");
 const fs = require("fs");
 // const { error } = require("console");
@@ -241,6 +244,7 @@ const submitLogbook = async (req, res) => {
   try {
     const logbookId = parseInt(req.params.id);
     const userId = req.user.id;
+    const userName = req.user.name || "Seseorang"; // Ambil nama mahasiswa dari token
 
     const logbook = await getLogbookByIdAndUser(logbookId, userId);
     if (!logbook) {
@@ -265,6 +269,17 @@ const submitLogbook = async (req, res) => {
     }
 
     const updatedLogbook = await updateLogbookStatusToSubmitted(logbookId);
+
+    // KIRIM NOTIFIKASI KE MENTOR AKTIF
+    const activeMentor = await checkAcceptedMentorship(userId);
+    if (activeMentor) {
+      await createNotificationData({
+        user_id: activeMentor.mentor_id, // Kirim ke ID Mentor
+        message: `Mahasiswa bimbingan Anda (${userName}) telah mengirimkan logbook baru dengan judul "${logbook.title}" untuk di-review.`,
+        logbook_id: Number(logbookId),
+      });
+      console.log(`✅ BERHASIL: Notifikasi submit logbook dikirim ke Mentor ID: ${activeMentor.mentor_id}`);
+    }
 
     return res.status(200).json({
       success: true,

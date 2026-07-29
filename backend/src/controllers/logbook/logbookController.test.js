@@ -17,10 +17,19 @@ const {
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
 
-// Mock dependencies
-jest.mock("@prisma/client", () => ({
-  PrismaClient: jest.fn(),
+jest.mock("../../models/mentorshipModel", () => ({
+  checkAcceptedMentorship: jest.fn(),
 }));
+
+jest.mock("../../models/notificationModel", () => ({
+  createNotificationData: jest.fn().mockResolvedValue({ id: 1, message: "Notif sukses" }),
+}));
+
+jest.mock("@prisma/client", () => {
+  return { PrismaClient: jest.fn() };
+});
+
+// 1. MOCKING: Memalsukan model dan module fs (agar tidak menghapus file beneran)
 jest.mock("../../models/logbookModel");
 jest.mock("fs");
 
