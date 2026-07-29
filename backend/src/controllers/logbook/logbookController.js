@@ -50,9 +50,23 @@ const createLogbook = async (req, res) => {
       });
     }
 
-    // 1. Rakit data tanpa menyertakan user_id (gunakan relasi connect) dan tanpa attachments null
+    // LOGIKA VALIDASI TANGGAL (ANTI TANGGAL MASA DEPAN)
+    const inputDate = new Date(activity_date);
+    const today = new Date();
+    
+    // Set 'today' ke penghujung hari (23:59:59) agar jika inputnya hari ini tetap lolos
+    today.setHours(23, 59, 59, 999);
+
+    if (inputDate > today) {
+      return res.status(400).json({
+        success: false,
+        message: "Tanggal kegiatan tidak boleh melebihi hari ini (tidak boleh tanggal masa depan).",
+      });
+    }
+
+    // 2. Rakit data tanpa menyertakan user_id (gunakan relasi connect) dan tanpa attachments null
     const logbookData = {
-      activity_date: new Date(activity_date),
+      activity_date: inputDate, // Langsung pakai inputDate yang sudah di-parsing di atas
       title,
       description,
       obstacles: obstacles || null,
@@ -63,7 +77,7 @@ const createLogbook = async (req, res) => {
       },
     };
 
-    // 2. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
+    // 3. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
     if (req.file) {
       logbookData.attachments = {
         create: [
@@ -75,7 +89,7 @@ const createLogbook = async (req, res) => {
       };
     }
 
-    // 3. Kirim ke model
+    // 4. Kirim ke model
     const logbook = await createLogbookEntry(logbookData);
 
     return res.status(201).json({

@@ -1,4 +1,4 @@
-const { getActiveMenteeIds, getLogbooksByMenteeIds, countLogbooksByMenteeIds, checkIsMyMentee, evaluateLogbook, getLogbookById } = require("../../models/mentorLogbookModel");
+const { getActiveMenteeIds, getLogbooksByMenteeIds, countLogbooksByMenteeIds, checkIsMyMentee, evaluateLogbook, getLogbookById, getLogbookDetailById } = require("../../models/mentorLogbookModel");
 const { createNotificationData } = require("../../models/notificationModel");
 
 
