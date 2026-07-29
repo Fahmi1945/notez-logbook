@@ -1,6 +1,5 @@
 const express = require("express");
 require("dotenv").config();
-const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
 const authRoutes = require("./src/routes/auth/authRoutes");
@@ -55,12 +54,12 @@ app.use("/api", mentorLogbookRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 // Routing upload
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // PERANGKAP 404: Menangkap semua request yang alamatnya salah
 app.use((req, res) => {
-  console.log(`❌ ALARM: Frontend mencoba mengakses rute yang salah!`);
+  console.log("❌ ALARM: Frontend mencoba mengakses rute yang salah!");
   console.log(`Metode: ${req.method}`);
   console.log(`URL yang diakses: ${req.originalUrl}`);
 

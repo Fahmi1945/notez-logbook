@@ -80,7 +80,7 @@ const getMyTeam = async (req, res) => {
       });
 
       const pending = await prisma.logbookEntry.count({ 
-        where: { user_id: item.user.id, status: 'draft' } 
+        where: { user_id: item.user.id, status: "draft" } 
       });
 
       return {

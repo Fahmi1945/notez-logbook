@@ -14,19 +14,26 @@ const getActiveMenteeIds = async (mentorId) => {
   return mentorships.map((m) => m.user_id);
 };
 
-// Fungsi untuk menarik data logbook beserta relasinya
+// [MODIFIKASI] - Dibuat "Lightweight" (Ringan) khusus untuk List Table/Card
 const getLogbooksByMenteeIds = async (studentIds, skip, limit) => {
   return await prisma.logbookEntry.findMany({
     where: {
       user_id: { in: studentIds },
       status: { not: "draft" },
     },
-    include: {
+    // Menggunakan select untuk HANYA memanggil kolom yang butuh ditampilkan di list
+    select: {
+      id: true,
+      user_id: true,
+      activity_date: true,
+      title: true,
+      status: true,
+      status_changed_at: true,
+      created_at: true,
       user: {
         select: { id: true, name: true, email: true },
       },
-      attachments: true,
-      feedbacks: true,
+      // description, obstacles, attachments, feedbacks TIDAK dipanggil di sini
     },
     orderBy: [
       { status_changed_at: "desc" },
@@ -47,9 +54,24 @@ const countLogbooksByMenteeIds = async (studentIds) => {
   });
 };
 
+// Dipakai untuk mengecek eksistensi data saat evaluasi (hanya ambil ID dan status)
 const getLogbookById = async (logbookId) => {
   return await prisma.logbookEntry.findUnique({
     where: { id: parseInt(logbookId, 10) },
+  });
+};
+
+// [BARU] - Dibuat "Heavyweight" (Lengkap) khusus untuk halaman Detail Logbook
+const getLogbookDetailById = async (logbookId) => {
+  return await prisma.logbookEntry.findUnique({
+    where: { id: parseInt(logbookId, 10) },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true },
+      },
+      attachments: true,
+      feedbacks: true,
+    },
   });
 };
 
@@ -89,5 +111,6 @@ module.exports = {
   countLogbooksByMenteeIds,
   evaluateLogbook,
   getLogbookById,
+  getLogbookDetailById, // <--- Export fungsi baru
   checkIsMyMentee,
 };

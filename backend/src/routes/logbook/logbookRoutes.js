@@ -9,6 +9,7 @@ const {
 } = require("../../controllers/logbook/logbookController.js");
 const verifyToken = require("../../middleware/verifyToken.js");
 const upload = require("../../middleware/uploadsFile.js");
+const {viewAttachment} = require("../../controllers/attachment/attachmentController.js");
 
 const router = express.Router();
 
@@ -18,10 +19,13 @@ router.use(verifyToken);
 router.get("/", getMyLogbook);
 
 //CREATE
-router.post("/", upload.single("attachment"), createLogbook);
+router.post("/", upload.single("attachments"), createLogbook);
 
 //UPDATE
-router.put("/:id", upload.single("attachment"), updateLogbook);
+router.put("/:id", upload.single("attachments"), updateLogbook);
+
+//SUBMIT
+router.patch("/submit/:id", verifyToken, submitLogbook);
 
 //SUBMIT
 router.patch("/:id/submit", verifyToken, submitLogbook);
@@ -31,5 +35,7 @@ router.delete("/:id", deleteLogbook);
 
 //GET DETAIL LOGBOOK
 router.get("/:id", getLogbook);
+
+router.get("/attachments/:id", viewAttachment);
 
 module.exports = router;

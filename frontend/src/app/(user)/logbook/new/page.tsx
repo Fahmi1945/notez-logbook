@@ -10,18 +10,39 @@ import Link from "next/link";
 
 export default function NewLogbookPage() {
   const router = useRouter();
+
+  const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (data: EntryFormInput, files: File[]) => {
-    setIsSubmitting(true);
+  /** Simpan sebagai draft tanpa submit ke mentor */
+  const handleSave = async (data: EntryFormInput, files: File[]) => {
+    setIsSaving(true);
     try {
       await entriesApi.create(data, files);
       router.push("/logbook");
       router.refresh();
     } catch (error: unknown) {
       const errorObj = error as { message?: string };
-      setIsSubmitting(false);
+      setIsSaving(false);
       throw new Error(errorObj.message || "Gagal menyimpan logbook. Silakan coba lagi.");
+    }
+  };
+
+  /** Buat entri lalu langsung submit ke mentor */
+  const handleSubmitEntry = async (data: EntryFormInput, files: File[]) => {
+    setIsSubmitting(true);
+    try {
+      const created = await entriesApi.create(data, files);
+      const entryId = created.data?.id;
+      if (entryId) {
+        await entriesApi.submit(entryId);
+      }
+      router.push("/logbook");
+      router.refresh();
+    } catch (error: unknown) {
+      const errorObj = error as { message?: string };
+      setIsSubmitting(false);
+      throw new Error(errorObj.message || "Gagal mengirim logbook. Silakan coba lagi.");
     }
   };
 
@@ -45,7 +66,12 @@ export default function NewLogbookPage() {
         </p>
       </div>
 
-      <EntryForm onSubmit={handleSubmit} isLoading={isSubmitting} />
+      <EntryForm
+        onSave={handleSave}
+        onSubmitEntry={handleSubmitEntry}
+        isSaving={isSaving}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

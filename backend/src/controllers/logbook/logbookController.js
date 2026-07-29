@@ -40,7 +40,6 @@ const getMyLogbook = async (req, res) => {
 
 const createLogbook = async (req, res) => {
   try {
-
     const { activity_date, title, description, obstacles } = req.body;
     const userId = req.user.id;
 
@@ -51,9 +50,22 @@ const createLogbook = async (req, res) => {
       });
     }
 
-    let attachmentFilename = undefined;
+    // 1. Rakit data tanpa menyertakan user_id (gunakan relasi connect) dan tanpa attachments null
+    const logbookData = {
+      activity_date: new Date(activity_date),
+      title,
+      description,
+      obstacles: obstacles || null,
+      user: {
+        connect: {
+          id: parseInt(userId),
+        },
+      },
+    };
+
+    // 2. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
     if (req.file) {
-      attachmentFilename = {
+      logbookData.attachments = {
         create: [
           {
             file_name: req.file.originalname,
@@ -63,14 +75,8 @@ const createLogbook = async (req, res) => {
       };
     }
 
-    const logbook = await createLogbookEntry({
-      user_id: parseInt(userId),
-      activity_date: new Date(activity_date),
-      title,
-      description,
-      obstacles: obstacles || null,
-      attachments: attachmentFilename ? attachmentFilename : null,
-    });
+    // 3. Kirim ke model
+    const logbook = await createLogbookEntry(logbookData);
 
     return res.status(201).json({
       success: true,
@@ -96,7 +102,7 @@ const getLogbook = async (req, res) => {
     if (isNaN(logbookId)) {
       return res.status(400).json({
         success: false,
-        message: `ID Logbook tidak valid.`,
+        message: "ID Logbook tidak valid.",
       });
     }
 
@@ -151,7 +157,7 @@ const updateLogbook = async (req, res) => {
           const fileNameOnly = path.basename(attachment.file_path);
 
           // PERBAIKAN 2: Gabungkan path utama proyek dengan folder uploads dan nama file
-          const file_path = path.join(process.cwd(), 'uploads', fileNameOnly);
+          const file_path = path.join(process.cwd(), "uploads", fileNameOnly);
 
           if (fs.existsSync(file_path)) {
             fs.unlinkSync(file_path);
@@ -167,7 +173,7 @@ const updateLogbook = async (req, res) => {
             file_path: `/uploads/${req.file.filename}`,
           }
         ]
-      }
+      };
     }
 
     const updated = await updateLogbookEntry(logbookId, updatedData);
@@ -207,7 +213,7 @@ const deleteLogbook = async (req, res) => {
     if (existingLogbook.attachments && existingLogbook.attachments.length > 0) {
       existingLogbook.attachments.forEach((attachment) => {
         const fileNameOnly = path.basename(attachment.file_path);
-        const file_path = path.join(process.cwd(), 'uploads', fileNameOnly);
+        const file_path = path.join(process.cwd(), "uploads", fileNameOnly);
         if (fs.existsSync(file_path)) {
           fs.unlinkSync(file_path);
         }

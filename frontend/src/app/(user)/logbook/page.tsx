@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useEntries } from "@/hooks/use-entries";
 import EntryFilter from "@/components/logbook/entry-filter";
 import EntryList from "@/components/logbook/entry-list";
-import { Spinner } from "@/components/ui/spinner";
+import LogbookListSkeleton from "@/components/logbook/logbook-list-skeleton";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 export default function LogbookPage() {
@@ -92,10 +92,7 @@ export default function LogbookPage() {
 
       {/* Konten */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center p-16 bg-white rounded-2xl border border-gray-200 shadow-sm animate-fade-in-down">
-          <Spinner />
-          <p className="text-sm text-gray-400 mt-4">Memuat data logbook...</p>
-        </div>
+        <LogbookListSkeleton rows={itemsPerPage} />
       ) : error ? (
         <div className="text-center p-10 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200 animate-fade-in-down">
           <p className="font-semibold mb-1">Terjadi Kesalahan</p>
@@ -103,7 +100,7 @@ export default function LogbookPage() {
         </div>
       ) : (
         <>
-          <EntryList entries={paginatedEntries} onDelete={deleteEntry} />
+          <EntryList entries={paginatedEntries} onDelete={deleteEntry} onRefresh={fetchEntries} />
 
           {/* Pagination */}
           {filteredEntries.length > itemsPerPage && (

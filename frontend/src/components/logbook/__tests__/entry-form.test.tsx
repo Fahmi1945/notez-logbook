@@ -13,13 +13,15 @@ jest.mock("next/navigation", () => ({
 
 // Mock komponen UI yang tidak perlu diuji di sini
 jest.mock("@/components/ui/button", () => ({
-  Button: ({ children, onClick, type, disabled }: {
+  Button: ({ children, onClick, type, disabled, isLoading }: {
     children: React.ReactNode;
     onClick?: () => void;
     type?: "button" | "submit" | "reset";
     disabled?: boolean;
+    isLoading?: boolean;
   }) => (
-    <button type={type} onClick={onClick} disabled={disabled}>
+    <button type={type} onClick={onClick} disabled={disabled || isLoading}>
+      {isLoading && <span data-testid="spinner">Loading...</span>}
       {children}
     </button>
   ),
@@ -53,7 +55,7 @@ describe("EntryForm", () => {
 
   // --- RENDER AWAL ---
   it("harus merender semua field form", () => {
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
     expect(screen.getByLabelText(/Tanggal Kegiatan/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Judul Kegiatan/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Deskripsi Pekerjaan/i)).toBeInTheDocument();
@@ -67,19 +69,19 @@ describe("EntryForm", () => {
       description: "Melakukan code review untuk fitur mentorship.",
       obstacles: "Tidak ada hambatan",
     };
-    render(<EntryForm initialData={initialData} onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm initialData={initialData} onSave={mockOnSubmit} isSaving={false} />);
     expect(screen.getByDisplayValue("Review Code Sprint 3")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Melakukan code review untuk fitur mentorship.")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Tidak ada hambatan")).toBeInTheDocument();
   });
 
-  it("harus menampilkan tombol 'Simpan Entri'", () => {
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
-    expect(screen.getByText("Simpan Entri")).toBeInTheDocument();
+  it("harus menampilkan tombol 'Simpan Draft'", () => {
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    expect(screen.getByText("Simpan Draft")).toBeInTheDocument();
   });
 
   it("harus menampilkan Spinner dan disable tombol saat isLoading=true", () => {
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={true} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={true} />);
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
     const buttons = screen.getAllByRole("button");
     buttons.forEach((btn) => expect(btn).toBeDisabled());
@@ -87,9 +89,9 @@ describe("EntryForm", () => {
 
   // --- VALIDASI FORM ---
   it("harus menampilkan error jika title kosong saat submit", async () => {
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
     // Langsung klik tombol submit tanpa mengisi title
-    fireEvent.click(screen.getByText("Simpan Entri"));
+    fireEvent.click(screen.getByText("Simpan Draft"));
     await waitFor(() => {
       expect(screen.getByText(/Judul kegiatan wajib diisi|Judul minimal 5 karakter/i)).toBeInTheDocument();
     });
@@ -97,20 +99,20 @@ describe("EntryForm", () => {
   });
 
   it("harus menampilkan error jika title kurang dari 5 karakter", async () => {
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
     // Isi description valid, biarkan title pendek
     fillForm({ title: "API", description: "Deskripsi yang cukup panjang untuk lolos validasi" });
-    fireEvent.click(screen.getByText("Simpan Entri"));
+    fireEvent.click(screen.getByText("Simpan Draft"));
     await waitFor(() => {
       expect(screen.getByText("Judul minimal 5 karakter")).toBeInTheDocument();
     });
   });
 
   it("harus menampilkan error jika description kosong saat submit", async () => {
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
     // Isi title valid, kosongkan description
     fillForm({ title: "Judul Valid", description: "" });
-    fireEvent.click(screen.getByText("Simpan Entri"));
+    fireEvent.click(screen.getByText("Simpan Draft"));
     await waitFor(() => {
       expect(
         screen.getByText(/Deskripsi pekerjaan wajib diisi|Deskripsi minimal 10 karakter/i)
@@ -122,7 +124,7 @@ describe("EntryForm", () => {
   // --- SUBMIT BERHASIL ---
   it("harus memanggil onSubmit dengan data yang benar jika form valid", async () => {
     mockOnSubmit.mockResolvedValue(undefined);
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
     fillForm();
     fireEvent.submit(document.querySelector("form")!);
     await waitFor(() => {
@@ -140,7 +142,7 @@ describe("EntryForm", () => {
   // --- ERROR DARI SERVER ---
   it("harus menampilkan errorMsg jika onSubmit throw error", async () => {
     mockOnSubmit.mockRejectedValue(new Error("Gagal menyimpan ke server"));
-    render(<EntryForm onSubmit={mockOnSubmit} isLoading={false} />);
+    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
     fillForm();
     fireEvent.submit(document.querySelector("form")!);
     await waitFor(() => {
