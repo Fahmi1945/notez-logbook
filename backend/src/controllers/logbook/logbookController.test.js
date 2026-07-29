@@ -16,7 +16,11 @@ const {
   getLogbookByIdAndUser,
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
-const { createNotificationData } = require("../../models/notificationModel");
+const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
+
+jest.mock("../../models/mentorshipModel", () => ({
+  checkAcceptedMentorship: jest.fn(),
+}));
 
 jest.mock("../../models/notificationModel", () => ({
   createNotificationData: jest.fn().mockResolvedValue({ id: 1, message: "Notif sukses" }),

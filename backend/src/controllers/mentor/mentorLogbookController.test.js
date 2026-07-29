@@ -7,7 +7,6 @@ const {
   evaluateLogbook,
   getLogbookById,
 } = require("../../models/mentorLogbookModel");
-const { createNotificationData } = require("../../models/notificationModel");
 
 jest.mock("../../models/notificationModel", () => ({
   createNotificationData: jest.fn().mockResolvedValue({ id: 1, message: "Notif sukses" }),
