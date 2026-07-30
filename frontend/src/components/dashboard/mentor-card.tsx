@@ -46,7 +46,7 @@ export function MentorCard({ activeMentor }: MentorCardProps) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-slate-900 truncate font-body">
-            {activeMentor.mentor_name || "Mentor"}
+            {activeMentor.mentorName || "Mentor"}
           </p>
           <span className="mt-1 inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 border border-emerald-200">
             Aktif
