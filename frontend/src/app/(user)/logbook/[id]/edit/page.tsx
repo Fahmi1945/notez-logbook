@@ -49,7 +49,7 @@ export default function EditLogbookPage() {
     if (id) fetchDetail();
   }, [id]);
 
-  const handleSave = async (data: EntryFormInput, files: File[]) => {
+  const handleSave = async (data: EntryFormInput & { remove_attachment?: boolean }, files: File[]) => {
     setIsSaving(true);
     try {
       await entriesApi.update(id, data, files);

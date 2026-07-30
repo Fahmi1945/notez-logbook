@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { entrySchema, EntryFormInput } from "@/lib/validators/entry.schema";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ interface EntryFormProps {
   existingAttachmentUrl?: string;
   existingFileName?: string;
   /** Dipanggil saat simpan sebagai draft atau simpan perubahan */
-  onSave: (data: EntryFormInput, files: File[]) => Promise<void>;
+  onSave: (data: EntryFormInput & { remove_attachment?: boolean }, files: File[]) => Promise<void>;
   /** Dipanggil saat submit ke mentor (hanya mode create) */
   onSubmitEntry?: (data: EntryFormInput, files: File[]) => Promise<void>;
   isSaving?: boolean;
@@ -65,6 +65,22 @@ export default function EntryForm({
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const [localExistingAttachmentUrl, setLocalExistingAttachmentUrl] = useState(existingAttachmentUrl);
+  const [localExistingFileName, setLocalExistingFileName] = useState(existingFileName);
+  const [isAttachmentRemoved, setIsAttachmentRemoved] = useState(false);
+
+  // Sync dengan props jika berubah
+  useEffect(() => {
+    setLocalExistingAttachmentUrl(existingAttachmentUrl);
+    setLocalExistingFileName(existingFileName);
+  }, [existingAttachmentUrl, existingFileName]);
+
+  const handleRemoveExistingAttachment = () => {
+    setLocalExistingAttachmentUrl(undefined);
+    setLocalExistingFileName(undefined);
+    setIsAttachmentRemoved(true);
+  };
 
   // ─── Handlers ──────────────────────────────────────────────────────────
 
@@ -104,7 +120,8 @@ export default function EntryForm({
       if (mode === "submit" && onSubmitEntry) {
         await onSubmitEntry(validData, attachedFiles);
       } else {
-        await onSave(validData, attachedFiles);
+        const dataWithFlag = { ...validData, remove_attachment: isAttachmentRemoved };
+        await onSave(dataWithFlag, attachedFiles);
       }
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
@@ -273,8 +290,9 @@ export default function EntryForm({
           <AttachmentUpload
             files={attachedFiles}
             onChange={setAttachedFiles}
-            existingAttachmentUrl={existingAttachmentUrl}
-            existingFileName={existingFileName}
+            existingAttachmentUrl={localExistingAttachmentUrl}
+            existingFileName={localExistingFileName}
+            onRemoveExisting={handleRemoveExistingAttachment}
           />
         </CardContent>
       </Card>
