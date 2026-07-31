@@ -98,7 +98,7 @@ const loginUser = async (req, res) => {
       message: "Login Berhasil",
       token: token,
       expires_at: expired_at,
-      user: {
+      user: { 
         id: user.id,
         name: user.name,
         email: user.email,

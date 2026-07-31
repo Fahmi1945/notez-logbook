@@ -8,6 +8,7 @@ const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
 const mentorLogbookRoutes = require("./src/routes/mentor/mentorLogbookRoutes");
 const notificationRoutes = require("./src/routes/notification/notificationRoutes");
+const userRoutes = require("./src/routes/user/userRoutes");
 
 const app = express();
 // app.set("trust proxy", true);
@@ -52,6 +53,9 @@ app.use("/api", mentorLogbookRoutes);
 
 // Routing notifikasi
 app.use("/api/notifications", notificationRoutes);
+
+// Routing user
+app.use("/api", userRoutes);
 
 // Routing upload
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
