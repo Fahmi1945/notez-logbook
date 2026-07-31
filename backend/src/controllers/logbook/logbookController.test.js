@@ -1,6 +1,6 @@
 // 1. MOCK DEPENDENCIES
 const mockUpload = jest.fn();
-const { Buffer } = require("buffer"); // <--- TAMBAHKAN BARIS INI
+const { Buffer } = require("buffer");
 
 jest.mock("../../config/supabase", () => ({
   storage: {
@@ -12,6 +12,8 @@ jest.mock("../../config/supabase", () => ({
 
 jest.mock("../../models/logbookModel");
 jest.mock("../attachment/attachmentController");
+jest.mock("../../models/notificationModel");
+jest.mock("../../models/mentorshipModel");
 
 const {
   getMyLogbook,
@@ -32,6 +34,10 @@ const {
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
 
+// TAMBAHAN IMPORT UNTUK MOCK SUBMIT LOGBOOK
+const { createNotificationData } = require("../../models/notificationModel");
+const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
+
 const { deleteSupabaseAttachments } = require("../attachment/attachmentController");
 const supabase = require("../../config/supabase");
 
@@ -47,14 +53,13 @@ describe("Logbook Controller Unit Tests", () => {
   });
 
   beforeEach(() => {
-    // PERUBAHAN KRUSIAL: Gunakan clearAllMocks agar struktur mock tidak hancur menjadi undefined
     jest.clearAllMocks();
 
-    // Default return value agar destructuring { error } di controller tidak crash
     mockUpload.mockResolvedValue({ data: {}, error: null });
 
     req = {
-      user: { id: 1 },
+      // Tambahkan nama untuk mencegah undefined saat submitLogbook
+      user: { id: 1, name: "Budi Mahasiswa" },
       body: {},
       params: {},
       file: undefined,
@@ -128,7 +133,7 @@ describe("Logbook Controller Unit Tests", () => {
 
     it("harus sukses 201 membuat logbook TANPA file attachment", async () => {
       req.body = {
-        activity_date: "2026-08-01",
+        activity_date: "2026-01-01", // PERUBAHAN: Gunakan tanggal di masa lalu agar lolos validasi
         title: "Setup Project",
         description: "Melakukan setup repository",
         obstacles: "Koneksi lambat",
@@ -156,7 +161,7 @@ describe("Logbook Controller Unit Tests", () => {
 
     it("harus sukses 201 membuat logbook DENGAN file attachment ke Supabase", async () => {
       req.body = {
-        activity_date: "2026-08-01",
+        activity_date: "2026-01-01", // PERUBAHAN: Gunakan tanggal di masa lalu
         title: "Setup Project",
         description: "Melakukan setup repository",
       };
@@ -166,7 +171,6 @@ describe("Logbook Controller Unit Tests", () => {
         mimetype: "application/pdf",
       };
 
-      // Mock return value sukses dari Supabase
       mockUpload.mockResolvedValue({ data: { path: "some-path" }, error: null });
       createLogbookEntry.mockResolvedValue({ id: 101, title: "Setup Project" });
 
@@ -190,7 +194,7 @@ describe("Logbook Controller Unit Tests", () => {
 
     it("harus error 500 jika upload file ke Supabase gagal", async () => {
       req.body = {
-        activity_date: "2026-08-01",
+        activity_date: "2026-01-01", // PERUBAHAN: Gunakan tanggal di masa lalu
         title: "Setup Project",
         description: "Melakukan setup",
       };
@@ -200,7 +204,6 @@ describe("Logbook Controller Unit Tests", () => {
         mimetype: "image/jpeg",
       };
 
-      // Mock return object saat Supabase upload mengalami error
       mockUpload.mockResolvedValue({
         data: null,
         error: { message: "Storage bucket fail" },
@@ -320,7 +323,6 @@ describe("Logbook Controller Unit Tests", () => {
       getLogbookDetail.mockResolvedValue(mockExisting);
       deleteSupabaseAttachments.mockResolvedValue(true);
 
-      // Mock khusus test ini (meski sudah ada defaultnya di beforeEach)
       mockUpload.mockResolvedValue({ data: {}, error: null });
       updateLogbookEntry.mockResolvedValue({ id: 5, title: "Judul Baru" });
 
@@ -449,9 +451,15 @@ describe("Logbook Controller Unit Tests", () => {
         status: "submitted",
       });
 
+      // PERUBAHAN KRUSIAL: Mencegah timeout dengan melakukan Mock pada fungsi Notifikasi & Mentorship
+      checkAcceptedMentorship.mockResolvedValue({ mentor_id: 99 });
+      createNotificationData.mockResolvedValue(true);
+
       await submitLogbook(req, res);
 
       expect(updateLogbookStatusToSubmitted).toHaveBeenCalledWith(12);
+      expect(checkAcceptedMentorship).toHaveBeenCalledWith(1); // User ID = 1
+      expect(createNotificationData).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,

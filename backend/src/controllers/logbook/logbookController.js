@@ -10,9 +10,6 @@ const {
 const { createNotificationData } = require("../../models/notificationModel");
 const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
 
-const path = require("path");
-const fs = require("fs");
-// const { error } = require("console");
 
 const { deleteSupabaseAttachments } = require("../attachment/attachmentController");
 
@@ -76,21 +73,17 @@ const createLogbook = async (req, res) => {
         });
       }
 
-      // PERUBAHAN:
-      // getPublicUrl dihapus. Kita hanya menyimpan fileName
-      // yang akan digunakan sebagai identifier saat generate Signed URL nanti.
       attachmentsFile = {
         file_name: req.file.originalname,
         file_path: fileName,
       };
     }
 
-    // 1. Rakit data tanpa menyertakan user_id (gunakan relasi connect)
     // LOGIKA VALIDASI TANGGAL (ANTI TANGGAL MASA DEPAN)
     const inputDate = new Date(activity_date);
     const today = new Date();
-    
-    // Set 'today' ke penghujung hari (23:59:59) agar jika inputnya hari ini tetap lolos
+
+    // Set 'today' ke penghujung hari (23:59:59)
     today.setHours(23, 59, 59, 999);
 
     if (inputDate > today) {
@@ -100,9 +93,9 @@ const createLogbook = async (req, res) => {
       });
     }
 
-    // 2. Rakit data tanpa menyertakan user_id (gunakan relasi connect) dan tanpa attachments null
+    // Rakit data tanpa menyertakan user_id (gunakan relasi connect)
     const logbookData = {
-      activity_date: inputDate, // Langsung pakai inputDate yang sudah di-parsing di atas
+      activity_date: inputDate,
       title,
       description,
       obstacles: obstacles || null,
@@ -113,16 +106,15 @@ const createLogbook = async (req, res) => {
       },
     };
 
-    // 2. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
+    // Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
     if (attachmentsFile) {
-    // 3. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
-    if (req.file) {
       logbookData.attachments = {
         create: [attachmentsFile],
       };
     }
 
-    // 4. Kirim ke model
+    // 4. Kirim ke model (DIPINDAHKAN KELUAR DARI BLOK IF)
+    // Agar logbook tetap terbuat meskipun tidak ada file attachment
     const logbook = await createLogbookEntry(logbookData);
 
     return res.status(201).json({
@@ -131,7 +123,7 @@ const createLogbook = async (req, res) => {
       data: logbook,
     });
 
-  } catch (error) {
+  } catch (error) { // 
     console.error(error);
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
