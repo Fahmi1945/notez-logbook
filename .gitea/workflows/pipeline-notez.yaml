@@ -43,31 +43,50 @@ jobs:
           npm run build
 
   Cek-Backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Ambil Kodingan Terbaru
-        uses: actions/checkout@v3
+      runs-on: ubuntu-latest
+      steps:
+        - name: Ambil Kodingan Terbaru
+          uses: actions/checkout@v3
 
-      - name: Install Backend Dependency
-        run: |
-          cd backend
-          npm install
+        # PERBAIKAN 1: Tambahkan Setup Node.js (Sebelumnya tidak ada di job backend)
+        - name: Install Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: "22.23.1"
+            cache: 'npm'
+            cache-dependency-path: 'backend/package-lock.json'
 
-      - name: Generate Prisma Client
-        run: |
-          cd backend
-          export DATABASE_URL="mysql://palsu:palsu@localhost:3306/db_palsu" 
-          npx prisma generate
+        - name: Install Backend Dependency
+          run: |
+            cd backend
+            npm ci
 
-      - name: Linter Backend
-        run: |
-          cd backend
-          npm run lint
+        - name: Generate Prisma Client
+          env:
+            # Gunakan URL palsu agar Prisma Client bisa di-generate tanpa butuh DB asli
+            DATABASE_URL: "postgresql://palsu:palsu@localhost:5432/db_palsu"
+          run: |
+            cd backend
+            npx prisma generate
 
-      - name: Unit Test Backend
-        run: |
-          cd backend
-          npm test
+        - name: Linter Backend
+          run: |
+            cd backend
+            npm run lint
+
+        - name: Unit Test Backend
+          env:
+            # PERBAIKAN 2: Setup Dummy Environment Variables & Timezone
+            TZ: UTC
+            CI: true
+            SUPABASE_URL: "https://dummy-url.supabase.co"
+            SUPABASE_SERVICE_ROLE_KEY: "dummy-key-12345"
+            DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/db_dummy"
+            JWT_SECRET: "dummy-jwt-secret-123"
+          run: |
+            cd backend
+            # PERBAIKAN 3: Menjalankan test secara runInBand khusus di CI
+            npm test -- --ci --runInBand
 
   # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:
