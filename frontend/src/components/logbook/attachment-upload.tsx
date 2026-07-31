@@ -20,6 +20,8 @@ interface AttachmentUploadProps {
    */
   existingAttachmentUrl?: string;
   existingFileName?: string;
+  /** Dipanggil ketika user menghapus lampiran existing */
+  onRemoveExisting?: () => void;
 }
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
@@ -43,6 +45,7 @@ export default function AttachmentUpload({
   onChange,
   existingAttachmentUrl,
   existingFileName,
+  onRemoveExisting,
 }: AttachmentUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -217,17 +220,29 @@ export default function AttachmentUpload({
           )}
         </div>
 
-        {/* Ganti file */}
+        {/* Ganti / Hapus file */}
         <div className="flex items-center justify-between px-1">
           <p className="text-xs text-gray-400">Lampiran sudah tersimpan di server.</p>
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-dark font-medium transition-colors"
-          >
-            <ArrowsClockwise size={13} weight="bold" />
-            Ganti lampiran
-          </button>
+          <div className="flex gap-3">
+            {onRemoveExisting && (
+              <button
+                type="button"
+                onClick={onRemoveExisting}
+                className="flex items-center gap-1.5 text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
+              >
+                <X size={13} weight="bold" />
+                Hapus
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-dark font-medium transition-colors"
+            >
+              <ArrowsClockwise size={13} weight="bold" />
+              Ganti lampiran
+            </button>
+          </div>
           <input
             ref={inputRef}
             type="file"

@@ -16,14 +16,13 @@ type RequestListItem = MentorshipHistory & {
 
 const makeItem = (overrides: Partial<RequestListItem>): RequestListItem => ({
   id: 1,
-  user_id: 10,
-  mentor_id: 20,
+  userId: 10,
+  mentorId: 20,
   status: "pending",
   information: null,
-  created_at: "2024-01-15T10:00:00Z",
+  createdAt: "2024-01-15T10:00:00Z",
   requestId: 1,
   mentorName: "Dr. Budi Santoso",
-  createdAt: "2024-01-15T10:00:00Z",
   ...overrides,
 });
 

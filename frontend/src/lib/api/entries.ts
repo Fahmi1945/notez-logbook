@@ -36,12 +36,13 @@ export const entriesApi = {
   },
 
   // PUT /logbook/:id (multipart/form-data for attachments)
-  update: async (id: number | string, data: Partial<EntryFormInput>, files?: File[]): Promise<ApiResponse<LogbookEntry>> => {
+  update: async (id: number | string, data: Partial<EntryFormInput> & { remove_attachment?: boolean }, files?: File[]): Promise<ApiResponse<LogbookEntry>> => {
     const formData = new FormData();
     if (data.activity_date) formData.append("activity_date", data.activity_date);
     if (data.title) formData.append("title", data.title);
     if (data.description) formData.append("description", data.description);
     if (data.obstacles !== undefined) formData.append("obstacles", data.obstacles ?? "");
+    if (data.remove_attachment) formData.append("remove_attachment", "true");
     if (files && files.length > 0) {
       files.forEach((file) => formData.append("attachments", file));
     }

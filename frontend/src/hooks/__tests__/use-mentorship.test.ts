@@ -29,12 +29,12 @@ const mockMentors = [
 const mockHistory: MentorshipHistory[] = [
   {
     id: 1,
-    user_id: 10,
-    mentor_id: 1,
-    mentor_name: "Dr. Budi",
+    userId: 10,
+    mentorId: 1,
+    mentorName: "Dr. Budi",
     status: "pending",
     information: null,
-    created_at: "2024-01-01T00:00:00Z",
+    createdAt: "2024-01-01T00:00:00Z",
   },
 ];
 

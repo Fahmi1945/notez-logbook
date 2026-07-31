@@ -42,13 +42,13 @@ export default function EntryFilter({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-9 py-2.5 border border-gray-200 rounded-xl bg-brand-white text-sm font-body focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all placeholder:text-gray-300 text-gray-700 shadow-sm"
+            className="block w-full pl-10 pr-9 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-body focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/40 transition-all placeholder:text-gray-300 text-gray-700 shadow-sm"
             placeholder="Cari judul kegiatan..."
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-300 hover:text-gray-500 transition-colors"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-300 hover:text-gray-500 transition-all duration-200 animate-in fade-in zoom-in-95"
             >
               <X size={14} weight="bold" />
             </button>
@@ -63,7 +63,7 @@ export default function EntryFilter({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className={`block w-full sm:w-auto pl-10 pr-8 py-2.5 border rounded-xl bg-brand-white text-sm font-body focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 appearance-none cursor-pointer transition-all shadow-sm text-gray-700 ${
+            className={`block w-full sm:w-auto pl-10 pr-8 py-2.5 border rounded-xl bg-white text-sm font-body focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/40 appearance-none cursor-pointer transition-all shadow-sm text-gray-700 ${
               statusFilter !== "all" ? "border-brand-primary/50 bg-brand-primary/3" : "border-gray-200"
             }`}
           >
@@ -84,7 +84,7 @@ export default function EntryFilter({
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className={`block w-full sm:w-auto pl-10 pr-3 py-2.5 border rounded-xl bg-brand-white text-sm font-body text-gray-600 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all cursor-text shadow-sm ${
+            className={`block w-full sm:w-auto pl-10 pr-3 py-2.5 border rounded-xl bg-white text-sm font-body text-gray-600 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/40 transition-all cursor-text shadow-sm ${
               dateFilter ? "border-brand-primary/50 bg-brand-primary/3" : "border-gray-200"
             }`}
           />
