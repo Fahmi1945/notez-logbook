@@ -17,7 +17,6 @@ import {
   CheckCircle,
   ArrowSquareOut,
   Pencil,
-  ChatText,
 } from "@phosphor-icons/react";
 
 function AttachmentIcon({ fileName }: { fileName: string }) {
