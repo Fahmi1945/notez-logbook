@@ -67,7 +67,7 @@ describe("Middleware: requiredAuth (menggunakan express-jwt)", () => {
     });
 
     expect(mockNext).toHaveBeenCalledWith(); // Sekarang pasti cocok 100%!
-    expect(mockReq.auth.id).toBe(99);
-    expect(mockReq.auth.role).toBe("admin");
+    expect(mockReq.user.id).toBe(99);
+    expect(mockReq.user.role).toBe("admin");
   });
 });

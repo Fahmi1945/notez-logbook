@@ -7,6 +7,12 @@ const {
   getLogbookByIdAndUser,
   updateLogbookStatusToSubmitted,
 } = require("../../models/logbookModel");
+const { createNotificationData } = require("../../models/notificationModel");
+const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
+
+const path = require("path");
+const fs = require("fs");
+// const { error } = require("console");
 
 const { deleteSupabaseAttachments } = require("../attachment/attachmentController");
 
@@ -80,8 +86,23 @@ const createLogbook = async (req, res) => {
     }
 
     // 1. Rakit data tanpa menyertakan user_id (gunakan relasi connect)
+    // LOGIKA VALIDASI TANGGAL (ANTI TANGGAL MASA DEPAN)
+    const inputDate = new Date(activity_date);
+    const today = new Date();
+    
+    // Set 'today' ke penghujung hari (23:59:59) agar jika inputnya hari ini tetap lolos
+    today.setHours(23, 59, 59, 999);
+
+    if (inputDate > today) {
+      return res.status(400).json({
+        success: false,
+        message: "Tanggal kegiatan tidak boleh melebihi hari ini (tidak boleh tanggal masa depan).",
+      });
+    }
+
+    // 2. Rakit data tanpa menyertakan user_id (gunakan relasi connect) dan tanpa attachments null
     const logbookData = {
-      activity_date: new Date(activity_date),
+      activity_date: inputDate, // Langsung pakai inputDate yang sudah di-parsing di atas
       title,
       description,
       obstacles: obstacles || null,
@@ -94,12 +115,14 @@ const createLogbook = async (req, res) => {
 
     // 2. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
     if (attachmentsFile) {
+    // 3. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
+    if (req.file) {
       logbookData.attachments = {
         create: [attachmentsFile],
       };
     }
 
-    // 3. Kirim ke model
+    // 4. Kirim ke model
     const logbook = await createLogbookEntry(logbookData);
 
     return res.status(201).json({
@@ -287,6 +310,7 @@ const submitLogbook = async (req, res) => {
   try {
     const logbookId = parseInt(req.params.id);
     const userId = req.user.id;
+    const userName = req.user.name || "Seseorang"; // Ambil nama mahasiswa dari token
 
     const logbook = await getLogbookByIdAndUser(logbookId, userId);
     if (!logbook) {
@@ -311,6 +335,17 @@ const submitLogbook = async (req, res) => {
     }
 
     const updatedLogbook = await updateLogbookStatusToSubmitted(logbookId);
+
+    // KIRIM NOTIFIKASI KE MENTOR AKTIF
+    const activeMentor = await checkAcceptedMentorship(userId);
+    if (activeMentor) {
+      await createNotificationData({
+        user_id: activeMentor.mentor_id, // Kirim ke ID Mentor
+        message: `Mahasiswa bimbingan Anda (${userName}) telah mengirimkan logbook baru dengan judul "${logbook.title}" untuk di-review.`,
+        logbook_id: Number(logbookId),
+      });
+      console.log(`✅ BERHASIL: Notifikasi submit logbook dikirim ke Mentor ID: ${activeMentor.mentor_id}`);
+    }
 
     return res.status(200).json({
       success: true,

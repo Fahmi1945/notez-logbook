@@ -1,26 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 interface TokenPayload {
   role?: 'user' | 'mentor';
   [key: string]: unknown;
 }
 
-async function verifyToken(token: string): Promise<TokenPayload | null> {
-  if (!JWT_SECRET) {
-    console.error('[proxy] JWT_SECRET belum diset di environment variables.');
-    return null;
-  }
-
+function decodeJwtPayload(token: string): TokenPayload | null {
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
     return payload as TokenPayload;
   } catch {
-    // Token invalid, expired, atau signature tidak cocok
     return null;
   }
 }
@@ -37,25 +29,25 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/logbook') ||
     pathname.startsWith('/profile');
 
-  const payload = token ? await verifyToken(token) : null;
+  const payload = token ? decodeJwtPayload(token) : null;
   const isValidSession = !!payload;
+  const role = payload?.role;
 
   // Sudah login (token valid) tapi buka /login atau /register -> lempar ke dashboard
   if (isAuthPage && isValidSession) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Belum login, atau token invalid/kedaluwarsa, buka rute terproteksi -> lempar ke /login
+  // Belum login buka rute terproteksi -> lempar ke /login
   if (isProtectedRoute && !isValidSession) {
     const response = NextResponse.redirect(new URL('/login', request.url));
-    // Bersihkan cookie token yang sudah tidak valid biar tidak nyangkut di browser
+    // Bersihkan cookie yang sudah tidak valid biar tidak nyangkut di browser
     response.cookies.delete('token');
     return response;
   }
 
   // Role tidak cocok dengan prefix rute -> lempar ke dashboard
-  if (isValidSession && payload) {
-    const role = payload.role;
+  if (isValidSession && role) {
     const isMentorRoute = pathname.startsWith('/mentor');
     const isUserOnlyRoute = pathname.startsWith('/logbook');
 

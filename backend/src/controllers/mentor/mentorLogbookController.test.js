@@ -8,6 +8,10 @@ const {
   getLogbookById,
 } = require("../../models/mentorLogbookModel");
 
+jest.mock("../../models/notificationModel", () => ({
+  createNotificationData: jest.fn().mockResolvedValue({ id: 1, message: "Notif sukses" }),
+}));
+
 // 1. MOCKING UTAMA: Cegah Prisma crash dan palsukan model
 jest.mock("@prisma/client", () => {
   return { PrismaClient: jest.fn() };

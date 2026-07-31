@@ -32,17 +32,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const contentType = response.headers.get("content-type") || "application/octet-stream";
-    const arrayBuffer = await response.arrayBuffer();
+    const data = await response.json();
 
-    return new NextResponse(arrayBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        // Optional: Cache file agar tidak fetch berulang kali
-        "Cache-Control": "public, max-age=3600",
-      },
-    });
+    if (data.success && data.url) {
+      return NextResponse.redirect(data.url);
+    } else {
+      return NextResponse.json(
+        { error: "Invalid response from backend" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Proxy attachment error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -6,8 +6,8 @@ const {
   checkExistingRequest,    
   getMyRequestedMentors, 
   getMentorRequestsHistory,
-  checkAcceptedMentorship  
-} = require("../../models/mentorshipModel");
+  checkAcceptedMentorship } = require("../../models/mentorshipModel");
+const { createNotificationData } = require("../../models/notificationModel");
 
 
 // Fungsi request ke mentorship (Dilengkapi Anti-Spam Sempurna)
@@ -49,6 +49,12 @@ const requestMentorship = async (req, res) => {
     // Jika belum pernah ada riwayat sama sekali, simpan data  
     const newRequest = await createMentorship(parseInt(userId), parseInt(mentorId));
 
+    await createNotificationData({
+      user_id: parseInt(mentorId),
+      message: "Ada mahasiswa baru yang mengajukan bimbingan kepada Anda.",
+      mentorships_id: Number(newRequest.id), // Menghubungkan mentorships_id sesuai ERD
+    });
+    
     return res.status(200).json({
       status: "success",
       message: "Request mentorship berhasil dikirim.",

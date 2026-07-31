@@ -9,12 +9,12 @@ export interface Mentor {
 // Mewakili data di Riwayat Pengajuan
 export interface MentorshipHistory {
   id: number;
-  user_id: number;
-  mentor_id: number;
-  mentor_name?: string;
+  userId: number;
+  mentorId: number;
+  mentorName?: string;
   status: "pending" | "accepted" | "rejected";
   information?: string | null;
-  created_at: string;
+  createdAt: string;
 }
 
 // types/mentor.ts
