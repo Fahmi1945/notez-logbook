@@ -21,6 +21,18 @@ export const MESSAGES = {
     DELETE_FAILED: "Gagal menghapus entri logbook.",
     ACTION_FAILED: "Terjadi kesalahan saat memproses logbook.",
   },
+  REVIEW: {
+    QUEUE_FETCH_FAILED: "Gagal memuat antrean review.",
+    DETAIL_FETCH_FAILED: "Gagal memuat detail entri.",
+    APPROVE_SUCCESS: "Entri berhasil disetujui.",
+    REJECT_SUCCESS: "Entri berhasil ditolak.",
+    APPROVE_FAILED: "Gagal menyetujui entri.",
+    REJECT_FAILED: "Gagal menolak entri.",
+    DEFAULT_APPROVE_NOTE: "Disetujui tanpa catatan",
+    NOTE_REQUIRED_ON_REJECT: "Catatan wajib diisi jika menolak logbook.",
+    DASHBOARD_REVIEW_FETCH_FAILED: "Gagal memuat data antrean review.",
+    DASHBOARD_STUDENTS_FETCH_FAILED: "Gagal memuat data mahasiswa aktif.",
+  },
   SUCCESS: {
     LOGIN: "Login berhasil!",
     REGISTER: "Pendaftaran berhasil! Silakan login.",

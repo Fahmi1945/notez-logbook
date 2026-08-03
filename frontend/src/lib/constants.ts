@@ -26,7 +26,7 @@ export const API_ENDPOINTS = {
     REJECT: (requestId: number | string) => `/mentorship/${requestId}/rejected`,
     GET_ACTIVE_STUDENTS: "/mentor/tim",
   },
-    MENTOR_REVIEW: {
+  MENTOR_REVIEW: {
     QUEUE: "/mentor/logbook",
     BY_ID: (id: number | string) => `/mentor/logbook/${id}`,
     EVALUATE: (id: number | string) => `/mentor/logbook/${id}/evaluate`,
