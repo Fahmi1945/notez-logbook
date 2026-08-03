@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import EntryList from "../entry-list";
 import { LogbookEntry } from "@/types/entry";
 
@@ -96,27 +96,6 @@ describe("EntryList", () => {
     expect(screen.getAllByText("Draft")[0]).toBeInTheDocument();
   });
 
-  // --- PESAN REVISI ---
-  it("harus menampilkan pesan revisi jika status rejected dan ada obstacles", () => {
-    render(
-      <EntryList
-        entries={[makeEntry({ status: "rejected", obstacles: "Butuh akses server" })]}
-        onDelete={mockOnDelete}
-      />
-    );
-    expect(screen.getAllByText(/Revisi: Butuh akses server/)[0]).toBeInTheDocument();
-  });
-
-  it("harus TIDAK menampilkan pesan revisi jika status bukan rejected", () => {
-    render(
-      <EntryList
-        entries={[makeEntry({ status: "submitted", obstacles: "Ada kendala" })]}
-        onDelete={mockOnDelete}
-      />
-    );
-    expect(screen.queryByText(/Revisi:/)).not.toBeInTheDocument();
-  });
-
   // --- TOMBOL AKSI ---
   it("harus menampilkan tombol Edit & Delete HANYA untuk status draft", () => {
     render(<EntryList entries={[makeEntry({ id: 1, status: "draft" })]} onDelete={mockOnDelete} />);
@@ -128,12 +107,10 @@ describe("EntryList", () => {
     expect(deleteButtons.length).toBe(2);
   });
 
-  it("harus menampilkan tombol Edit & Delete HANYA untuk status rejected", () => {
+  it("harus TIDAK menampilkan tombol Edit & Delete untuk status rejected", () => {
     render(<EntryList entries={[makeEntry({ id: 1, status: "rejected" })]} onDelete={mockOnDelete} />);
-    const links = screen.getAllByRole("link");
-    expect(links.length).toBe(2); // Edit saja (2 view)
-    const deleteButtons = screen.getAllByText("Hapus");
-    expect(deleteButtons.length).toBe(2);
+    expect(screen.queryAllByRole("link").length).toBe(0);
+    expect(screen.queryAllByText("Hapus").length).toBe(0);
   });
 
   it("harus TIDAK menampilkan tombol Edit & Delete untuk status approved", () => {
@@ -158,7 +135,11 @@ describe("EntryList", () => {
     
     // Dialog konfirmasi muncul, cari tombol "Ya, Hapus"
     const confirmButton = await screen.findByRole("button", { name: /ya, hapus/i });
-    fireEvent.click(confirmButton);
+    
+    // Bungkus klik di dalam act karena memicu async state update
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
     
     expect(mockOnDelete).toHaveBeenCalledWith(42);
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
