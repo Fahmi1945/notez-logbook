@@ -1,26 +1,28 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 import { redirect } from "next/navigation";
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 interface TokenPayload {
   role?: "user" | "mentor";
   [key: string]: unknown;
 }
 
-async function getVerifiedPayload(): Promise<TokenPayload | null> {
-  const token = (await cookies()).get("token")?.value;
-  if (!token || !JWT_SECRET) return null;
-
+function decodeJwtPayload(token: string): TokenPayload | null {
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
     return payload as TokenPayload;
   } catch {
     return null;
   }
+}
+
+async function getVerifiedPayload(): Promise<TokenPayload | null> {
+  const token = (await cookies()).get("token")?.value;
+  if (!token) return null;
+
+  return decodeJwtPayload(token);
 }
 
 /**

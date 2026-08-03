@@ -27,5 +27,11 @@ export const API_ENDPOINTS = {
     BY_ID: (id: number | string) => `/mentor/logbook/${id}`,
     EVALUATE: (id: number | string) => `/mentor/logbook/${id}/evaluate`,
   },
+  NOTIFICATIONS: {
+    BASE: "/notifications",
+    READ: (id: number | string) => `/notifications/${id}/read`,
+    READ_ALL: "/notifications/read-all",
+  },
 } as const;
+
 

@@ -10,10 +10,12 @@ const {
 const { createNotificationData } = require("../../models/notificationModel");
 const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
 
-const path = require("path");
-const fs = require("fs");
-// const { error } = require("console");
 
+const { deleteSupabaseAttachments } = require("../attachment/attachmentController");
+
+const supabase = require("../../config/supabase");
+
+// GET MY LOGBOOK
 const getMyLogbook = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -38,6 +40,7 @@ const getMyLogbook = async (req, res) => {
   }
 };
 
+// CREATE LOGBOOK
 const createLogbook = async (req, res) => {
   try {
     const { activity_date, title, description, obstacles } = req.body;
@@ -50,11 +53,37 @@ const createLogbook = async (req, res) => {
       });
     }
 
+    let attachmentsFile = null;
+    if (req.file) {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+      const cleanFilename = req.file.originalname.replace(/\s+/g, "-");
+      const fileName = `${uniqueSuffix}-${cleanFilename}`;
+
+      const { error } = await supabase.storage
+        .from("attachments")
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype
+        });
+
+      if (error) {
+        console.error("Error upload file supabase", error);
+        return res.status(500).json({
+          success: false,
+          message: "Gagal mengunggah file attachment ke server penyimpanan.",
+        });
+      }
+
+      attachmentsFile = {
+        file_name: req.file.originalname,
+        file_path: fileName,
+      };
+    }
+
     // LOGIKA VALIDASI TANGGAL (ANTI TANGGAL MASA DEPAN)
     const inputDate = new Date(activity_date);
     const today = new Date();
-    
-    // Set 'today' ke penghujung hari (23:59:59) agar jika inputnya hari ini tetap lolos
+
+    // Set 'today' ke penghujung hari (23:59:59)
     today.setHours(23, 59, 59, 999);
 
     if (inputDate > today) {
@@ -64,9 +93,9 @@ const createLogbook = async (req, res) => {
       });
     }
 
-    // 2. Rakit data tanpa menyertakan user_id (gunakan relasi connect) dan tanpa attachments null
+    // Rakit data tanpa menyertakan user_id (gunakan relasi connect)
     const logbookData = {
-      activity_date: inputDate, // Langsung pakai inputDate yang sudah di-parsing di atas
+      activity_date: inputDate,
       title,
       description,
       obstacles: obstacles || null,
@@ -77,19 +106,15 @@ const createLogbook = async (req, res) => {
       },
     };
 
-    // 3. Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
-    if (req.file) {
+    // Tambahkan attachments secara dinamis HANYA jika file benar-benar ada
+    if (attachmentsFile) {
       logbookData.attachments = {
-        create: [
-          {
-            file_name: req.file.originalname,
-            file_path: `/uploads/${req.file.filename}`,
-          },
-        ],
+        create: [attachmentsFile],
       };
     }
 
-    // 4. Kirim ke model
+    // 4. Kirim ke model (DIPINDAHKAN KELUAR DARI BLOK IF)
+    // Agar logbook tetap terbuat meskipun tidak ada file attachment
     const logbook = await createLogbookEntry(logbookData);
 
     return res.status(201).json({
@@ -98,7 +123,7 @@ const createLogbook = async (req, res) => {
       data: logbook,
     });
 
-  } catch (error) {
+  } catch (error) { // 
     console.error(error);
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
@@ -143,75 +168,90 @@ const getLogbook = async (req, res) => {
   }
 };
 
+//update logbook
 const updateLogbook = async (req, res) => {
   try {
-    const { activity_date, title, description, obstacles, status } = req.body;
+    // Tambahkan remove_attachment untuk menangkap sinyal dari frontend
+    const { activity_date, title, description, obstacles, status, remove_attachment } = req.body;
     const logbookId = req.params.id;
     const userId = req.user.id;
 
     const existingLogbook = await getLogbookDetail(logbookId, userId);
     if (!existingLogbook) {
-      return res.status(404).json({
-        success: false,
-        message: "Logbook tidak ditemukan.",
-      });
+      return res.status(404).json({ success: false, message: "Logbook tidak ditemukan." });
     }
 
     const updatedData = {};
-    if (activity_date) updatedData.activity_date = new Date(activity_date); // Pastikan ini dikonversi ke Date
+    if (activity_date) updatedData.activity_date = new Date(activity_date);
     if (title) updatedData.title = title;
     if (description) updatedData.description = description;
     if (obstacles !== undefined) updatedData.obstacles = obstacles;
     if (status) updatedData.status = status;
 
-    if (req.file) {
+    // SKENARIO 1: User sengaja menghapus attachment lama tanpa upload yang baru
+    if (String(remove_attachment) === "true") {
       if (existingLogbook.attachments && existingLogbook.attachments.length > 0) {
-        existingLogbook.attachments.forEach((attachment) => {
-          // PERBAIKAN 1: Ambil nama file-nya saja dari string "/uploads/nama-file.jpg"
-          const safeFileName = path.basename(attachment.file_path);
-
-          const baseUploadsDir = path.join(process.cwd(), "uploads");
-    
-          const file_path = `${baseUploadsDir}/${safeFileName}`;
-
-          if (fs.existsSync(file_path)) {
-            fs.unlinkSync(file_path);
-          }
-        });
+        // 1. Hapus file fisik di Supabase
+        await deleteSupabaseAttachments(existingLogbook.attachments);
+        // 2. Beri instruksi ke Prisma untuk menghapus relasi di DB
+        updatedData.attachments = {
+          deleteMany: {},
+        };
       }
+    }
+
+    // SKENARIO 2: User mengupload attachment baru (menggantikan yang lama)
+    if (req.file) {
+      // Pastikan file lama di Supabase terhapus lebih dulu jika ada
+      if (existingLogbook.attachments && existingLogbook.attachments.length > 0) {
+        await deleteSupabaseAttachments(existingLogbook.attachments);
+      }
+
+      // Proses upload file baru ke Supabase
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const cleanOriginalName = req.file.originalname.replace(/\s+/g, "_");
+      const fileName = `${uniqueSuffix}-${cleanOriginalName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("attachments")
+        .upload(fileName, req.file.buffer, { contentType: req.file.mimetype });
+
+      if (uploadError) {
+        console.error("Error upload update supabase:", uploadError);
+        throw uploadError;
+      }
+
+      // PERUBAHAN: getPublicUrl Dihapus.
+      // Kita langsung menyimpan 'fileName' ke dalam database (Sesuai skema Private Bucket)
+
+      // Simpan data file baru ke DB sekaligus hapus data file lama (jika Skenario 1 belum tereksekusi)
       updatedData.attachments = {
         deleteMany: {},
-        create: [
-          {
-            file_name: req.file.originalname,
-            // PERBAIKAN 3: Gunakan backtick (`) dan perbaiki nama variabel menjadi req.file.filename
-            file_path: `/uploads/${req.file.filename}`,
-          }
-        ]
+        create: [{
+          file_name: req.file.originalname,
+          file_path: fileName, // <--- Hanya menyimpan nama file
+        }],
       };
     }
 
+    // Simpan semua perubahan ke database
     const updated = await updateLogbookEntry(logbookId, updatedData);
-    if (!updated) {
-      return res.status(500).json({
-        success: false,
-        message: "Terjadi kesalahan saat memperbarui logbook.",
-      });
-    }
+
     return res.status(200).json({
       success: true,
       message: "Logbook berhasil diperbarui.",
-      data: updated,
+      data: updated
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Error update logbook:", error);
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
-      message: "Terjadi kesalahan saat memperbarui logbook.",
+      message: "Terjadi kesalahan saat memperbarui logbook."
     });
   }
 };
-
+//delete logbook
 const deleteLogbook = async (req, res) => {
   try {
     const logbookId = req.params.id;
@@ -225,33 +265,29 @@ const deleteLogbook = async (req, res) => {
       });
     }
 
+    // 1. HAPUS FILE FISIK DI SUPABASE
     if (existingLogbook.attachments && existingLogbook.attachments.length > 0) {
-      existingLogbook.attachments.forEach((attachment) => {
-        
-        const safeFileName = path.basename(attachment.file_path);
-
-        const baseUploadsDir = path.join(process.cwd(), "uploads");
-        
-        // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
-        const file_path = `${baseUploadsDir}/${safeFileName}`;
-
-        if (fs.existsSync(file_path)) {
-          fs.unlinkSync(file_path);
-        }
-      });
+      // Panggil helper yang sudah kita buat
+      await deleteSupabaseAttachments(existingLogbook.attachments);
     }
 
+    // 2. HAPUS DATA DI DATABASE
+    // Catatan: Prisma biasanya akan otomatis menghapus attachment di database
+    // jika kamu menggunakan onDelete: Cascade di schema.prisma
     const deleted = await deleteLogbookEntry(logbookId);
+
     if (!deleted) {
       return res.status(500).json({
         success: false,
         message: "Terjadi kesalahan saat menghapus logbook.",
       });
     }
+
     return res.status(200).json({
       success: true,
       message: "Logbook berhasil dihapus.",
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -261,6 +297,7 @@ const deleteLogbook = async (req, res) => {
   }
 };
 
+//submit logbook
 const submitLogbook = async (req, res) => {
   try {
     const logbookId = parseInt(req.params.id);

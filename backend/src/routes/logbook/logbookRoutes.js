@@ -36,6 +36,7 @@ router.delete("/:id", deleteLogbook);
 //GET DETAIL LOGBOOK
 router.get("/:id", getLogbook);
 
+// GET ATTACHMENT
 router.get("/attachments/:id", viewAttachment);
 
 module.exports = router;

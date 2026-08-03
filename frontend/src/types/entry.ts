@@ -1,5 +1,14 @@
 export type LogbookStatus = "draft" | "submitted" | "approved" | "rejected";
 
+/** Statistik ringkasan entri logbook — dihitung client-side */
+export interface EntryStats {
+  total: number;
+  draft: number;
+  submitted: number;
+  approved: number;
+  rejected: number;
+}
+
 export interface Attachment {
   id: number;
   file_name: string;

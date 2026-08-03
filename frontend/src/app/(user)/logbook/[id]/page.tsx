@@ -150,6 +150,19 @@ export default function LogbookDetailPage() {
             </div>
           )}
 
+          {/* Pesan Mentor (jika ada)
+          {entry.message && (
+            <div>
+              <h3 className="text-xs font-semibold text-brand-primary mb-3 uppercase tracking-widest flex items-center gap-2">
+                <ChatText size={14} weight="fill" />
+                Catatan Review Mentor
+              </h3>
+              <div className="p-5 bg-brand-primary/5 rounded-xl border border-brand-primary/10 text-brand-dark leading-relaxed whitespace-pre-wrap text-sm">
+                {entry.message}
+              </div>
+            </div>
+          )} */}
+
           {/* Lampiran (jika ada) */}
           {entry.attachments && entry.attachments.length > 0 && (
             <div>

@@ -187,9 +187,9 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
   // ─── Empty state ───────────────────────────────────────────────────────
   if (entries.length === 0) {
     return (
-      <Card className="flex flex-col items-center justify-center p-12 text-center border-gray-200 shadow-sm animate-fade-in-down">
-        <div className="w-16 h-16 rounded-full bg-brand-white-bg border border-gray-200 flex items-center justify-center mb-4">
-          <CalendarBlank size={28} weight="regular" className="text-gray-300" />
+      <Card className="flex flex-col items-center justify-center p-12 text-center border-gray-200 bg-white shadow-sm animate-fade-in-down">
+        <div className="w-16 h-16 rounded-full bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center mb-4 text-brand-primary">
+          <CalendarBlank size={28} weight="duotone" />
         </div>
         <p className="text-brand-dark font-semibold text-sm mb-1">
           Belum ada entri logbook
@@ -215,7 +215,7 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
         isLoading={isDeleting}
       />
 
-      <Card className="border-gray-200 overflow-hidden animate-fade-in-down">
+      <Card className="border-gray-200 bg-white overflow-hidden animate-fade-in-down">
         {/* ── DESKTOP TABLE ──────────────────────────────────────────────── */}
         <div className="hidden md:block">
           <Table>
@@ -237,7 +237,7 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                   <TableRow
                     key={entry.id}
                     onClick={() => navigateToDetail(entry.id)}
-                    className="cursor-pointer group"
+                    className="cursor-pointer group hover:bg-brand-primary/5 transition-colors duration-200"
                   >
                     {/* Tanggal */}
                     <TableCell>
@@ -304,7 +304,7 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
               <div
                 key={entry.id}
                 onClick={() => navigateToDetail(entry.id)}
-                className="p-4 hover:bg-brand-white-bg transition-colors cursor-pointer"
+                className="p-4 hover:bg-brand-primary/5 transition-colors cursor-pointer"
               >
                 {/* Top row */}
                 <div className="flex items-start justify-between gap-3 mb-3">
