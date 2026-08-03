@@ -2,8 +2,8 @@ const express = require("express");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
-const csurf = require('csurf');
-const cookieParser = require('cookie-parser');
+const csurf = require("csurf");
+const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./src/routes/auth/authRoutes");
 const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
