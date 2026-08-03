@@ -3,9 +3,10 @@ import React from "react";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   icon?: React.ReactNode;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-export default function Input({ label, icon, id, ...props }: InputProps) {
+export default function Input({ label, icon, id, ref, ...props }: InputProps) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-xs font-semibold text-gray-700 block">
@@ -20,6 +21,7 @@ export default function Input({ label, icon, id, ...props }: InputProps) {
         )}
         <input
           id={id}
+          ref={ref}
           {...props}
           className={`w-full ${
             icon ? "pl-10" : "pl-4"
