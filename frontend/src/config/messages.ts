@@ -9,10 +9,13 @@ export const MESSAGES = {
     NOTIFICATION_FETCH: "Gagal memuat notifikasi.",
     NOTIFICATION_MARK_READ: "Gagal menandai notifikasi.",
     NOTIFICATION_MARK_ALL_READ: "Gagal menandai semua notifikasi.",
+    PROFILE_FETCH_FAILED: "Gagal memuat data profil.",
+    CHANGE_PASSWORD_FAILED: "Gagal mengubah password. Pastikan password saat ini benar.",
   },
   SUCCESS: {
     LOGIN: "Login berhasil!",
     REGISTER: "Pendaftaran berhasil! Silakan login.",
     NOTIFICATION_MARK_ALL_READ: "Semua notifikasi ditandai dibaca.",
+    CHANGE_PASSWORD: "Password berhasil diubah!",
   }
 };

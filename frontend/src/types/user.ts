@@ -3,5 +3,5 @@ export interface User {
   name: string;
   email: string;
   role: "user" | "mentor";
-  
+  created_at?: string;
 }

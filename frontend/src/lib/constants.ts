@@ -8,6 +8,10 @@ export const API_ENDPOINTS = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
   },
+  PROFILE: {
+    BASE: "/profile",
+    CHANGE_PASSWORD: "/change-password",
+  },
   LOGBOOK: {
     BASE: "/logbook",
     BY_ID: (id: number | string) => `/logbook/${id}`,
