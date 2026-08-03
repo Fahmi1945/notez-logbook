@@ -1,6 +1,34 @@
 // src/models/users.js
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+
+const findUserById = async (id) => {
+  return await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      created_at: true, // sesuaikan nama field di schema.prisma
+      password_hash: true, // jangan ambil password hash 
+    }
+  });
+};
+
+// Update data profil user
+const updateUser = async (id, data) => {
+  return await prisma.user.update({
+    where: { id: parseInt(id) },
+    data: data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    }
+  });
+};
 
 // Fungsi FIND BY EMAIL
 const findUserByEmail = async (email) => {
@@ -36,4 +64,4 @@ const createUser = async (data) => {
   });
 };
 
-module.exports = { findUserByEmail, createUser, findMentors, };
+module.exports = { findUserByEmail, createUser, findMentors, findUserById, updateUser };

@@ -1,114 +1,121 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import EntryForm from "@/components/logbook/entry-form";
-import { entriesApi } from "@/lib/api/entries";
-import { LogbookFormData } from "@/types/entry";
-import { ArrowLeft } from "@phosphor-icons/react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Spinner } from "@/components/ui/spinner";
+import { ArrowLeft } from "@phosphor-icons/react";
+import EntryForm from "@/components/logbook/entry-form";
+import LogbookDetailSkeleton from "@/components/logbook/logbook-detail-skeleton";
+import { EntryFormInput } from "@/lib/validators/entry.schema";
+import { entriesApi } from "@/lib/api/entries";
+import { LogbookEntry } from "@/types/entry";
+import { useUIStore } from "@/store/ui-store";
+import { MESSAGES } from "@/config/messages";
 
 export default function EditLogbookPage() {
-  const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
 
-  const [initialData, setInitialData] = useState<LogbookFormData | null>(null);
-  const [isFetching, setIsFetching] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const showToast = useUIStore((s) => s.showToast);
+  
+  const [entry, setEntry] = useState<LogbookEntry | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Ambil data logbook lama saat halaman pertama kali dimuat
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        setIsFetching(true);
+        setIsLoading(true);
         const res = await entriesApi.getById(id);
-        
-        // Sesuaikan format data dari API ke format form
-        setInitialData({
-          activity_date: res.data.activity_date,
-          title: res.data.title,
-          description: res.data.description,
-          obstacles: res.data.obstacles || "",
-        });
-      } catch (err: any) {
-        setFetchError(err.message || "Gagal mengambil data logbook.");
+        setEntry(res.data);
+      } catch (err: unknown) {
+        const e = err as { response?: { data?: { message?: string } } };
+        setError(e.response?.data?.message || MESSAGES.LOGBOOK.FETCH_FAILED);
       } finally {
-        setIsFetching(false);
+        setIsLoading(false);
       }
     };
 
-    if (id) {
-      fetchDetail();
-    }
+    if (id) fetchDetail();
   }, [id]);
 
-  // Fungsi untuk menangani proses submit (Update data)
-  const handleSubmit = async (data: LogbookFormData) => {
-    setIsSubmitting(true);
+  const handleSave = async (data: EntryFormInput & { remove_attachment?: boolean }, files: File[]) => {
+    if (!entry) return;
+    setIsSaving(true);
     try {
-      // Tembak endpoint PUT /logbook/:id
-      await entriesApi.update(id, data);
-      
-      // Jika sukses, arahkan kembali ke halaman utama logbook
+      await entriesApi.update(entry.id, data, files);
+      showToast(MESSAGES.LOGBOOK.UPDATE_SUCCESS, "success");
       router.push("/logbook");
-      router.refresh(); 
-    } catch (error: any) {
-      setIsSubmitting(false);
-      throw new Error(error.message || "Gagal memperbarui logbook. Silakan coba lagi.");
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      showToast(e.response?.data?.message || MESSAGES.LOGBOOK.ACTION_FAILED, "error");
+    } finally {
+      setIsSaving(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <LogbookDetailSkeleton />
+      </div>
+    );
+  }
+
+  if (error || !entry) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto font-body mt-10">
+        <div className="text-center p-10 bg-rose-50 text-rose-600 rounded-2xl border border-rose-200 animate-fade-in-down shadow-sm">
+          <p className="font-heading font-bold text-lg mb-2">Terjadi Kesalahan</p>
+          <p className="text-sm mb-6 text-rose-500">{error || "Data logbook tidak ditemukan."}</p>
+          <Link
+            href="/logbook"
+            className="inline-flex px-6 py-2.5 bg-white border border-rose-200 rounded-xl text-sm hover:bg-rose-50 transition-colors font-medium text-rose-700 shadow-sm"
+          >
+            Kembali ke Daftar
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const initialData = {
+    activity_date: entry.activity_date,
+    title: entry.title,
+    description: entry.description,
+    obstacles: entry.obstacles || "",
+  };
+
+  const existingAttachment = entry.attachments?.[0];
+
   return (
     <div className="p-6 max-w-4xl mx-auto font-body">
-      {/* Header Halaman */}
       <div className="mb-6 animate-fade-in-down">
-        <Link 
-          href="/logbook" 
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-accent mb-4 transition-colors font-medium"
+        <Link
+          href="/logbook"
+          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-brand-primary mb-4 transition-colors font-medium"
         >
           <ArrowLeft size={16} weight="bold" />
-          Batal & Kembali
+          Kembali ke Manajemen Logbook
         </Link>
-        
-        <h1 className="text-2xl font-heading font-bold text-brand-dark mb-2">
-          Edit Entri Logbook
+        <h1 className="text-2xl font-heading font-bold text-brand-dark mb-1">
+          Edit Logbook
         </h1>
-        <p className="text-gray-500 text-sm">
-          Perbarui detail aktivitas bimbinganmu. Pastikan perbaikan sesuai dengan catatan revisi (jika ada).
+        <p className="text-gray-400 text-sm">
+          Perbarui entri logbook yang belum disubmit.
         </p>
       </div>
 
-      {/* Tampilan Loading saat mengambil data */}
-      {isFetching ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl border border-gray-200">
-          <Spinner />
-          <p className="text-sm text-gray-500 mt-4">Memuat data entri...</p>
-        </div>
-      ) : fetchError ? (
-        /* Tampilan Error jika gagal mengambil data (misal ID tidak ditemukan) */
-        <div className="text-center p-8 bg-red-50 text-red-600 rounded-xl border border-red-200 animate-fade-in-down">
-          <p className="font-semibold mb-2">Terjadi Kesalahan</p>
-          <p className="text-sm mb-4">{fetchError}</p>
-          <button 
-            onClick={() => router.push("/logbook")}
-            className="px-4 py-2 bg-white border border-red-200 rounded-lg text-sm hover:bg-red-50"
-          >
-            Kembali ke Daftar
-          </button>
-        </div>
-      ) : (
-        /* Render form hanya jika data sudah berhasil diambil */
-        initialData && (
-          <EntryForm 
-            initialData={initialData} 
-            onSubmit={handleSubmit} 
-            isLoading={isSubmitting} 
-          />
-        )
-      )}
+      <EntryForm
+        initialData={initialData}
+        existingAttachmentUrl={existingAttachment ? `/api/proxy/attachments/${existingAttachment.id}` : undefined}
+        existingFileName={existingAttachment?.file_name}
+        onSave={handleSave}
+        onCancel={() => router.back()}
+        isSaving={isSaving}
+      />
     </div>
   );
 }

@@ -13,4 +13,5 @@ COPY . .
 
 EXPOSE 3333
 
+USER node
 CMD ["node", "app.js"]

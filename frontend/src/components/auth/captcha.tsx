@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Input from "@/components/ui/Input";
+import Input from "@/components/ui/input";
 import { Calculator, ArrowsClockwise } from "@phosphor-icons/react";
 
 interface CaptchaProps {
@@ -9,9 +9,21 @@ interface CaptchaProps {
 }
 
 export default function Captcha({ onValidate }: CaptchaProps) {
+  // 1. Berikan nilai awal statis (misal 0) untuk menghindari mismatch saat SSR
   const [num1, setNum1] = useState(0);
   const [num2, setNum2] = useState(0);
   const [answer, setAnswer] = useState("");
+  
+  // 2. State untuk mendeteksi apakah komponen sudah berada di browser
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 3. Generate angka HANYA setelah komponen di-mount di client (browser)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNum1(Math.floor(Math.random() * 10) + 1);
+    setNum2(Math.floor(Math.random() * 10) + 1);
+    setIsMounted(true);
+  }, []);
 
   const generateNumbers = () => {
     const n1 = Math.floor(Math.random() * 10) + 1;
@@ -21,11 +33,6 @@ export default function Captcha({ onValidate }: CaptchaProps) {
     setAnswer("");
     onValidate(false);
   };
-
-  useEffect(() => {
-    generateNumbers();
-
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -38,6 +45,17 @@ export default function Captcha({ onValidate }: CaptchaProps) {
       onValidate(false);
     }
   };
+
+  // 4. Tampilkan fallback UI saat proses SSR berjalan agar tidak terjadi mismatch
+  if (!isMounted) {
+    return (
+      <div className="flex gap-2 items-end h-[68px] opacity-50">
+        <div className="flex-1 flex items-center px-3 border border-gray-200 rounded-lg bg-gray-50 text-sm text-gray-500">
+          Memuat keamanan...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-2 items-end">

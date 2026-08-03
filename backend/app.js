@@ -1,28 +1,58 @@
 const express = require("express");
 require("dotenv").config();
-const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
+const csurf = require("csurf");
+const cookieParser = require("cookie-parser");
+
 const authRoutes = require("./src/routes/auth/authRoutes");
 const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
 const timMahasiswaRoutes = require("./src/routes/mentor/timMahasiswaRoutes");
+const mentorLogbookRoutes = require("./src/routes/mentor/mentorLogbookRoutes");
+const notificationRoutes = require("./src/routes/notification/notificationRoutes");
+const userRoutes = require("./src/routes/user/userRoutes");
 
 const app = express();
+
+// CSRF butuh cookie-parser atau express-session
+app.use(cookieParser());
+
 // app.set("trust proxy", true);
 app.use(
   cors({
     origin: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-XSRF-TOKEN", "X-CSRF-Token"],
     credentials: true,
   }),
 );
+
+// Pasang perlindungan CSRF
+const csrfProtection = csurf({ 
+  cookie: {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true
+  } 
+});
+app.use(csrfProtection);
 
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
+
+// Route untuk mengambil CSRF token
+app.get("/api/csrf-token", (req, res) => {
+  const token = req.csrfToken();
+  res.cookie("XSRF-TOKEN", token, {
+    httpOnly: false, // Perlu false agar bisa dibaca oleh JS/Axios di frontend
+    secure: true,
+    sameSite: "none",
+  });
+  res.status(200).json({ csrfToken: token });
+});
 
 // Route utama
 app.get("/", (req, res) => {
@@ -46,13 +76,22 @@ app.use("/api", mentorshipRoutes);
 // Routing logbook
 app.use("/api/logbook", logbookRoutes);
 
+// Routing mentor logbook
+app.use("/api", mentorLogbookRoutes);
+
+// Routing notifikasi
+app.use("/api/notifications", notificationRoutes);
+
+// Routing user
+app.use("/api", userRoutes);
+
 // Routing upload
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // PERANGKAP 404: Menangkap semua request yang alamatnya salah
 app.use((req, res) => {
-  console.log(`❌ ALARM: Frontend mencoba mengakses rute yang salah!`);
+  console.log("❌ ALARM: Frontend mencoba mengakses rute yang salah!");
   console.log(`Metode: ${req.method}`);
   console.log(`URL yang diakses: ${req.originalUrl}`);
 

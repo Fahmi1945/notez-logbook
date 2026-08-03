@@ -2,7 +2,7 @@ import { useState } from "react";
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { LoginInput, RegisterInput } from "@/lib/validators/auth.schema";
-import { MESSAGES } from "@/config/constants";
+import { MESSAGES } from "@/config/messages";
 import { useUIStore } from "@/store/ui-store";
 
 export const useAuth = () => {
@@ -35,8 +35,9 @@ export const useAuth = () => {
         window.location.href = role === "mentor" ? "/mentor/dashboard" : "/dashboard";
       }, 1000); 
       
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || MESSAGES.ERROR.LOGIN_FAILED;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage = err.response?.data?.message || MESSAGES.ERROR.LOGIN_FAILED;
       showToast(errorMessage, "error");
     } finally {
       setIsLoading(false);
@@ -53,8 +54,9 @@ export const useAuth = () => {
         window.location.href = "/login";
       }, 1500);
       
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || MESSAGES.ERROR.REGISTER_FAILED;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage = err.response?.data?.message || MESSAGES.ERROR.REGISTER_FAILED;
       showToast(errorMessage, "error");
     } finally {
       setIsLoading(false);

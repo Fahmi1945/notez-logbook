@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import { useMentorRequests } from "@/hooks/use-mentor-request";
-import { Button } from "@/components/ui/Button"; 
+import { Button } from "@/components/ui/button"; 
 import { Badge } from "@/components/ui/badge"; 
 import { Spinner } from "@/components/ui/spinner"; 
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import Modal from "@/components/ui/modal";
+import { Textarea } from "@/components/ui/textarea";
 import { Clock, Check, X } from "@phosphor-icons/react";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 export default function MentorRequestList() {
   const { requests, isLoading, handleApproval } = useMentorRequests();
@@ -52,33 +57,29 @@ export default function MentorRequestList() {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-4 animate-fade-in-down">
-        <table className="w-full text-sm text-left text-gray-600">
-          <thead className="bg-brand-white text-brand-dark font-heading font-semibold border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 text-left whitespace-nowrap">TANGGAL</th>
-              <th className="px-6 py-4 text-left">MAHASISWA</th>
-              <th className="px-6 py-4 text-left whitespace-nowrap">STATUS</th>
-              <th className="px-6 py-4 text-left whitespace-nowrap">AKSI</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 font-mono">
+      <div className="mt-4 animate-fade-in-down">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>TANGGAL</TableHead>
+              <TableHead>MAHASISWA</TableHead>
+              <TableHead>STATUS</TableHead>
+              <TableHead>AKSI</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {requests.map((req) => (
-              <tr key={req.requestId} className="hover:bg-brand-white/50 transition-colors">
+              <TableRow key={req.requestId}>
                 
                 {/* Tanggal */}
-                <td className="px-6 py-4 text-left align-middle text-gray-500 whitespace-nowrap">
+                <TableCell className="text-gray-500">
                   {req.createdAt 
-                    ? new Date(req.createdAt).toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric"
-                      })
+                    ? format(new Date(req.createdAt), "dd MMM yyyy", { locale: idLocale })
                     : "-"}
-                </td>
+                </TableCell>
 
                 {/* Mahasiswa (Nama & Email) */}
-                <td className="px-6 py-4 text-left align-middle">
+                <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 flex-shrink-0 rounded-full bg-blue-50 text-brand-primary flex items-center justify-center font-bold text-xs">
                       {req.studentName?.substring(0, 2).toUpperCase() || "NN"}
@@ -89,22 +90,23 @@ export default function MentorRequestList() {
                       </div>
                     </div>
                   </div>
-                </td>
+                </TableCell>
 
                 {/* Status */}
-                <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
-                  <Badge status="pending" className="px-3 py-1 inline-flex items-center gap-1.5">
+                <TableCell>
+                  <Badge status="submitted" className="px-3 py-1 inline-flex items-center gap-1.5">
                     <Clock size={14} className="shrink-0 text-amber-600" />
                     <span>Perlu Persetujuan</span>
                   </Badge>
-                </td>
+                </TableCell>
                 
                 {/* Aksi */}
-                <td className="px-6 py-4 text-left align-middle whitespace-nowrap">
+                <TableCell>
                   <div className="flex justify-start gap-2">
                     <Button 
                       onClick={() => openModal(req.requestId, "accept", req.studentName)}
-                      className="bg-status-approved hover:bg-green-600 text-white flex items-center gap-1.5 shadow-sm h-8 px-3 text-xs font-mono"
+                      variant="success"
+                      className="flex items-center gap-1.5 shadow-sm h-8 px-3 text-xs font-mono"
                     >
                       <Check size={14} />
                       Terima
@@ -118,55 +120,53 @@ export default function MentorRequestList() {
                       Tolak
                     </Button>
                   </div>
-                </td>
+                </TableCell>
 
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* --- KOMPONEN POP-UP MODAL --- */}
-      {modal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-dark/40 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-fade-in-down">
-            <div className="p-6">
-              <h3 className="text-lg font-heading font-bold text-brand-dark mb-2">
-                {modal.action === "accept" ? "Terima Mahasiswa" : "Tolak Mahasiswa"}
-              </h3>
-              <p className="text-sm font-body text-gray-600 mb-5 leading-relaxed">
-                Anda akan {modal.action === "accept" ? "menerima" : "menolak"} permintaan bimbingan dari <span className="font-heading font-bold text-brand-primary">{modal.studentName}</span>. 
-                Silakan berikan pesan atau alasan (opsional).
-              </p>
-              
-              <textarea
-                value={alasan}
-                onChange={(e) => setAlasan(e.target.value)}
-                placeholder={modal.action === "accept" ? "Contoh: Selamat bergabung di tim!" : "Contoh: Kuota bimbingan sudah penuh."}
-                className="w-full font-body border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary resize-none h-28 transition-all"
-              />
-            </div>
-            
-            <div className="px-6 py-4 bg-brand-white border-t border-gray-100 flex justify-end gap-3 font-body">
-              <Button 
-                variant="outline" 
-                onClick={closeModal} 
-                disabled={isLoading} 
-                className="text-gray-600 border-gray-300 hover:text-brand-dark hover:bg-gray-100 transition-colors"
-              >
-                Batal
-              </Button>
-              <Button 
-                onClick={onSubmit}
-                disabled={isLoading}
-                className={modal.action === "accept" ? "bg-status-approved hover:bg-green-600 text-white shadow-sm" : "bg-status-rejected hover:bg-red-600 text-white shadow-sm"}
-              >
-                {isLoading ? <Spinner /> : "Konfirmasi"}
-              </Button>
-            </div>
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={closeModal} 
+        title={modal.action === "accept" ? "Terima Mahasiswa" : "Tolak Mahasiswa"}
+      >
+        <div className="space-y-5">
+          <p className="text-sm font-body text-gray-600 leading-relaxed">
+            Anda akan {modal.action === "accept" ? "menerima" : "menolak"} permintaan bimbingan dari <span className="font-heading font-bold text-brand-primary">{modal.studentName}</span>. 
+            Silakan berikan pesan atau alasan (opsional).
+          </p>
+          
+          <Textarea
+            value={alasan}
+            onChange={(e) => setAlasan(e.target.value)}
+            placeholder={modal.action === "accept" ? "Contoh: Selamat bergabung di tim!" : "Contoh: Kuota bimbingan sudah penuh."}
+          />
+          
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 font-body">
+            <Button 
+              variant="outline" 
+              onClick={closeModal} 
+              disabled={isLoading} 
+              className="text-gray-600 border-gray-300 hover:text-brand-dark hover:bg-gray-100 transition-colors"
+            >
+              Batal
+            </Button>
+            <Button 
+              onClick={onSubmit}
+              disabled={isLoading}
+              variant={modal.action === "accept" ? "success" : "danger"}
+              className="shadow-sm"
+              isLoading={isLoading}
+            >
+              Konfirmasi
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
     </>
   );
 }

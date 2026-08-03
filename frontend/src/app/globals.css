@@ -56,10 +56,39 @@
 }
 
 @keyframes fade-in-down {
-  0% { opacity: 0; transform: translateY(-20px); }
+  0% { opacity: 0; transform: translateY(-12px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in-down {
-  animation: fade-in-down 0.3s ease-out forwards;
+  animation: fade-in-down 0.25s ease-out forwards;
 }
 
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.25s ease-out forwards;
+}
+
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out forwards;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

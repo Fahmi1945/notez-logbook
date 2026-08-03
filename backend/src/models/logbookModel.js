@@ -9,9 +9,39 @@ const getLogbookById = async (user_id) => {
     },
     include: {
       attachments: true,
+      feedbacks: {
+        orderBy: {
+          created_at: "desc",
+        },
+        take: 1,
+      },
     },
     orderBy: {
       activity_date: "desc",
+    },
+  });
+};
+
+const getLogbookByIdAndUser = async (logbookId, userId) => {
+  return await prisma.logbookEntry.findFirst({
+    where: {
+      id: parseInt(logbookId, 10),
+      user_id: parseInt(userId, 10),
+    },
+  });
+};
+
+const updateLogbookStatusToSubmitted = async (logbookId) => {
+  return await prisma.logbookEntry.update({
+    where: {
+      id: parseInt(logbookId, 10),
+    },
+    data: {
+      status: "submitted",
+      status_changed_at: new Date(),
+    },
+    include: {
+      attachments: true,
     },
   });
 };
@@ -35,6 +65,12 @@ const getLogbookDetail = async (logbookId, userId) => {
     },
     include: {
       attachments: true,
+      feedbacks: {
+        orderBy: {
+          created_at: "desc",
+        },
+        take: 1,
+      },
     },
   });
 };
@@ -70,4 +106,6 @@ module.exports = {
   getLogbookDetail,
   updateLogbookEntry,
   deleteLogbookEntry,
+  getLogbookByIdAndUser,
+  updateLogbookStatusToSubmitted,
 };

@@ -9,16 +9,17 @@ import {
 } from "@phosphor-icons/react";
 import { RequestAction } from "./request-action";
 import { Mentor } from "@/types/mentorship";
+import Input from "@/components/ui/input";
 
 // 1. UPDATE PROPS: Ganti isSubmitting menjadi submittingId dan requestedIds
 interface MentorListProps {
   mentors: Mentor[];
   onApply: (mentorId: number) => void;
-  submittingId: number | null;
-  requestedIds: number[]; 
+  submittingId?: number | null;
+  requestedIds?: number[]; 
 }
 
-export function MentorList({ mentors, onApply, submittingId, requestedIds = [] }: MentorListProps) {
+export function MentorList({ mentors, onApply }: MentorListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredMentors = mentors.filter(m => 
@@ -28,13 +29,10 @@ export function MentorList({ mentors, onApply, submittingId, requestedIds = [] }
 
   return (
     <div className="space-y-6">
-      <div className="relative max-w-md">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlass className="h-5 w-5 text-gray-400" />
-        </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary transition-shadow"
+      <div className="max-w-md">
+        <Input
+          label="Pencarian"
+          icon={<MagnifyingGlass className="h-5 w-5" />}
           placeholder="Cari nama atau email mentor..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -43,11 +41,6 @@ export function MentorList({ mentors, onApply, submittingId, requestedIds = [] }
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden divide-y divide-gray-100">
         {filteredMentors.map((mentor) => {
-          // 2. DEKLARASI VARIABEL: Wajib ditaruh di dalam map agar dievaluasi untuk setiap mentor
-          const isThisSubmitting = submittingId === mentor.id;
-          const isAnySubmitting = submittingId !== null;
-          const isRequested = requestedIds.includes(mentor.id);
-
           return (
             <div key={mentor.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-gray-50 transition-colors">
               

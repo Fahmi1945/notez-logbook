@@ -1,0 +1,5 @@
+# Cek Backend
+cd backend && npm run lint && npm test
+
+# Pindah ke Frontend lalu Cek Frontend
+cd ../frontend && npm run lint && npm test

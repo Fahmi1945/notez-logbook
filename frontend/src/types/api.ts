@@ -10,5 +10,11 @@ export interface AuthResponse {
 // Definisi struktur Error standar dari API
 export interface ApiError {
   message: string;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
