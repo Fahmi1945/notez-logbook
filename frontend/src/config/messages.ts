@@ -12,6 +12,15 @@ export const MESSAGES = {
     PROFILE_FETCH_FAILED: "Gagal memuat data profil.",
     CHANGE_PASSWORD_FAILED: "Gagal mengubah password. Pastikan password saat ini benar.",
   },
+  LOGBOOK: {
+    FETCH_FAILED: "Gagal memuat data logbook.",
+    CREATE_SUCCESS: "Entri logbook berhasil ditambahkan.",
+    UPDATE_SUCCESS: "Entri logbook berhasil diperbarui.",
+    DELETE_SUCCESS: "Entri logbook berhasil dihapus.",
+    SUBMIT_SUCCESS: "Logbook berhasil disubmit ke mentor.",
+    DELETE_FAILED: "Gagal menghapus entri logbook.",
+    ACTION_FAILED: "Terjadi kesalahan saat memproses logbook.",
+  },
   SUCCESS: {
     LOGIN: "Login berhasil!",
     REGISTER: "Pendaftaran berhasil! Silakan login.",
