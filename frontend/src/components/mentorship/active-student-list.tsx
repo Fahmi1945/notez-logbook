@@ -9,13 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Clock, Check } from "@phosphor-icons/react";
 
+import { format } from 'date-fns';
+import { id as idLocale } from 'date-fns/locale';
+
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return format(new Date(dateString), "dd MMM yyyy", { locale: idLocale });
 };
 
 export default function ActiveStudentsList({ data }: { data: ActiveStudent[] }) {

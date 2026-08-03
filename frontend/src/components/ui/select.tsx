@@ -4,9 +4,10 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   icon?: React.ReactNode;
   options: { value: string; label: string }[];
+  ref?: React.Ref<HTMLSelectElement>;
 }
 
-export default function Select({ label, icon, id, options, ...props }: SelectProps) {
+export default function Select({ label, icon, id, options, ref, ...props }: SelectProps) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-xs font-semibold text-gray-700 block">
@@ -20,6 +21,7 @@ export default function Select({ label, icon, id, options, ...props }: SelectPro
         )}
         <select
           id={id}
+          ref={ref}
           {...props}
           className={`w-full ${
             icon ? "pl-10" : "pl-4"

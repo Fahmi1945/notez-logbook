@@ -5,6 +5,11 @@ import { API_ENDPOINTS } from "@/lib/constants";
 
 export type ReviewStatus = "approved" | "rejected";
 
+export interface EvaluatePayload {
+  status: ReviewStatus;
+  feedback?: string;
+}
+
 /**
  * API layer untuk halaman /mentor/review.
  */
@@ -32,9 +37,8 @@ export const mentorReviewApi = {
     status: ReviewStatus,
     comment?: string
   ): Promise<ApiResponse<LogbookEntry>> => {
-    const payload: Record<string, string> = { status };
+    const payload: EvaluatePayload = { status };
     if (comment) {
-      payload.comment = comment;
       payload.feedback = comment;
     }
 

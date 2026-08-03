@@ -3,6 +3,7 @@ import { mentorReviewApi, ReviewStatus } from "@/lib/api/mentor-review";
 import { useUIStore } from "@/store/ui-store";
 import { LogbookEntry } from "@/types/entry";
 import { reviewActionSchema } from "@/lib/validators/review.schema";
+import { MESSAGES } from "@/config/messages";
 
 /**
  * Hook untuk halaman antrean: /mentor/review
@@ -22,7 +23,7 @@ export function useReviewQueue() {
       setEntries(res.data || []);
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } } };
-      const message = errorObj.response?.data?.message || "Gagal memuat antrean review.";
+      const message = errorObj.response?.data?.message || MESSAGES.REVIEW.QUEUE_FETCH_FAILED;
       setError(message);
       showToast(message, "error");
     } finally {
@@ -31,28 +32,8 @@ export function useReviewQueue() {
   }, [showToast]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    (async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await mentorReviewApi.getQueue();
-        if (isMounted) setEntries(res.data || []);
-      } catch (err: unknown) {
-        const errorObj = err as { response?: { data?: { message?: string } } };
-        if (isMounted) {
-          setError(errorObj.response?.data?.message || "Gagal memuat antrean review.");
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    fetchQueue();
+  }, [fetchQueue]);
 
   return { entries, isLoading, error, refetch: fetchQueue };
 }
@@ -77,36 +58,15 @@ export function useReviewDetail(id: string | number | undefined) {
       setEntry(res.data);
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } } };
-      setError(errorObj.response?.data?.message || "Gagal memuat detail entri.");
+      setError(errorObj.response?.data?.message || MESSAGES.REVIEW.DETAIL_FETCH_FAILED);
     } finally {
       setIsLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
-    if (!id) return;
-    let isMounted = true;
-
-    (async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await mentorReviewApi.getById(id);
-        if (isMounted) setEntry(res.data);
-      } catch (err: unknown) {
-        const errorObj = err as { response?: { data?: { message?: string } } };
-        if (isMounted) {
-          setError(errorObj.response?.data?.message || "Gagal memuat detail entri.");
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
+    fetchDetail();
+  }, [fetchDetail]);
 
   /**
    * Kirim aksi review (approved/rejected) lewat endpoint evaluate tunggal.
@@ -118,7 +78,7 @@ export function useReviewDetail(id: string | number | undefined) {
 
     let finalComment = comment?.trim();
     if (status === "approved" && !finalComment) {
-      finalComment = "Disetujui tanpa catatan";
+      finalComment = MESSAGES.REVIEW.DEFAULT_APPROVE_NOTE;
     }
     
     const validation = reviewActionSchema.safeParse({ status, comment: finalComment });
@@ -139,17 +99,15 @@ export function useReviewDetail(id: string | number | undefined) {
       setEntry(res.data);
       showToast(
         res.message ||
-          (status === "approved" ? "Entri berhasil disetujui." : "Entri berhasil ditolak."),
+          (status === "approved" ? MESSAGES.REVIEW.APPROVE_SUCCESS : MESSAGES.REVIEW.REJECT_SUCCESS),
         "success"
       );
       return res.data;
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { errors?: unknown; message?: string } } };
       const apiData = errorObj.response?.data;
-      
-      console.error("DEBUG API ERROR:", apiData);
 
-      let message = `Gagal ${status === "approved" ? "menyetujui" : "menolak"} entri.`;
+      let message = status === "approved" ? MESSAGES.REVIEW.APPROVE_FAILED : MESSAGES.REVIEW.REJECT_FAILED;
       if (apiData) {
         if (apiData.errors) {
           message = typeof apiData.errors === "string" ? apiData.errors : JSON.stringify(apiData.errors);

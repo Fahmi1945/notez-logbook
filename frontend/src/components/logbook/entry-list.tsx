@@ -20,6 +20,7 @@ import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { entriesApi } from "@/lib/api/entries";
 import { useUIStore } from "@/store/ui-store";
+import { MESSAGES } from "@/config/messages";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -60,10 +61,11 @@ function SubmitButton({
     setLoading(true);
     try {
       await entriesApi.submit(entryId);
-      showToast("Logbook berhasil disubmit ke mentor.", "success");
+      showToast(MESSAGES.LOGBOOK.SUBMIT_SUCCESS, "success");
       onSuccess?.();
-    } catch {
-      showToast("Gagal submit logbook. Coba lagi.", "error");
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } };
+      showToast(errorObj.response?.data?.message || MESSAGES.LOGBOOK.ACTION_FAILED, "error");
     } finally {
       setLoading(false);
     }
@@ -268,7 +270,10 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                         {canModify ? (
                           <>
                             <SubmitButton entryId={entry.id} onSuccess={handleSubmitSuccess} />
-                            <ActionMenu entryId={entry.id} onDelete={(e) => openConfirm(entry.id, e)} />
+                            <ActionMenu 
+                              entryId={entry.id} 
+                              onDelete={(e) => openConfirm(entry.id, e)} 
+                            />
                           </>
                         ) : (
                           <span className="text-gray-300 text-xs">—</span>
@@ -330,7 +335,10 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                   {canModify && (
                     <div className="flex items-center gap-2">
                       <SubmitButton entryId={entry.id} onSuccess={handleSubmitSuccess} />
-                      <ActionMenu entryId={entry.id} onDelete={(e) => openConfirm(entry.id, e)} />
+                      <ActionMenu 
+                        entryId={entry.id} 
+                        onDelete={(e) => openConfirm(entry.id, e)} 
+                      />
                     </div>
                   )}
                 </div>
