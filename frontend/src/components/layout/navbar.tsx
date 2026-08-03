@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { List, Bell } from "@phosphor-icons/react";
+import { List } from "@phosphor-icons/react";
 import { useAuth } from "@/hooks/use-auth";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 export function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
   const { user } = useAuth();
@@ -27,11 +28,7 @@ export function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
       {/* Kanan: Notifikasi & Profil Singkat */}
       <div className="flex items-center gap-4">
         {/* Ikon Notifikasi */}
-        <button className="relative p-2 text-gray-400 hover:text-brand-primary transition-colors rounded-full hover:bg-brand-soft/50">
-          <Bell className="w-6 h-6" weight="regular" />
-          {/* Badge merah jika ada notifikasi baru */}
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-status-rejected rounded-full border-2 border-brand-white"></span>
-        </button>
+        <NotificationBell />
 
         {/* Garis Pemisah */}
         <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>

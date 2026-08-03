@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { entrySchema, EntryFormInput } from "@/lib/validators/entry.schema";
 import { Button } from "@/components/ui/button";
@@ -70,11 +70,16 @@ export default function EntryForm({
   const [localExistingFileName, setLocalExistingFileName] = useState(existingFileName);
   const [isAttachmentRemoved, setIsAttachmentRemoved] = useState(false);
 
-  // Sync dengan props jika berubah
-  useEffect(() => {
+  // Sync dengan props jika berubah saat render (React recommended pattern)
+  const [prevAttachmentProps, setPrevAttachmentProps] = useState({ existingAttachmentUrl, existingFileName });
+  if (
+    prevAttachmentProps.existingAttachmentUrl !== existingAttachmentUrl ||
+    prevAttachmentProps.existingFileName !== existingFileName
+  ) {
+    setPrevAttachmentProps({ existingAttachmentUrl, existingFileName });
     setLocalExistingAttachmentUrl(existingAttachmentUrl);
     setLocalExistingFileName(existingFileName);
-  }, [existingAttachmentUrl, existingFileName]);
+  }
 
   const handleRemoveExistingAttachment = () => {
     setLocalExistingAttachmentUrl(undefined);
