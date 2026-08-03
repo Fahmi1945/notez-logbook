@@ -88,16 +88,36 @@ jobs:
             # PERBAIKAN 3: Menjalankan test secara runInBand khusus di CI
             npm test -- --ci --runInBand
 
+  Cek-Keamanan:
+    runs-on: ubuntu-latest
+    # Menggunakan container docker semgrep agar tidak perlu install manual
+    container:
+      image: semgrep/semgrep
+    steps:
+      - name: Ambil Kodingan Terbaru
+        uses: actions/checkout@v3
+
+      - name: Scan Kode dengan Semgrep CI
+        env:
+          # Memanggil rahasia token dari Gitea Secrets
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        # Perintah ini otomatis scan seluruh folder (frontend & backend sekaligus)
+        run: semgrep ci
+
   # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:
     runs-on: ubuntu-latest
-    needs: [Cek-Frontend, Cek-Backend]
+    
+    needs: [Cek-Frontend, Cek-Backend, Cek-Keamanan]
+    
+    if: always() 
+    
     steps:
       - name: Laporan Sukses
-        # Hanya mencetak ini jika Frontend DAN Backend sukses
-        if: ${{ needs.Cek-Frontend.result == 'success' && needs.Cek-Backend.result == 'success' }}
-        run: echo "KELAS KINGG! Pipeline aman, semua tes, linter, dan build lolos!"
+        # Syarat sukses sekarang nambah: Semgrep juga harus sukses
+        if: ${{ needs.Cek-Frontend.result == 'success' && needs.Cek-Backend.result == 'success' && needs.Cek-Keamanan.result == 'success' }}
+        run: echo "KELAS KINGG! Pipeline aman, semua tes, linter, build, dan SCAN KEAMANAN lolos!"
 
       - name: Laporan Gagal
-        if: failure()
-        run: echo "Waduh bro, build-nya gagal. Buruan cek terminal lu!"
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: echo "Waduh bro, ada yang gagal nih (entah build atau keamanannya). Buruan cek terminal lu!"

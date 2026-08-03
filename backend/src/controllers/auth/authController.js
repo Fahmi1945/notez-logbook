@@ -91,6 +91,7 @@ const loginUser = async (req, res) => {
       role: user.role,
     };
 
+    
     const token = jwt.sign(payload, secretKey, { expiresIn: "24h" });
     const expired_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
