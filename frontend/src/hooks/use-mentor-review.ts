@@ -32,6 +32,7 @@ export function useReviewQueue() {
   }, [showToast]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchQueue();
   }, [fetchQueue]);
 
@@ -65,6 +66,7 @@ export function useReviewDetail(id: string | number | undefined) {
   }, [id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDetail();
   }, [fetchDetail]);
 

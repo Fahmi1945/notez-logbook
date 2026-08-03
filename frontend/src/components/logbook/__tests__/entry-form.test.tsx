@@ -55,7 +55,7 @@ describe("EntryForm", () => {
 
   // --- RENDER AWAL ---
   it("harus merender semua field form", () => {
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     expect(screen.getByLabelText(/Tanggal Kegiatan/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Judul Kegiatan/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Deskripsi Pekerjaan/i)).toBeInTheDocument();
@@ -69,19 +69,19 @@ describe("EntryForm", () => {
       description: "Melakukan code review untuk fitur mentorship.",
       obstacles: "Tidak ada hambatan",
     };
-    render(<EntryForm initialData={initialData} onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm initialData={initialData} onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     expect(screen.getByDisplayValue("Review Code Sprint 3")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Melakukan code review untuk fitur mentorship.")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Tidak ada hambatan")).toBeInTheDocument();
   });
 
   it("harus menampilkan tombol 'Simpan Draft'", () => {
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     expect(screen.getByText("Simpan Draft")).toBeInTheDocument();
   });
 
   it("harus menampilkan Spinner dan disable tombol saat isLoading=true", () => {
-    render(<EntryForm onSave={mockOnSubmit} isSaving={true} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={true} />);
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
     const buttons = screen.getAllByRole("button");
     buttons.forEach((btn) => expect(btn).toBeDisabled());
@@ -89,7 +89,7 @@ describe("EntryForm", () => {
 
   // --- VALIDASI FORM ---
   it("harus menampilkan error jika title kosong saat submit", async () => {
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     // Langsung klik tombol submit tanpa mengisi title
     fireEvent.click(screen.getByText("Simpan Draft"));
     await waitFor(() => {
@@ -99,7 +99,7 @@ describe("EntryForm", () => {
   });
 
   it("harus menampilkan error jika title kurang dari 5 karakter", async () => {
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     // Isi description valid, biarkan title pendek
     fillForm({ title: "API", description: "Deskripsi yang cukup panjang untuk lolos validasi" });
     fireEvent.click(screen.getByText("Simpan Draft"));
@@ -109,7 +109,7 @@ describe("EntryForm", () => {
   });
 
   it("harus menampilkan error jika description kosong saat submit", async () => {
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     // Isi title valid, kosongkan description
     fillForm({ title: "Judul Valid", description: "" });
     fireEvent.click(screen.getByText("Simpan Draft"));
@@ -124,7 +124,7 @@ describe("EntryForm", () => {
   // --- SUBMIT BERHASIL ---
   it("harus memanggil onSubmit dengan data yang benar jika form valid", async () => {
     mockOnSubmit.mockResolvedValue(undefined);
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     fillForm();
     fireEvent.submit(document.querySelector("form")!);
     await waitFor(() => {
@@ -142,7 +142,7 @@ describe("EntryForm", () => {
   // --- ERROR DARI SERVER ---
   it("harus menampilkan errorMsg jika onSubmit throw error", async () => {
     mockOnSubmit.mockRejectedValue(new Error("Gagal menyimpan ke server"));
-    render(<EntryForm onSave={mockOnSubmit} isSaving={false} />);
+    render(<EntryForm onSave={mockOnSubmit} onCancel={jest.fn()} isSaving={false} />);
     fillForm();
     fireEvent.submit(document.querySelector("form")!);
     await waitFor(() => {
