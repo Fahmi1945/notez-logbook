@@ -17,6 +17,7 @@ import {
   CheckCircle,
   ArrowSquareOut,
   Pencil,
+  ChatText,
 } from "@phosphor-icons/react";
 
 function AttachmentIcon({ fileName }: { fileName: string }) {
@@ -72,7 +73,8 @@ export default function LogbookDetailPage() {
     );
   }
 
-  const canEdit = entry.status === "draft" || entry.status === "rejected";
+  const canEdit = entry.status === "draft";
+  const latestFeedback = entry.feedbacks?.[0]?.comment;
 
   return (
     <div className="p-6 max-w-4xl mx-auto font-body animate-fade-in-down">
@@ -126,6 +128,41 @@ export default function LogbookDetailPage() {
 
         {/* Card Body */}
         <div className="p-6 sm:p-8 space-y-8">
+          {/* Catatan Review Mentor */}
+          {entry.status === "rejected" && (
+            <div className="flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700">
+              <WarningCircle size={18} weight="fill" className="mt-0.5 shrink-0 text-rose-500" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold mb-1">Logbook Ditolak</p>
+                {latestFeedback ? (
+                  <>
+                    <p className="text-rose-600 text-xs mb-2">Alasan penolakan dari mentor:</p>
+                    <p className="text-rose-700 text-sm leading-relaxed whitespace-pre-wrap bg-rose-100/60 rounded-lg p-3 border border-rose-200/70">
+                      {latestFeedback}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-rose-600 text-xs leading-relaxed">
+                    Logbook ini telah ditolak oleh mentor dan tidak dapat diedit atau dikirim ulang.
+                    Hubungi mentor Anda untuk informasi lebih lanjut.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {entry.status === "approved" && latestFeedback && (
+            <div className="flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+              <ChatText size={18} weight="fill" className="mt-0.5 shrink-0 text-emerald-500" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold mb-1">Catatan Mentor</p>
+                <p className="text-emerald-700 text-sm leading-relaxed whitespace-pre-wrap bg-emerald-100/60 rounded-lg p-3 border border-emerald-200/70">
+                  {latestFeedback}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Deskripsi */}
           <div>
             <h3 className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-widest flex items-center gap-2">
@@ -150,18 +187,7 @@ export default function LogbookDetailPage() {
             </div>
           )}
 
-          {/* Pesan Mentor (jika ada)
-          {entry.message && (
-            <div>
-              <h3 className="text-xs font-semibold text-brand-primary mb-3 uppercase tracking-widest flex items-center gap-2">
-                <ChatText size={14} weight="fill" />
-                Catatan Review Mentor
-              </h3>
-              <div className="p-5 bg-brand-primary/5 rounded-xl border border-brand-primary/10 text-brand-dark leading-relaxed whitespace-pre-wrap text-sm">
-                {entry.message}
-              </div>
-            </div>
-          )} */}
+
 
           {/* Lampiran (jika ada) */}
           {entry.attachments && entry.attachments.length > 0 && (

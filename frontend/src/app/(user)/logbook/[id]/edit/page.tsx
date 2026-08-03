@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import EntryForm from "@/components/logbook/entry-form";
 import { entriesApi } from "@/lib/api/entries";
 import { EntryFormInput } from "@/lib/validators/entry.schema";
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowLeft, WarningCircle } from "@phosphor-icons/react";
 import Link from "next/link";
 import LogbookFormSkeleton from "@/components/logbook/logbook-form-skeleton";
 
@@ -15,6 +15,7 @@ export default function EditLogbookPage() {
   const id = params.id as string;
 
   const [initialData, setInitialData] = useState<EntryFormInput | null>(null);
+  const [entryStatus, setEntryStatus] = useState<string | null>(null);
   const [existingAttachmentUrl, setExistingAttachmentUrl] = useState<string | undefined>();
   const [existingFileName, setExistingFileName] = useState<string | undefined>();
   const [isFetching, setIsFetching] = useState(true);
@@ -32,6 +33,7 @@ export default function EditLogbookPage() {
           description: res.data.description,
           obstacles: res.data.obstacles || "",
         });
+        setEntryStatus(res.data.status);
         // Simpan info lampiran existing jika ada
         if (res.data.attachments && res.data.attachments.length > 0) {
           const att = res.data.attachments[0];
@@ -94,6 +96,23 @@ export default function EditLogbookPage() {
           >
             Kembali ke Daftar
           </button>
+        </div>
+      ) : entryStatus === "rejected" ? (
+        <div className="flex items-start gap-3 p-5 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-700 animate-fade-in-down">
+          <WarningCircle size={20} weight="fill" className="mt-0.5 shrink-0 text-rose-500" />
+          <div>
+            <p className="font-semibold font-heading mb-1">Logbook Tidak Dapat Diedit</p>
+            <p className="text-rose-600 text-xs leading-relaxed mb-4">
+              Logbook ini telah ditolak oleh mentor dan tidak dapat diedit atau dikirim ulang.
+              Hubungi mentor Anda untuk informasi lebih lanjut.
+            </p>
+            <button
+              onClick={() => router.push("/logbook")}
+              className="px-5 py-2 bg-white border border-rose-200 rounded-xl text-xs hover:bg-rose-50 transition-colors font-semibold text-rose-700 shadow-sm"
+            >
+              Kembali ke Daftar Logbook
+            </button>
+          </div>
         </div>
       ) : (
         initialData && (

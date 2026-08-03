@@ -1,24 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-// Pastikan kamu sudah menginstal jose: npm install jose
-import { jwtVerify } from 'jose'; 
 
 interface TokenPayload {
   role?: 'user' | 'mentor';
   [key: string]: unknown;
 }
 
-// Rahasia untuk memverifikasi token (Bisa ambil dari .env)
-const JWT_SECRET = process.env.JWT_SECRET || 'rahasia-super-kuat';
-
-// Fungsi terpisah untuk memverifikasi token menggunakan jose (Aman untuk Next.js Edge Runtime)
-async function verifyToken(token: string): Promise<TokenPayload | null> {
+function decodeJwtPayload(token: string): TokenPayload | null {
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1]));
     return payload as TokenPayload;
-  } catch (error) {
-    // Token invalid, expired, atau signature tidak cocok
+  } catch {
     return null;
   }
 }
@@ -35,16 +29,16 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/logbook') ||
     pathname.startsWith('/profile');
 
-  // Verifikasi token (jika ada)
-  const payload = token ? await verifyToken(token) : null;
+  const payload = token ? decodeJwtPayload(token) : null;
   const isValidSession = !!payload;
+  const role = payload?.role;
 
-  // 1. Sudah login tapi membuka halaman Auth (/login, /register) -> Lempar ke dashboard
+  // Sudah login (token valid) tapi buka /login atau /register -> lempar ke dashboard
   if (isAuthPage && isValidSession) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // 2. Belum login / token invalid tapi membuka rute terproteksi -> Lempar ke /login
+  // Belum login buka rute terproteksi -> lempar ke /login
   if (isProtectedRoute && !isValidSession) {
     const response = NextResponse.redirect(new URL('/login', request.url));
     // Bersihkan cookie yang sudah tidak valid biar tidak nyangkut di browser
@@ -52,26 +46,22 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // 3. Pengecekan Role (Role-Based Access Control)
-  if (isValidSession && payload) {
-    const role = payload.role;
+  // Role tidak cocok dengan prefix rute -> lempar ke dashboard
+  if (isValidSession && role) {
     const isMentorRoute = pathname.startsWith('/mentor');
     const isUserOnlyRoute = pathname.startsWith('/logbook');
 
     if (isMentorRoute && role !== 'mentor') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
-    
     if (isUserOnlyRoute && role !== 'user') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
-  // Jika semua lolos, lanjutkan perjalanan!
   return NextResponse.next();
 }
 
-// Konfigurasi wajib berada di luar (top-level)
 export const config = {
   matcher: [
     '/login',
