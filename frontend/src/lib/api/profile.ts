@@ -28,9 +28,8 @@ export const profileApi = {
     const response = await apiClient.put<ChangePasswordResponse>(
       API_ENDPOINTS.PROFILE.CHANGE_PASSWORD,
       {
-        currentPassword: data.currentPassword,
+        oldPassword: data.currentPassword,
         newPassword: data.newPassword,
-        confirmPassword: data.confirmPassword,
       }
     );
     return response.data;
