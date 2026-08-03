@@ -23,6 +23,7 @@ export interface LogbookEntry {
   description: string;
   obstacles: string | null;
   status: LogbookStatus;
+  feedbacks?: { comment: string }[];
   attachments?: Attachment[];
   user?: {
     id: number;

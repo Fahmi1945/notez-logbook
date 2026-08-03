@@ -12,7 +12,6 @@ import {
   DotsThreeVertical,
   PaperPlaneTilt,
 } from "@phosphor-icons/react";
-import { WarningIcon } from "@/components/ui/warning-icon";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,9 +31,8 @@ interface EntryListProps {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Cek apakah entri boleh di-edit / hapus / submit */
-const isModifiable = (status: LogbookStatus) =>
-  status === "draft" || status === "rejected";
+/** Cek apakah entri boleh di-modifikasi (Submit, Edit, Hapus) */
+const isModifiable = (status: LogbookStatus) => status === "draft";
 
 /** Format tanggal ke format Indonesia */
 const formatDate = (dateStr: string, style: "short" | "long" = "short") =>
@@ -138,14 +136,6 @@ function AttachmentCount({ count }: { count: number }) {
   );
 }
 
-function RevisionNote({ obstacles }: { obstacles: string }) {
-  return (
-    <p className="text-rose-500 text-[11px] mt-2 font-medium flex items-start gap-1.5">
-      <WarningIcon size={13} className="text-rose-500 mt-0.5" />
-      <span>Revisi: {obstacles}</span>
-    </p>
-  );
-}
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
@@ -255,9 +245,6 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                       <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">
                         {entry.description}
                       </p>
-                      {entry.status === "rejected" && entry.obstacles && (
-                        <RevisionNote obstacles={entry.obstacles} />
-                      )}
                     </TableCell>
 
                     {/* Lampiran */}
@@ -325,9 +312,6 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                   {entry.description}
                 </p>
 
-                {entry.status === "rejected" && entry.obstacles && (
-                  <RevisionNote obstacles={entry.obstacles} />
-                )}
 
                 {/* Bottom row */}
                 <div
