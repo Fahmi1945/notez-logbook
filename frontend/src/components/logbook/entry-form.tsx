@@ -132,7 +132,10 @@ export default function EntryForm({
       }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      setErrorMsg(e.response?.data?.message || MESSAGES.LOGBOOK.ACTION_FAILED);
+      const message =
+        e.response?.data?.message ||
+        (err instanceof Error ? err.message : MESSAGES.LOGBOOK.ACTION_FAILED);
+      setErrorMsg(message);
     }
   };
 

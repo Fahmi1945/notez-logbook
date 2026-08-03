@@ -8,7 +8,6 @@ import { LogbookDetail } from "@/components/logbook/logbook-detail";
 import LogbookDetailSkeleton from "@/components/logbook/logbook-detail-skeleton";
 import { entriesApi } from "@/lib/api/entries";
 import { LogbookEntry } from "@/types/entry";
-import { useUIStore } from "@/store/ui-store";
 import { MESSAGES } from "@/config/messages";
 
 export default function LogbookDetailPage() {
