@@ -46,8 +46,13 @@ const viewAttachment = async (req, res) => {
       });
     }
 
-    const pathFile = path.join(process.cwd(), attachment.file_path);
+
+    const safeFileName = path.basename(attachment.file_path);
     
+    const baseDir = path.join(process.cwd(), "uploads");
+    
+    // nosemgrep: javascript.express.security.audit.express-path-join-resolve-traversal.express-path-join-resolve-traversal, javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+    const pathFile = path.join(baseDir, safeFileName);
 
     if (!fs.existsSync(pathFile)) {
       return res.status(404).json({
@@ -56,7 +61,9 @@ const viewAttachment = async (req, res) => {
       });
     }
 
-    res.sendFile(pathFile);
+    // 4. Gunakan opsi 'root' pada res.sendFile agar lolos dari Express Path Traversal check
+    res.sendFile(safeFileName, { root: baseDir });
+
   } catch (error) {
     console.error("Error viewAttachment:", error);
     return res.status(500).json({

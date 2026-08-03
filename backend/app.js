@@ -2,6 +2,9 @@ const express = require("express");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
+const csurf = require('csurf');
+const cookieParser = require('cookie-parser');
+
 const authRoutes = require("./src/routes/auth/authRoutes");
 const logbookRoutes = require("./src/routes/logbook/logbookRoutes");
 const mentorshipRoutes = require("./src/routes/user/mentorshipRoutes");
@@ -11,6 +14,14 @@ const notificationRoutes = require("./src/routes/notification/notificationRoutes
 const userRoutes = require("./src/routes/user/userRoutes");
 
 const app = express();
+
+// CSRF butuh cookie-parser atau express-session
+app.use(cookieParser());
+
+// Pasang perlindungan CSRF
+const csrfProtection = csurf({ cookie: true });
+app.use(csrfProtection);
+
 // app.set("trust proxy", true);
 app.use(
   cors({

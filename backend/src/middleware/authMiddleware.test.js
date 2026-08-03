@@ -53,6 +53,7 @@ describe("Middleware: requiredAuth (menggunakan express-jwt)", () => {
 
   it("harus memanggil next() tanpa error dan menyimpan data token di req.auth", async () => {
     const dataUser = { id: 99, role: "admin" };
+    // nosemgrep: javascript.jsonwebtoken.security.jwt-hardcode.hardcoded-jwt-secret
     const validToken = jwt.sign(dataUser, process.env.JWT_SECRET, { 
       algorithm: "HS256" 
     });

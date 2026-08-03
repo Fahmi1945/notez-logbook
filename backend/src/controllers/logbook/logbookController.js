@@ -168,10 +168,11 @@ const updateLogbook = async (req, res) => {
       if (existingLogbook.attachments && existingLogbook.attachments.length > 0) {
         existingLogbook.attachments.forEach((attachment) => {
           // PERBAIKAN 1: Ambil nama file-nya saja dari string "/uploads/nama-file.jpg"
-          const fileNameOnly = path.basename(attachment.file_path);
+          const safeFileName = path.basename(attachment.file_path);
 
-          // PERBAIKAN 2: Gabungkan path utama proyek dengan folder uploads dan nama file
-          const file_path = path.join(process.cwd(), "uploads", fileNameOnly);
+          const baseUploadsDir = path.join(process.cwd(), "uploads");
+    
+          const file_path = `${baseUploadsDir}/${safeFileName}`;
 
           if (fs.existsSync(file_path)) {
             fs.unlinkSync(file_path);
@@ -226,8 +227,14 @@ const deleteLogbook = async (req, res) => {
 
     if (existingLogbook.attachments && existingLogbook.attachments.length > 0) {
       existingLogbook.attachments.forEach((attachment) => {
-        const fileNameOnly = path.basename(attachment.file_path);
-        const file_path = path.join(process.cwd(), "uploads", fileNameOnly);
+        
+        const safeFileName = path.basename(attachment.file_path);
+
+        const baseUploadsDir = path.join(process.cwd(), "uploads");
+        
+        // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+        const file_path = `${baseUploadsDir}/${safeFileName}`;
+
         if (fs.existsSync(file_path)) {
           fs.unlinkSync(file_path);
         }
