@@ -12,7 +12,7 @@ export function QuickActions() {
         Aksi Cepat
       </h2>
       <div className="flex flex-col gap-3">
-        <Link href="/logbook/new">
+        <Link href="/logbook?action=new">
           <Button
             variant="primary"
             className="w-full flex justify-start gap-3"
