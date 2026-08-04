@@ -18,24 +18,41 @@ const app = express();
 // CSRF butuh cookie-parser atau express-session
 app.use(cookieParser());
 
-// Pasang perlindungan CSRF
-const csrfProtection = csurf({ cookie: true });
-app.use(csrfProtection);
-
 // app.set("trust proxy", true);
 app.use(
   cors({
     origin: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-XSRF-TOKEN", "X-CSRF-Token"],
     credentials: true,
   }),
 );
+
+// Pasang perlindungan CSRF
+const csrfProtection = csurf({ 
+  cookie: {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true
+  } 
+});
+app.use(csrfProtection);
 
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
+
+// Route untuk mengambil CSRF token
+app.get("/api/csrf-token", (req, res) => {
+  const token = req.csrfToken();
+  res.cookie("XSRF-TOKEN", token, {
+    httpOnly: false, // Perlu false agar bisa dibaca oleh JS/Axios di frontend
+    secure: true,
+    sameSite: "none",
+  });
+  res.status(200).json({ csrfToken: token });
+});
 
 // Route utama
 app.get("/", (req, res) => {

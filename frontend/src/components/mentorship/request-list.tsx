@@ -5,16 +5,17 @@ import React, { useState } from "react";
 import { Clock, CheckCircle, XCircle, ChatTeardropText } from "@phosphor-icons/react";
 import { MentorshipHistory } from "@/types/mentorship";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 interface RequestListProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  history: (MentorshipHistory & Record<string, any>)[]; 
+  history: MentorshipHistory[]; 
 }
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
-  const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
-  return new Date(dateString).toLocaleDateString("id-ID", options);
+  return format(new Date(dateString), "dd MMM yyyy", { locale: idLocale });
 }
 
 export function RequestList({ history }: RequestListProps) {
@@ -40,15 +41,15 @@ export function RequestList({ history }: RequestListProps) {
         </TableHeader>
         <TableBody>
           {history.map((req) => {
-              const targetDate = req.status === "pending" ? req.createdAt : req.updatedAt;
-              const isExpanded = expandedId === req.requestId;
+              const targetDate = req.createdAt;
+              const isExpanded = expandedId === req.id;
 
               return (
                 // Wajib pakai React.Fragment karena 1 loop me-return 2 elemen <tr>
-                <React.Fragment key={req.requestId}>
+                <React.Fragment key={req.id}>
                   {/* BARIS UTAMA (BISA DIKLIK) */}
                   <TableRow 
-                    onClick={() => toggleRow(req.requestId)}
+                    onClick={() => toggleRow(req.id)}
                     // Tambahkan cursor-pointer supaya kursor berubah jadi tangan
                     className="cursor-pointer group" 
                   >
@@ -62,19 +63,19 @@ export function RequestList({ history }: RequestListProps) {
                     
                     <TableCell>
                       {req.status === "pending" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                        <Badge status="submitted" className="px-2.5 py-1 gap-1.5">
                           <Clock className="w-3.5 h-3.5" /> Menunggu
-                        </span>
+                        </Badge>
                       )}
                       {req.status === "accepted" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                        <Badge status="approved" className="px-2.5 py-1 gap-1.5">
                           <CheckCircle className="w-3.5 h-3.5" /> Diterima
-                        </span>
+                        </Badge>
                       )}
                       {req.status === "rejected" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                        <Badge status="rejected" className="px-2.5 py-1 gap-1.5">
                           <XCircle className="w-3.5 h-3.5" /> Ditolak
-                        </span>
+                        </Badge>
                       )}
                     </TableCell>
 

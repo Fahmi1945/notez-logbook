@@ -10,6 +10,7 @@ import {
   SquaresFour, 
   BookOpen, 
   Users, 
+  UserCircle,
   SignOut 
 } from "@phosphor-icons/react";
 import { useAuthStore } from "@/store/auth-store"; // Gunakan Zustand untuk cek role
@@ -38,6 +39,7 @@ export function Sidebar() { // Ubah nama menjadi Sidebar (umum)
     { name: "Dashboard", href: "/dashboard", icon: House },
     { name: "Logbook Saya", href: "/logbook", icon: BookBookmark },
     { name: "Mentorship", href: "/mentorship", icon: UsersThree },
+    { name: "Profil Saya", href: "/profile", icon: UserCircle },
   ];
 
   // 2. Menu Khusus MENTOR 
@@ -45,6 +47,7 @@ export function Sidebar() { // Ubah nama menjadi Sidebar (umum)
     { name: "Dashboard", href: "/mentor/dashboard", icon: SquaresFour },
     { name: "Review Logbook", href: "/mentor/review", icon: BookOpen },
     { name: "Daftar Mahasiswa", href: "/mentor/students", icon: Users },
+    { name: "Profil Saya", href: "/mentor/profile", icon: UserCircle },
   ];
 
   // 3. LOGIKA PENENTU: Cek role, lalu pilih daftar menu yang tepat

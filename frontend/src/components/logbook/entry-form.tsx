@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { MESSAGES } from "@/config/messages";
 import { entrySchema, EntryFormInput } from "@/lib/validators/entry.schema";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,8 @@ interface EntryFormProps {
   existingFileName?: string;
   /** Dipanggil saat simpan sebagai draft atau simpan perubahan */
   onSave: (data: EntryFormInput & { remove_attachment?: boolean }, files: File[]) => Promise<void>;
+  /** Dipanggil saat tombol batal diklik */
+  onCancel: () => void;
   /** Dipanggil saat submit ke mentor (hanya mode create) */
   onSubmitEntry?: (data: EntryFormInput, files: File[]) => Promise<void>;
   isSaving?: boolean;
@@ -46,8 +48,8 @@ export default function EntryForm({
   onSubmitEntry,
   isSaving = false,
   isSubmitting = false,
+  onCancel,
 }: EntryFormProps) {
-  const router = useRouter();
   const isEdit = !!initialData;
   const isBusy = isSaving || isSubmitting;
 
@@ -129,8 +131,11 @@ export default function EntryForm({
         await onSave(dataWithFlag, attachedFiles);
       }
     } catch (err: unknown) {
-      const errorObj = err as { message?: string };
-      setErrorMsg(errorObj.message || "Terjadi kesalahan saat menyimpan data.");
+      const e = err as { response?: { data?: { message?: string } } };
+      const message =
+        e.response?.data?.message ||
+        (err instanceof Error ? err.message : MESSAGES.LOGBOOK.ACTION_FAILED);
+      setErrorMsg(message);
     }
   };
 
@@ -308,7 +313,7 @@ export default function EntryForm({
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.back()}
+          onClick={onCancel}
           disabled={isBusy}
           className="text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700 gap-2 h-11 px-6 rounded-xl"
         >

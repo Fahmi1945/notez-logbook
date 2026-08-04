@@ -4,6 +4,7 @@ import { mentorshipApi } from "@/lib/api/mentorship";
 import { useUIStore } from "@/store/ui-store";
 import { LogbookEntry } from "@/types/entry";
 import { ActiveStudent } from "@/types/mentorship";
+import { MESSAGES } from "@/config/messages";
 
 interface DashboardStats {
   totalMentee: number;
@@ -46,8 +47,8 @@ export function useMentorDashboard() {
       setRecentPendingEntries(pending.slice(0, RECENT_LIMIT));
       setReviewError(null);
     } else {
-      setReviewError("Gagal memuat data antrean review.");
-      showToast("Gagal memuat data antrean review.", "error");
+      setReviewError(MESSAGES.REVIEW.DASHBOARD_REVIEW_FETCH_FAILED);
+      showToast(MESSAGES.REVIEW.DASHBOARD_REVIEW_FETCH_FAILED, "error");
     }
 
     // --- Process active students ---
@@ -58,8 +59,8 @@ export function useMentorDashboard() {
       setActiveStudents(students);
       setStudentsError(null);
     } else {
-      setStudentsError("Gagal memuat data mahasiswa aktif.");
-      showToast("Gagal memuat data mahasiswa aktif.", "error");
+      setStudentsError(MESSAGES.REVIEW.DASHBOARD_STUDENTS_FETCH_FAILED);
+      showToast(MESSAGES.REVIEW.DASHBOARD_STUDENTS_FETCH_FAILED, "error");
     }
 
     setStats({

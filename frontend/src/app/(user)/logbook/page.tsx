@@ -5,6 +5,7 @@ import { useEntries } from "@/hooks/use-entries";
 import EntryFilter from "@/components/logbook/entry-filter";
 import EntryList from "@/components/logbook/entry-list";
 import LogbookListSkeleton from "@/components/logbook/logbook-list-skeleton";
+import { Button } from "@/components/ui/button";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 export default function LogbookPage() {
@@ -100,7 +101,11 @@ export default function LogbookPage() {
         </div>
       ) : (
         <>
-          <EntryList entries={paginatedEntries} onDelete={deleteEntry} onRefresh={fetchEntries} />
+          <EntryList 
+            entries={paginatedEntries} 
+            onDelete={deleteEntry} 
+            onRefresh={fetchEntries} 
+          />
 
           {/* Pagination */}
           {filteredEntries.length > itemsPerPage && (
@@ -121,13 +126,14 @@ export default function LogbookPage() {
 
               {/* Controls */}
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                   disabled={currentPage === 1}
-                  className="p-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-brand-primary/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="p-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-brand-primary/30 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm min-w-0"
                 >
                   <CaretLeft size={15} />
-                </button>
+                </Button>
 
                 {getPageNumbers().map((page, i) =>
                   page === "..." ? (
@@ -135,27 +141,29 @@ export default function LogbookPage() {
                       ···
                     </span>
                   ) : (
-                    <button
+                    <Button
                       key={page}
+                      variant={currentPage === page ? "primary" : "outline"}
                       onClick={() => setCurrentPage(page as number)}
-                      className={`w-9 h-9 flex items-center justify-center rounded-xl text-xs font-semibold transition-all ${
+                      className={`w-9 h-9 p-0 flex items-center justify-center rounded-xl text-xs font-semibold shadow-sm min-w-0 ${
                         currentPage === page
-                          ? "bg-brand-primary text-white shadow-sm shadow-brand-primary/30"
-                          : "border border-gray-200 bg-white hover:bg-gray-50 hover:border-brand-primary/30 text-gray-600"
+                          ? "shadow-brand-primary/30"
+                          : "border-gray-200 bg-white hover:bg-gray-50 hover:border-brand-primary/30 text-gray-600"
                       }`}
                     >
                       {page}
-                    </button>
+                    </Button>
                   )
                 )}
 
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="p-2 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-brand-primary/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="p-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-brand-primary/30 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm min-w-0"
                 >
                   <CaretRight size={15} />
-                </button>
+                </Button>
               </div>
             </div>
           )}

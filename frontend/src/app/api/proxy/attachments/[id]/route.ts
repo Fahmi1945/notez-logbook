@@ -35,6 +35,21 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (data.success && data.url) {
+      try {
+        const allowedOrigin = new URL(API_BASE_URL).origin;
+        const redirectTarget = new URL(data.url);
+        if (redirectTarget.origin !== allowedOrigin) {
+          return NextResponse.json(
+            { error: "Forbidden redirect target" },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid redirect URL" },
+          { status: 400 }
+        );
+      }
       return NextResponse.redirect(data.url);
     } else {
       return NextResponse.json(
