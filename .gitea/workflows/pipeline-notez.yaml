@@ -98,20 +98,21 @@ jobs:
             npm test -- --ci --runInBand
 
   Cek-Keamanan:
-    runs-on: ubuntu-latest
-    # Menggunakan container docker semgrep agar tidak perlu install manual
-    container:
-      image: semgrep/semgrep:1
-    steps:
-      - name: Ambil Kodingan Terbaru
-        uses: actions/checkout@v4
+  runs-on: ubuntu-latest
+  
+  steps:
+    - name: Ambil Kodingan Terbaru
+      uses: actions/checkout@v3
+      # Step ini tidak akan error karena berjalan di mesin Ubuntu bawaan 
+      # runner yang sudah ada Node.js-nya.
 
-      - name: Scan Kode dengan Semgrep CI
-        env:
-          # Memanggil rahasia token dari Gitea Secrets
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-        # Perintah ini otomatis scan seluruh folder (frontend & backend sekaligus)
-        run: semgrep ci
+    - name: Scan Kode dengan Semgrep CI (Pakai Image Resmi)
+      run: |
+        docker run --rm \
+          -v "${{ github.workspace }}:/src" \
+          -e SEMGREP_APP_TOKEN="${{ secrets.SEMGREP_APP_TOKEN }}" \
+          semgrep/semgrep semgrep ci
+          # ^^^ Langsung pakai image 'semgrep/semgrep' dari internet!
 
   # Job Kedua: Hanya jalan kalau Job Pertama SUKSES
   Kirim-Notifikasi:

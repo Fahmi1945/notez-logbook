@@ -32,7 +32,7 @@ app.use(
 const csrfProtection = csurf({ 
   cookie: {
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: "none",
     secure: true
   } 
 });
