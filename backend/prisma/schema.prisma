@@ -98,6 +98,8 @@ model LogbookEntry {
   feedbacks     Feedback[]
   notifications Notification[]
 
+  @@index([user_id, activity_date])
+
   @@map("logbook_entries")
 }
 

@@ -97,6 +97,20 @@ const checkAcceptedMentorship = async (userId) => {
   });
 };
 
+const getMentorshipDetail = async (mentorshipId) => {
+  return await prisma.mentorship.findUnique({
+    where: { id: parseInt(mentorshipId) },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true }
+      },
+      mentor: {
+        select: { id: true, name: true }
+      }
+    }
+  });
+};
+
 // 🔴 PASTIKAN SEMUA FUNGSI DI-EXPORT
 module.exports = { 
   createMentorship, 
@@ -106,5 +120,6 @@ module.exports = {
   getMentorActiveTeam, 
   updateMentorshipStatus, 
   getMentorshipById, 
-  checkAcceptedMentorship 
+  checkAcceptedMentorship, 
+  getMentorshipDetail
 };

@@ -9,7 +9,8 @@ const {
 } = require("../../controllers/logbook/logbookController.js");
 const verifyToken = require("../../middleware/verifyToken.js");
 const upload = require("../../middleware/uploadsFile.js");
-const {viewAttachment} = require("../../controllers/attachment/attachmentController.js");
+const { viewAttachment } = require("../../controllers/attachment/attachmentController.js");
+const { exportMyLogbookToPDF } = require("../../controllers/export/exportController.js");
 
 const router = express.Router();
 
@@ -38,5 +39,9 @@ router.get("/:id", getLogbook);
 
 // GET ATTACHMENT
 router.get("/attachments/:id", viewAttachment);
+
+//EXPORT PDF
+router.get("/export/pdf", exportMyLogbookToPDF);
+
 
 module.exports = router;

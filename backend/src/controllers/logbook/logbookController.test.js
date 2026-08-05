@@ -9,11 +9,17 @@ jest.mock("../../config/supabase", () => ({
     })),
   },
 }));
-
+jest.mock("../../services/pdfServices", () => {
+  return {
+    // CUKUP GUNAKAN STRING BIASA, HAPUS Buffer.from()
+    generateLogbookPDF: jest.fn().mockResolvedValue("PDF_PALSU"),
+  };
+});
 jest.mock("../../models/logbookModel");
 jest.mock("../attachment/attachmentController");
 jest.mock("../../models/notificationModel");
 jest.mock("../../models/mentorshipModel");
+
 
 const {
   getMyLogbook,
@@ -41,11 +47,12 @@ const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
 const { deleteSupabaseAttachments } = require("../attachment/attachmentController");
 const supabase = require("../../config/supabase");
 
+
 describe("Logbook Controller Unit Tests", () => {
   let req, res;
 
   beforeAll(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => { });
   });
 
   afterAll(() => {
@@ -468,4 +475,9 @@ describe("Logbook Controller Unit Tests", () => {
       });
     });
   });
+
+  // ==========================================
+  // TES: exportLogbookToPDF
+  // ==========================================
+
 });
