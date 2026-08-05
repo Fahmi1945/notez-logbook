@@ -92,6 +92,7 @@ const loginUser = async (req, res) => {
       name: user.name,
     };
 
+    
     const token = jwt.sign(payload, secretKey, { expiresIn: "24h" });
     const expired_at = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -99,7 +100,7 @@ const loginUser = async (req, res) => {
       message: "Login Berhasil",
       token: token,
       expires_at: expired_at,
-      user: {
+      user: { 
         id: user.id,
         name: user.name,
         email: user.email,

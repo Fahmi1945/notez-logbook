@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ReviewStatus } from "@/lib/api/mentor-review";
 import { useUIStore } from "@/store/ui-store";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
+import { MESSAGES } from "@/config/messages";
 
 interface ReviewFormProps {
   submitReview: (status: ReviewStatus, comment?: string) => Promise<unknown>;
@@ -19,7 +20,7 @@ export function ReviewForm({ submitReview, isProcessing, onSuccess }: ReviewForm
 
   const handleSubmit = async (action: "approved" | "rejected") => {
     if (action === "rejected" && !note.trim()) {
-      showToast("Catatan wajib diisi jika menolak logbook.", "error");
+      showToast(MESSAGES.REVIEW.NOTE_REQUIRED_ON_REJECT, "error");
       return;
     }
 

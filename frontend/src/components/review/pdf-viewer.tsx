@@ -20,10 +20,12 @@ export function PdfViewer({ url, title }: PdfViewerProps) {
           <FileText size={20} weight="fill" className="text-brand-primary" />
           <span className="truncate max-w-[200px] sm:max-w-xs">{title}</span>
         </h4>
-        <Button variant="outline" size="sm" onClick={() => window.open(url, "_blank")} className="text-xs h-8">
-          Buka di Tab Baru
-          <ArrowSquareOut size={16} weight="bold" className="ml-2" />
-        </Button>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-block">
+          <Button variant="outline" size="sm" className="text-xs h-8">
+            Buka di Tab Baru
+            <ArrowSquareOut size={16} weight="bold" className="ml-2" />
+          </Button>
+        </a>
       </CardHeader>
       
       <CardContent className="flex-1 w-full h-[600px] relative p-0 border-t border-gray-100">
@@ -32,6 +34,7 @@ export function PdfViewer({ url, title }: PdfViewerProps) {
             src={`${url}#toolbar=0`} 
             className="w-full h-full"
             title={title}
+            sandbox="allow-scripts allow-same-origin"
             onError={() => setError(true)}
           />
         ) : (
@@ -39,9 +42,11 @@ export function PdfViewer({ url, title }: PdfViewerProps) {
             <WarningCircle size={48} weight="light" className="mb-4 text-gray-300" />
             <p className="font-medium text-gray-700">Gagal memuat pratinjau dokumen.</p>
             <p className="text-sm text-gray-400 mt-1 mb-4 max-w-sm">Browser Anda mungkin tidak mendukung pratinjau PDF langsung di dalam halaman.</p>
-            <Button variant="primary" onClick={() => window.open(url, "_blank")}>
-              Unduh atau Buka Langsung
-            </Button>
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              <Button variant="primary">
+                Unduh atau Buka Langsung
+              </Button>
+            </a>
           </div>
         )}
       </CardContent>

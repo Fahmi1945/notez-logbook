@@ -8,6 +8,10 @@ export const API_ENDPOINTS = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
   },
+  PROFILE: {
+    BASE: "/profile",
+    CHANGE_PASSWORD: "/change-password",
+  },
   LOGBOOK: {
     BASE: "/logbook",
     BY_ID: (id: number | string) => `/logbook/${id}`,
@@ -22,10 +26,16 @@ export const API_ENDPOINTS = {
     REJECT: (requestId: number | string) => `/mentorship/${requestId}/rejected`,
     GET_ACTIVE_STUDENTS: "/mentor/tim",
   },
-    MENTOR_REVIEW: {
+  MENTOR_REVIEW: {
     QUEUE: "/mentor/logbook",
     BY_ID: (id: number | string) => `/mentor/logbook/${id}`,
     EVALUATE: (id: number | string) => `/mentor/logbook/${id}/evaluate`,
   },
+  NOTIFICATIONS: {
+    BASE: "/notifications",
+    READ: (id: number | string) => `/notifications/${id}/read`,
+    READ_ALL: "/notifications/read-all",
+  },
 } as const;
+
 

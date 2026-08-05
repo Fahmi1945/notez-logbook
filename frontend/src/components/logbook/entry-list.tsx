@@ -12,7 +12,6 @@ import {
   DotsThreeVertical,
   PaperPlaneTilt,
 } from "@phosphor-icons/react";
-import { WarningIcon } from "@/components/ui/warning-icon";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { entriesApi } from "@/lib/api/entries";
 import { useUIStore } from "@/store/ui-store";
+import { MESSAGES } from "@/config/messages";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -32,9 +32,8 @@ interface EntryListProps {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Cek apakah entri boleh di-edit / hapus / submit */
-const isModifiable = (status: LogbookStatus) =>
-  status === "draft" || status === "rejected";
+/** Cek apakah entri boleh di-modifikasi (Submit, Edit, Hapus) */
+const isModifiable = (status: LogbookStatus) => status === "draft";
 
 /** Format tanggal ke format Indonesia */
 const formatDate = (dateStr: string, style: "short" | "long" = "short") =>
@@ -62,10 +61,11 @@ function SubmitButton({
     setLoading(true);
     try {
       await entriesApi.submit(entryId);
-      showToast("Logbook berhasil disubmit ke mentor.", "success");
+      showToast(MESSAGES.LOGBOOK.SUBMIT_SUCCESS, "success");
       onSuccess?.();
-    } catch {
-      showToast("Gagal submit logbook. Coba lagi.", "error");
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } };
+      showToast(errorObj.response?.data?.message || MESSAGES.LOGBOOK.ACTION_FAILED, "error");
     } finally {
       setLoading(false);
     }
@@ -138,14 +138,6 @@ function AttachmentCount({ count }: { count: number }) {
   );
 }
 
-function RevisionNote({ obstacles }: { obstacles: string }) {
-  return (
-    <p className="text-rose-500 text-[11px] mt-2 font-medium flex items-start gap-1.5">
-      <WarningIcon size={13} className="text-rose-500 mt-0.5" />
-      <span>Revisi: {obstacles}</span>
-    </p>
-  );
-}
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
@@ -255,9 +247,6 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                       <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">
                         {entry.description}
                       </p>
-                      {entry.status === "rejected" && entry.obstacles && (
-                        <RevisionNote obstacles={entry.obstacles} />
-                      )}
                     </TableCell>
 
                     {/* Lampiran */}
@@ -281,7 +270,10 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                         {canModify ? (
                           <>
                             <SubmitButton entryId={entry.id} onSuccess={handleSubmitSuccess} />
-                            <ActionMenu entryId={entry.id} onDelete={(e) => openConfirm(entry.id, e)} />
+                            <ActionMenu 
+                              entryId={entry.id} 
+                              onDelete={(e) => openConfirm(entry.id, e)} 
+                            />
                           </>
                         ) : (
                           <span className="text-gray-300 text-xs">—</span>
@@ -325,9 +317,6 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                   {entry.description}
                 </p>
 
-                {entry.status === "rejected" && entry.obstacles && (
-                  <RevisionNote obstacles={entry.obstacles} />
-                )}
 
                 {/* Bottom row */}
                 <div
@@ -346,7 +335,10 @@ export default function EntryList({ entries, onDelete, onRefresh }: EntryListPro
                   {canModify && (
                     <div className="flex items-center gap-2">
                       <SubmitButton entryId={entry.id} onSuccess={handleSubmitSuccess} />
-                      <ActionMenu entryId={entry.id} onDelete={(e) => openConfirm(entry.id, e)} />
+                      <ActionMenu 
+                        entryId={entry.id} 
+                        onDelete={(e) => openConfirm(entry.id, e)} 
+                      />
                     </div>
                   )}
                 </div>

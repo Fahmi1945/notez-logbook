@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 interface RequestActionProps {
   onApply: () => Promise<void>; 
@@ -33,26 +34,23 @@ export function RequestAction({ onApply }: RequestActionProps) {
 
   if (status === "pending") {
     return (
-      <button disabled className="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-emerald-100 text-emerald-700 cursor-not-allowed">
+      <Button disabled variant="success" className="cursor-not-allowed">
         Pending
-      </button>
+      </Button>
     );
   }
 
   if (status === "loading") {
     return (
-      <button disabled className="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-200 text-gray-400 cursor-not-allowed">
+      <Button disabled isLoading variant="primary" className="cursor-not-allowed">
         Mengajukan...
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
-      onClick={handleClick}
-      className="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-brand-primary text-white hover:bg-brand-dark shadow-sm hover:shadow"
-    >
+    <Button onClick={handleClick} variant="primary">
       Ajukan Bimbingan
-    </button>
+    </Button>
   );
 }

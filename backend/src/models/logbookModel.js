@@ -9,6 +9,12 @@ const getLogbookById = async (user_id) => {
     },
     include: {
       attachments: true,
+      feedbacks: {
+        orderBy: {
+          created_at: "desc",
+        },
+        take: 1,
+      },
     },
     orderBy: {
       activity_date: "desc",
@@ -59,6 +65,12 @@ const getLogbookDetail = async (logbookId, userId) => {
     },
     include: {
       attachments: true,
+      feedbacks: {
+        orderBy: {
+          created_at: "desc",
+        },
+        take: 1,
+      },
     },
   });
 };

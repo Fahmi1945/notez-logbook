@@ -2,17 +2,18 @@ const express = require("express");
 const router = express.Router();
 const { requiredAuth } = require("../../middleware/authMiddleware");
 // Import controller notifikasi
-const { getMyNotifications, markAsRead } = require("../../controllers/notification/notificationController");
+const { getMyNotifications, markAsRead, markAllAsRead } = require("../../controllers/notification/notificationController");
 
 // 🛡️ Pasang middleware 'verifyToken' ke seluruh endpoint di bawah ini
 router.use(requiredAuth);
 
-// 1. Ambil daftar notifikasi milik user yang sedang login
-// Endpoint: GET /api/notifications
+// Ambil daftar notifikasi milik user yang sedang login
 router.get("/", getMyNotifications);
 
-// 2. Tandai notifikasi sebagai sudah dibaca
-// Endpoint: PATCH /api/notifications/:id/read
+// Tandai notifikasi sebagai sudah dibaca
 router.patch("/:id/read", markAsRead);
+
+// Tandai semua notifikasi sebagai sudah dibaca
+router.patch("/read-all", markAllAsRead);
 
 module.exports = router;

@@ -6,6 +6,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "danger" | "ghost" | "success";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 export function Button({
@@ -15,6 +16,7 @@ export function Button({
   isLoading = false,
   disabled,
   children,
+  ref,
   ...props
 }: ButtonProps) {
   const baseStyles = "inline-flex items-center justify-center font-semibold transition-all duration-200 active:scale-95 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap";
@@ -38,6 +40,7 @@ export function Button({
     <button
       className={cn(baseStyles, variants[variant], sizes[size], className)}
       disabled={disabled || isLoading}
+      ref={ref}
       {...props}
     >
       {isLoading && <Spinner size="sm" className="mr-2" />}
