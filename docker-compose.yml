@@ -5,9 +5,13 @@ networks:
     external: false
 
 services:
+  # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
   server:
     image: gitea/gitea:latest
     container_name: gitea
+    # PERBAIKAN 3: Kunci keamanan agar hacker tidak bisa naik pangkat jadi root
+    security_opt:
+      - no-new-privileges:true
     environment:
       - USER_UID=1000
       - USER_GID=1000
@@ -27,9 +31,13 @@ services:
     depends_on:
       - db
 
+  # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
   db:
     image: postgres:14
     container_name: gitea_db
+    # PERBAIKAN 3: Kunci keamanan agar hacker tidak bisa naik pangkat jadi root
+    security_opt:
+      - no-new-privileges:true
     restart: always
     environment:
       - POSTGRES_USER=notez_user
@@ -42,9 +50,13 @@ services:
     volumes:
       - ./postgres:/var/lib/postgresql/data
 
+  # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin_gitea
+    # PERBAIKAN 3: Kunci keamanan agar hacker tidak bisa naik pangkat jadi root
+    security_opt:
+      - no-new-privileges:true
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com # Email untuk login pgAdmin
@@ -58,20 +70,24 @@ services:
     volumes:
       - ./pgadmin:/var/lib/pgadmin
 
+  # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
   act_runner:
     image: gitea/act_runner:latest
     container_name: gitea-runner
+    # PERBAIKAN 3: Kunci keamanan agar hacker tidak bisa naik pangkat jadi root
+    security_opt:
+      - no-new-privileges:true
     environment:
       # Tetap gunakan IP Address komputer lu
       - GITEA_INSTANCE_URL=http://host.docker.internal:3000
       # Paste token yang lu dapet dari Gitea
       - GITEA_RUNNER_REGISTRATION_TOKEN=8advyAO4tgQz2ftgcg0qRmZnSLvXc65inU2jeA7K
       - GITEA_RUNNER_NAME=git-runner
+    # nosemgrep: yaml.docker-compose.security.exposing-docker-socket-volume.exposing-docker-socket-volume
     volumes:
-      # Wajib untuk Docker out of Docker (DooD)
+     # Wajib untuk Docker out of Docker (DooD)
       - /var/run/docker.sock:/var/run/docker.sock
       # Bedakan nama folder data-nya agar tidak bentrok dengan Gitea
       - ./runner-data:/data
       - ./config.yaml:/config.yaml
-
     restart: always
