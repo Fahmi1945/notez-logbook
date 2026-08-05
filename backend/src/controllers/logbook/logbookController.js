@@ -9,10 +9,7 @@ const {
 } = require("../../models/logbookModel");
 const { createNotificationData } = require("../../models/notificationModel");
 const { checkAcceptedMentorship } = require("../../models/mentorshipModel");
-
-
 const { deleteSupabaseAttachments } = require("../attachment/attachmentController");
-
 const supabase = require("../../config/supabase");
 
 // GET MY LOGBOOK
@@ -123,7 +120,7 @@ const createLogbook = async (req, res) => {
       data: logbook,
     });
 
-  } catch (error) { // 
+  } catch (error) { //
     console.error(error);
     return res.status(500).json({
       error: "INTERNAL_SERVER_ERROR",
@@ -251,6 +248,7 @@ const updateLogbook = async (req, res) => {
     });
   }
 };
+
 //delete logbook
 const deleteLogbook = async (req, res) => {
   try {
@@ -352,6 +350,9 @@ const submitLogbook = async (req, res) => {
     });
   }
 };
+
+//export Logbook
+
 
 module.exports = {
   getMyLogbook,

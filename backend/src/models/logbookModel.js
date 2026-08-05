@@ -88,6 +88,60 @@ const deleteLogbookEntry = async (logbookId) => {
   });
 };
 
+
+const getLogbooksForExport = async (userId, startDate, endDate) => {
+  // 1. Siapkan kondisi dasar (hanya milik user ini & status approved)
+  const queryConditions = {
+    user_id: parseInt(userId), // Sesuaikan jika di schema Anda menggunakan user_id
+    status: "approved"
+  };
+
+  // 2. Tambahkan filter tanggal JIKA user mengirimkan parameternya
+  if (startDate || endDate) {
+    queryConditions.activity_date = {}; // Inisialisasi object tanggal
+
+    if (startDate) {
+      // gte = greater than or equal (Lebih dari sama dengan startDate)
+      queryConditions.activity_date.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+      // lte = less than or equal (Kurang dari sama dengan endDate)
+      // Tambahkan waktu 23:59:59 agar mencakup waktu sampai akhir hari tersebut
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      queryConditions.activity_date.lte = endOfDay;
+    }
+  }
+
+  // 3. Eksekusi query ke database
+  return await prisma.logbookEntry.findMany({
+    where: queryConditions,
+    orderBy: { activity_date: "asc" }, // Urutkan dari terlama ke terbaru
+    include: {
+      attachments: true, // Bawa serta relasi attachment
+      feedbacks: true,
+    }
+  });
+};
+
+// Tambahkan fungsi ini
+const getAllLogbooksByUserId = async (userId) => {
+  return await prisma.logbookEntry.findMany({ // <--- SESUAIKAN KATA 'logbookEntry' DENGAN YANG ADA DI FUNGSI LAIN
+    where: {
+      user_id: parseInt(userId), // Jika error, ganti userId menjadi user_id (sesuai schema Anda)
+      status: "approved",
+    },
+    orderBy: { activity_date: "asc" }, // Urutkan dari yang terlama ke terbaru
+    include: {
+      attachments: true,
+      feedbacks: true,
+    }
+  });
+};
+
+
+
 module.exports = {
   getLogbookById,
   createLogbookEntry,
@@ -96,4 +150,6 @@ module.exports = {
   deleteLogbookEntry,
   getLogbookByIdAndUser,
   updateLogbookStatusToSubmitted,
+  getAllLogbooksByUserId,
+  getLogbooksForExport,
 };
