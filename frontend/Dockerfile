@@ -19,4 +19,5 @@ RUN npm run build
 EXPOSE 3000
 
 # 7. Jalankan aplikasi
+USER node
 CMD ["npm", "start"]
