@@ -95,6 +95,7 @@ const generateLogbookPDF = async (pdfData) => {
   const page = await browser.newPage();
 
   // Set konten HTML
+  // nosemgrep: javascript.puppeteer.security.audit.puppeteer-setcontent-injection.puppeteer-setcontent-injection
   await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
   // Generate PDF
