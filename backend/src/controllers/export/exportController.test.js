@@ -1,4 +1,5 @@
 // exportController.test.js
+const { Buffer } = require("node:buffer");
 
 // 1. MOCKING DEPENDENCIES (Memalsukan fungsi dari file lain)
 jest.mock("../../services/pdfServices", () => ({
@@ -105,7 +106,7 @@ describe("Export Controller Tests", () => {
   it("4. Harus mereturn 500 jika terjadi kesalahan sistem (Internal Error)", async () => {
     // 1. BUNGKAM CONSOLE ERROR SEMENTARA
     // Kita menugaskan mata-mata (spy) untuk menahan error agar tidak tampil di terminal
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     // 2. Simulasi database meledak / error
     getLogbooksForExport.mockRejectedValue(new Error("Database Down!"));
