@@ -101,10 +101,15 @@ jobs:
       - name: Ambil Kodingan Terbaru
         uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
 
+      - name: Setup Vercel Project Config
+        working-directory: ./frontend
+        run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+
       - name: Pull Vercel Environment Information
         working-directory: ./frontend
         run: |
-          rm -rf .vercel
           npx --yes vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
