@@ -1,4 +1,4 @@
-# 1. Nama Pipeline Lu
+# 1. Nama Pipeline
 name: Pipeline Utama Notez
 
 # 2. KONDISI PEMICU (Kapan robot ini harus bekerja?)
@@ -92,6 +92,14 @@ jobs:
             -v "${{ github.workspace }}:/src" \
             -e SEMGREP_APP_TOKEN="${{ secrets.SEMGREP_APP_TOKEN }}" \
             semgrep/semgrep semgrep ci
+      
+  Deploy-Backend:
+    runs-on: ubuntu-latest
+    needs: [Cek-Frontend, Cek-Backend, Cek-Keamanan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Memicu Deploy Otomatis ke Render
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
 
   Deploy-Vercel-Frontend:
     runs-on: ubuntu-latest
