@@ -27,7 +27,7 @@
     "multer": "^2.2.0",
     "pg-promise": "^12.7.0",
     "prisma": "^6.19.3",
-    "puppeteer": "^25.4.0"
+    "puppeteer": "^25.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

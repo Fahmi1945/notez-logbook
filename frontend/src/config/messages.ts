@@ -20,6 +20,9 @@ export const MESSAGES = {
     SUBMIT_SUCCESS: "Logbook berhasil disubmit ke mentor.",
     DELETE_FAILED: "Gagal menghapus entri logbook.",
     ACTION_FAILED: "Terjadi kesalahan saat memproses logbook.",
+    EXPORT_PDF_SUCCESS: "Laporan PDF berhasil diunduh.",
+    EXPORT_PDF_FAILED: "Gagal mengekspor PDF. Pastikan Anda sudah memiliki logbook yang disetujui.",
+    EXPORT_PDF_EMPTY: "Belum ada logbook yang disetujui untuk diekspor.",
   },
   REVIEW: {
     QUEUE_FETCH_FAILED: "Gagal memuat antrean review.",

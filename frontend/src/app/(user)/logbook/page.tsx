@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useEntries } from "@/hooks/use-entries";
+import { reportsApi } from "@/lib/api/reports";
+import { useUIStore } from "@/store/ui-store";
+import { MESSAGES } from "@/config/messages";
 import EntryFilter from "@/components/logbook/entry-filter";
+import ExportPDFModal from "@/components/logbook/export-pdf-modal";
 import EntryList from "@/components/logbook/entry-list";
 import LogbookListSkeleton from "@/components/logbook/logbook-list-skeleton";
 import { Button } from "@/components/ui/button";
@@ -10,16 +14,41 @@ import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 export default function LogbookPage() {
   const { entries, isLoading, error, fetchEntries, deleteEntry } = useEntries();
+  const showToast = useUIStore((s) => s.showToast);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const itemsPerPage = 5;
 
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries]);
+
+  const handleExportConfirm = useCallback(
+    async (startDate?: string, endDate?: string) => {
+      try {
+        setIsExporting(true);
+        await reportsApi.exportLogbookPDF({ startDate, endDate });
+        showToast(MESSAGES.LOGBOOK.EXPORT_PDF_SUCCESS, "success");
+        setIsExportModalOpen(false);
+      } catch (err: unknown) {
+        const e = err as { response?: { data?: { message?: string }; status?: number } };
+        if (e.response?.status === 404) {
+          showToast(MESSAGES.LOGBOOK.EXPORT_PDF_EMPTY, "error");
+        } else {
+          const msg = e.response?.data?.message || MESSAGES.LOGBOOK.EXPORT_PDF_FAILED;
+          showToast(msg, "error");
+        }
+      } finally {
+        setIsExporting(false);
+      }
+    },
+    [showToast]
+  );
 
   const filteredEntries = useMemo(() => {
     let result = entries;
@@ -71,6 +100,14 @@ export default function LogbookPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto font-body">
+      {/* Modal Export PDF */}
+      <ExportPDFModal
+        isOpen={isExportModalOpen}
+        isExporting={isExporting}
+        onClose={() => setIsExportModalOpen(false)}
+        onConfirm={handleExportConfirm}
+      />
+
       {/* Header */}
       <div className="mb-8 animate-fade-in-down">
         <h1 className="text-2xl font-heading font-bold text-brand-dark mb-1">
@@ -89,6 +126,7 @@ export default function LogbookPage() {
         setStatusFilter={handleSetStatusFilter}
         dateFilter={dateFilter}
         setDateFilter={handleSetDateFilter}
+        onOpenExportModal={() => setIsExportModalOpen(true)}
       />
 
       {/* Konten */}
