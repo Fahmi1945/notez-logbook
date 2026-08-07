@@ -11,6 +11,7 @@ interface EntryFilterProps {
   setStatusFilter: (status: string) => void;
   dateFilter: string;
   setDateFilter: (date: string) => void;
+  onOpenExportModal: () => void;
 }
 
 export default function EntryFilter({
@@ -20,6 +21,7 @@ export default function EntryFilter({
   setStatusFilter,
   dateFilter,
   setDateFilter,
+  onOpenExportModal,
 }: EntryFilterProps) {
   const hasActiveFilter = searchQuery !== "" || statusFilter !== "all" || dateFilter !== "";
 
@@ -109,6 +111,7 @@ export default function EntryFilter({
       <div className="flex flex-row items-center gap-2.5 w-full lg:w-auto justify-end font-body">
         <Button
           variant="outline"
+          onClick={onOpenExportModal}
           className="text-brand-primary border-brand-primary/30 hover:bg-brand-primary/8 hover:border-brand-primary/60 flex items-center gap-2 h-10 px-4 rounded-xl shadow-sm bg-brand-white text-sm"
         >
           <Printer size={16} />

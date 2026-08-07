@@ -29,6 +29,7 @@ const renderFilter = (overrides: Partial<Parameters<typeof EntryFilter>[0]> = {}
     setStatusFilter: jest.fn(),
     dateFilter: "",
     setDateFilter: jest.fn(),
+    onOpenExportModal: jest.fn(),
     ...overrides,
   };
   render(<EntryFilter {...props} />);
@@ -57,9 +58,12 @@ describe("EntryFilter", () => {
     expect(screen.getByText("Tambah Entri")).toBeInTheDocument();
   });
 
-  it("harus merender tombol 'Cetak Laporan'", () => {
-    renderFilter();
-    expect(screen.getByText("Cetak Laporan")).toBeInTheDocument();
+  it("harus merender tombol 'Cetak Laporan' dan memanggil onOpenExportModal saat diklik", () => {
+    const { onOpenExportModal } = renderFilter();
+    const btn = screen.getByText("Cetak Laporan");
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+    expect(onOpenExportModal).toHaveBeenCalledTimes(1);
   });
 
   // --- INTERAKSI: SEARCH ---
