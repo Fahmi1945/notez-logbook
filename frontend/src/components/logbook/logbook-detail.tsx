@@ -135,7 +135,7 @@ export function LogbookDetail({ entry, onEdit }: LogbookDetailProps) {
           </h3>
           <ul className="space-y-4">
             {entry.attachments.map((att) => {
-              const isImage = att.file_name.toLowerCase().match(/\.(jpg|jpeg|png)$/);
+              const isImage = att.file_name.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|svg)$/);
               const attachmentUrl = `/api/proxy/attachments/${att.id}`;
               
               return (

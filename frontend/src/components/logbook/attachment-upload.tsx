@@ -26,6 +26,7 @@ interface AttachmentUploadProps {
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
 const ALLOWED_EXTENSIONS = ".jpg,.jpeg,.png,.pdf";
+const ALLOWED_EXT_REGEX = /\.(jpg|jpeg|png|pdf)$/i;
 const MAX_SIZE_MB = 5;
 const MAX_FILES = 1;
 
@@ -61,8 +62,11 @@ export default function AttachmentUpload({
     const file = incoming[0];
     if (!file) return;
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      setError(`Format tidak didukung. Hanya JPG, PNG, JPEG, dan PDF yang diizinkan.`);
+    const isExtValid = ALLOWED_EXT_REGEX.test(file.name);
+    const isMimeValid = ALLOWED_TYPES.includes(file.type) || file.type === "";
+
+    if (!isExtValid || !isMimeValid) {
+      setError(`Format file tidak didukung. Hanya file PDF, PNG, JPG, dan JPEG yang diizinkan.`);
       return;
     }
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
