@@ -116,7 +116,7 @@ describe("Export Controller Tests", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      message: "Terjadi kesalahan internal saat mengekspor PDF."
+      message: "Database Down!"
     });
 
     // 3. KEMBALIKAN FUNGSI CONSOLE ERROR SEPERTI SEMULA

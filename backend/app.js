@@ -2,7 +2,6 @@ const express = require("express");
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const cors = require("cors");
-const csurf = require("csurf");
 const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./src/routes/auth/authRoutes");
@@ -28,31 +27,10 @@ app.use(
   }),
 );
 
-// Pasang perlindungan CSRF
-const csrfProtection = csurf({ 
-  cookie: {
-    httpOnly: true,
-    sameSite: "none",
-    secure: true
-  } 
-});
-app.use(csrfProtection);
-
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
-
-// Route untuk mengambil CSRF token
-app.get("/api/csrf-token", (req, res) => {
-  const token = req.csrfToken();
-  res.cookie("XSRF-TOKEN", token, {
-    httpOnly: false, // Perlu false agar bisa dibaca oleh JS/Axios di frontend
-    secure: true,
-    sameSite: "none",
-  });
-  res.status(200).json({ csrfToken: token });
-});
 
 // Route utama
 app.get("/", (req, res) => {
@@ -88,7 +66,6 @@ app.use("/api", userRoutes);
 // Routing upload
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
 // PERANGKAP 404: Menangkap semua request yang alamatnya salah
 app.use((req, res) => {
   console.log("❌ ALARM: Frontend mencoba mengakses rute yang salah!");
@@ -98,6 +75,15 @@ app.use((req, res) => {
   res.status(404).json({
     error: "NOT_FOUND",
     message: `Rute ${req.method} ${req.originalUrl} tidak ada di server backend ini.`,
+  });
+});
+
+// Global error handler — menangkap semua error yang di-throw middleware/controller
+app.use((err, req, res, next) => {
+  console.error("[Global Error]:", err.message, err.stack);
+  return res.status(err.status || 500).json({
+    error: "INTERNAL_SERVER_ERROR",
+    message: err.message || "Terjadi kesalahan pada server."
   });
 });
 
