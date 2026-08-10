@@ -1,3 +1,4 @@
+import axios from "axios";
 import { apiClient } from "./client";
 import { API_ENDPOINTS } from "@/lib/constants";
 
@@ -30,8 +31,8 @@ export const reportsApi = {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (error: any) {
-      if (error.response?.data instanceof Blob) {
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
         try {
           const text = await error.response.data.text();
           error.response.data = JSON.parse(text);
