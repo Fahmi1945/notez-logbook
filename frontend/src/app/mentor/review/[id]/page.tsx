@@ -189,13 +189,44 @@ export default function ReviewDetailPage({ params }: { params: Promise<{ id: str
                 Lampiran
               </h3>
               <div className="space-y-4">
-                {entry.attachments.map(att => (
-                  <PdfViewer 
-                    key={att.id} 
-                    url={getProxyAttachmentUrl(att.id)} 
-                    title={att.file_name} 
-                  />
-                ))}
+                {entry.attachments.map((att) => {
+                  const isImage = att.file_name.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|svg)$/);
+                  const attUrl = getProxyAttachmentUrl(att.id);
+
+                  if (isImage) {
+                    return (
+                      <div key={att.id} className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm max-w-xl">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={attUrl}
+                          alt={att.file_name}
+                          className="w-full h-auto max-h-96 object-contain bg-checkerboard"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
+                        <div className="absolute bottom-3 left-4 right-12 text-white">
+                          <p className="text-sm font-semibold truncate drop-shadow">{att.file_name}</p>
+                        </div>
+                        <a
+                          href={attUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center bg-black/50 text-white hover:bg-black/70 transition-colors shadow-md"
+                          title="Buka gambar di tab baru"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <PdfViewer 
+                      key={att.id} 
+                      url={attUrl} 
+                      title={att.file_name} 
+                    />
+                  );
+                })}
               </div>
             </div>
           )}

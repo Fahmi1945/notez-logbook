@@ -36,12 +36,11 @@ export async function GET(request: NextRequest) {
 
     if (data.success && data.url) {
       try {
-        const allowedOrigin = new URL(API_BASE_URL).origin;
         const redirectTarget = new URL(data.url);
-        if (redirectTarget.origin !== allowedOrigin) {
+        if (redirectTarget.protocol !== "http:" && redirectTarget.protocol !== "https:") {
           return NextResponse.json(
-            { error: "Forbidden redirect target" },
-            { status: 403 }
+            { error: "Invalid redirect protocol" },
+            { status: 400 }
           );
         }
       } catch {

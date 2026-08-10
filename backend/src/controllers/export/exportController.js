@@ -53,7 +53,7 @@ const exportMyLogbookToPDF = async (req, res) => {
     console.error("[Export PDF Error]:", error);
     return res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan internal saat mengekspor PDF."
+      message: error.message || "Terjadi kesalahan internal saat mengekspor PDF."
     });
   }
 };

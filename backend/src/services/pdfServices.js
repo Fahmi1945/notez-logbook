@@ -63,7 +63,9 @@ const generateLogbookPDF = async (pdfData) => {
     const dateStr = new Date(entry.activity_date).toLocaleDateString("id-ID");
 
     // Ambil komentar mentor terbaru (jika ada)
-    const feedback = entry.feedbacks.length > 0 ? entry.feedbacks[entry.feedbacks.length - 1].comment : "-";
+    const feedback = (entry.feedbacks && entry.feedbacks.length > 0) 
+      ? entry.feedbacks[entry.feedbacks.length - 1].comment 
+      : "-";
 
     htmlContent += `
        <tr>
@@ -87,28 +89,33 @@ const generateLogbookPDF = async (pdfData) => {
 
   // 3. Jalankan Puppeteer
   // Pastikan menambah args --no-sandbox untuk deployment di server (seperti Linux/VPS)
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  });
+  let browser = null;
+  try {
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
 
-  const page = await browser.newPage();
+    const page = await browser.newPage();
 
-  // Set konten HTML
-  // nosemgrep: javascript.puppeteer.security.audit.puppeteer-setcontent-injection.puppeteer-setcontent-injection
-  await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+    // Set konten HTML
+    // nosemgrep: javascript.puppeteer.security.audit.puppeteer-setcontent-injection.puppeteer-setcontent-injection
+    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
-  // Generate PDF
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
-    printBackground: true,
-    displayHeaderFooter: false // Matikan jika tidak butuh nomor halaman bawaan browser
-  });
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
+      printBackground: true,
+      displayHeaderFooter: false // Matikan jika tidak butuh nomor halaman bawaan browser
+    });
 
-  await browser.close();
-
-  return pdfBuffer;
+    return pdfBuffer;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
 };
 
 module.exports = {

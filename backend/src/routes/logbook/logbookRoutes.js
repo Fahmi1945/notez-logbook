@@ -34,14 +34,14 @@ router.patch("/:id/submit", verifyToken, submitLogbook);
 //DELETE
 router.delete("/:id", deleteLogbook);
 
-//GET DETAIL LOGBOOK
-router.get("/:id", getLogbook);
+//EXPORT PDF
+router.get("/export/pdf", exportMyLogbookToPDF);
 
 // GET ATTACHMENT
 router.get("/attachments/:id", viewAttachment);
 
-//EXPORT PDF
-router.get("/export/pdf", exportMyLogbookToPDF);
+//GET DETAIL LOGBOOK
+router.get("/:id", getLogbook);
 
 
 module.exports = router;
