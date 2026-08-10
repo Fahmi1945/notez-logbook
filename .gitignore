@@ -1,6 +1,8 @@
 gitea/
 postgres/
 backend/node_modules/
+.cache/
+backend/.cache/
 
 runner-data/
 coverage/
