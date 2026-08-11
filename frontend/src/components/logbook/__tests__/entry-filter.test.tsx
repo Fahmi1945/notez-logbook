@@ -30,6 +30,9 @@ const renderFilter = (overrides: Partial<Parameters<typeof EntryFilter>[0]> = {}
     dateFilter: "",
     setDateFilter: jest.fn(),
     onOpenExportModal: jest.fn(),
+    hasActiveMentor: true,
+    isCheckingMentor: false,
+    onNoMentorClick: jest.fn(),
     ...overrides,
   };
   render(<EntryFilter {...props} />);

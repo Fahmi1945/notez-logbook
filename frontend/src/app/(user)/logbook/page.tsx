@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useEntries } from "@/hooks/use-entries";
+import { useMentorStatus } from "@/hooks/use-mentor-status";
 import { reportsApi } from "@/lib/api/reports";
 import { useUIStore } from "@/store/ui-store";
 import { MESSAGES } from "@/config/messages";
@@ -10,11 +11,13 @@ import ExportPDFModal from "@/components/logbook/export-pdf-modal";
 import EntryList from "@/components/logbook/entry-list";
 import LogbookListSkeleton from "@/components/logbook/logbook-list-skeleton";
 import { Button } from "@/components/ui/button";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, WarningCircle } from "@phosphor-icons/react";
+import Link from "next/link";
 
 export default function LogbookPage() {
   const { entries, isLoading, error, fetchEntries, deleteEntry } = useEntries();
   const showToast = useUIStore((s) => s.showToast);
+  const { hasActiveMentor, isLoading: isCheckingMentor } = useMentorStatus();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -27,6 +30,10 @@ export default function LogbookPage() {
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries]);
+
+  const handleNoMentorClick = () => {
+    showToast(MESSAGES.LOGBOOK.NO_ACTIVE_MENTOR, "error");
+  };
 
   const handleExportConfirm = useCallback(
     async (startDate?: string, endDate?: string) => {
@@ -118,6 +125,30 @@ export default function LogbookPage() {
         </p>
       </div>
 
+      {/* Banner: Belum ada mentor aktif */}
+      {!isCheckingMentor && hasActiveMentor === false && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 animate-fade-in-down">
+          <WarningCircle size={20} weight="fill" className="text-amber-500 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-800">
+              {MESSAGES.LOGBOOK.NO_ACTIVE_MENTOR}
+            </p>
+            <p className="text-xs text-amber-600 mt-0.5">
+              {MESSAGES.LOGBOOK.NO_ACTIVE_MENTOR_DESC}
+            </p>
+          </div>
+          <Link href="/mentorship">
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-brand-accent bg-brand-white-bg text-amber-800 hover:bg-brand-accent hover:text-white shadow-sm"
+            >
+              Ajukan Sekarang
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Filter */}
       <EntryFilter
         searchQuery={searchQuery}
@@ -127,6 +158,9 @@ export default function LogbookPage() {
         dateFilter={dateFilter}
         setDateFilter={handleSetDateFilter}
         onOpenExportModal={() => setIsExportModalOpen(true)}
+        hasActiveMentor={hasActiveMentor}
+        isCheckingMentor={isCheckingMentor}
+        onNoMentorClick={handleNoMentorClick}
       />
 
       {/* Konten */}

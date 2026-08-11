@@ -109,7 +109,7 @@ export function DashboardClient() {
 
       {/* ④ Quick Actions + Mentor Card */}
       <div className="grid gap-6 md:grid-cols-2">
-        <QuickActions />
+        <QuickActions hasActiveMentor={!!activeMentor} />
         <MentorCard activeMentor={activeMentor} />
       </div>
     </section>
