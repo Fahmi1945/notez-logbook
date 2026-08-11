@@ -1,6 +1,6 @@
 "use client";
 
-import { MagnifyingGlass, Funnel, Printer, Plus, CalendarBlank, X } from "@phosphor-icons/react";
+import { MagnifyingGlass, Funnel, Printer, Plus, CalendarBlank, X, LockSimple } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -12,6 +12,9 @@ interface EntryFilterProps {
   dateFilter: string;
   setDateFilter: (date: string) => void;
   onOpenExportModal: () => void;
+  hasActiveMentor: boolean | null;
+  isCheckingMentor: boolean;
+  onNoMentorClick: () => void;
 }
 
 export default function EntryFilter({
@@ -22,6 +25,9 @@ export default function EntryFilter({
   dateFilter,
   setDateFilter,
   onOpenExportModal,
+  hasActiveMentor,
+  isCheckingMentor,
+  onNoMentorClick,
 }: EntryFilterProps) {
   const hasActiveFilter = searchQuery !== "" || statusFilter !== "all" || dateFilter !== "";
 
@@ -119,13 +125,27 @@ export default function EntryFilter({
           <span className="sm:hidden">Cetak</span>
         </Button>
 
-        <Link href="/logbook/new">
-          <Button className="bg-brand-accent hover:bg-orange-500 text-white flex items-center gap-2 h-10 px-4 rounded-xl shadow-sm shadow-brand-accent/25 border-none text-sm transition-all">
-            <Plus size={16} weight="bold" />
+        {hasActiveMentor ? (
+          <Link href="/logbook/new">
+            <Button className="bg-brand-accent hover:bg-orange-500 text-white flex items-center gap-2 h-10 px-4 rounded-xl shadow-sm shadow-brand-accent/25 border-none text-sm transition-all">
+              <Plus size={16} weight="bold" />
+              <span className="hidden sm:inline">Tambah Entri</span>
+              <span className="sm:hidden">Tambah</span>
+            </Button>
+          </Link>
+        ) : (
+          <Button
+            type="button"
+            onClick={onNoMentorClick}
+            disabled={isCheckingMentor}
+            title="Anda belum memiliki mentor pendamping yang aktif"
+            className="bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed flex items-center gap-2 h-10 px-4 rounded-xl text-sm shadow-sm select-none hover:bg-gray-100"
+          >
+            <LockSimple size={16} weight="bold" />
             <span className="hidden sm:inline">Tambah Entri</span>
             <span className="sm:hidden">Tambah</span>
           </Button>
-        </Link>
+        )}
       </div>
     </div>
   );

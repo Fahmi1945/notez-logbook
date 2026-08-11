@@ -14,6 +14,8 @@ export const MESSAGES = {
   },
   LOGBOOK: {
     FETCH_FAILED: "Gagal memuat data logbook.",
+    NO_ACTIVE_MENTOR: "Anda belum memiliki mentor pendamping yang aktif.",
+    NO_ACTIVE_MENTOR_DESC: "Ajukan bimbingan ke mentor terlebih dahulu dan tunggu persetujuan sebelum dapat membuat logbook.",
     CREATE_SUCCESS: "Entri logbook berhasil ditambahkan.",
     UPDATE_SUCCESS: "Entri logbook berhasil diperbarui.",
     DELETE_SUCCESS: "Entri logbook berhasil dihapus.",
