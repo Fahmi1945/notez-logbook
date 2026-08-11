@@ -127,8 +127,8 @@ export default function LogbookPage() {
 
       {/* Banner: Belum ada mentor aktif */}
       {!isCheckingMentor && hasActiveMentor === false && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 animate-fade-in-down">
-          <WarningCircle size={20} weight="fill" className="text-amber-500 mt-0.5 shrink-0" />
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 animate-fade-in-down">
+          <WarningCircle size={20} weight="fill" className="text-amber-500 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-amber-800">
               {MESSAGES.LOGBOOK.NO_ACTIVE_MENTOR}
@@ -137,11 +137,14 @@ export default function LogbookPage() {
               {MESSAGES.LOGBOOK.NO_ACTIVE_MENTOR_DESC}
             </p>
           </div>
-          <Link
-            href="/mentorship"
-            className="shrink-0 text-xs font-semibold text-amber-700 underline underline-offset-2 hover:text-amber-900 transition-colors whitespace-nowrap"
-          >
-            Ajukan Sekarang →
+          <Link href="/mentorship">
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-brand-accent bg-brand-white-bg text-amber-800 hover:bg-brand-accent hover:text-white shadow-sm"
+            >
+              Ajukan Sekarang
+            </Button>
           </Link>
         </div>
       )}
