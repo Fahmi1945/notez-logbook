@@ -1,0 +1,151 @@
+# 1. Nama Pipeline
+name: Pipeline Utama Notez
+
+# 2. KONDISI PEMICU (Kapan robot ini harus bekerja?)
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+
+# 3. DAFTAR TUGAS
+jobs:
+  Cek-Frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil Kodingan Terbaru
+        # PERBAIKAN: Menggunakan SHA untuk lolos Semgrep
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Install Frontend Dependency
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Linter Frontend
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Unit Test Frontend
+        run: |
+          cd frontend
+          npm test
+
+      - name: Typecheck Frontend (Pengganti Build Berat)
+        run: |
+          cd frontend
+          npx tsc --noEmit
+
+  Cek-Backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil Kodingan Terbaru
+        # PERBAIKAN: Menggunakan SHA untuk lolos Semgrep
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Install Backend Dependency
+        run: |
+          cd backend
+          npm ci
+
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: "postgresql://palsu:palsu@localhost:5432/db_palsu"
+        run: |
+          cd backend
+          npx prisma generate
+
+      - name: Linter Backend
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Unit Test Backend
+        env:
+          TZ: UTC
+          CI: true
+          SUPABASE_URL: "https://dummy-url.supabase.co"
+          SUPABASE_SERVICE_ROLE_KEY: "dummy-key-12345"
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/db_dummy"
+          JWT_SECRET: "dummy-jwt-secret-123"
+        run: |
+          cd backend
+          npm test -- --ci --runInBand
+
+  Cek-Keamanan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil Kodingan Terbaru
+        # PERBAIKAN: Menggunakan SHA untuk lolos Semgrep
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Scan Kode dengan Semgrep CI (Pakai Image Resmi)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/src" \
+            -e SEMGREP_APP_TOKEN="${{ secrets.SEMGREP_APP_TOKEN }}" \
+            semgrep/semgrep semgrep ci
+      
+  Deploy-Backend:
+    runs-on: ubuntu-latest
+    needs: [Cek-Frontend, Cek-Backend, Cek-Keamanan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Memicu Deploy Otomatis ke Render
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+  Deploy-Vercel-Frontend:
+    runs-on: ubuntu-latest
+    needs: [Cek-Frontend, Cek-Keamanan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Ambil Kodingan Terbaru
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Setup Vercel Project Config
+        working-directory: ./frontend
+        run: |
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+
+      - name: Pull Vercel Environment Information
+        working-directory: ./frontend
+        run: |
+          npx --yes vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build Project Artifacts untuk Vercel
+        working-directory: ./frontend
+        run: npx --yes vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy ke Vercel Production
+        working-directory: ./frontend
+        run: npx --yes vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  Kirim-Notifikasi:
+    runs-on: ubuntu-latest
+    needs: [Cek-Frontend, Cek-Backend, Cek-Keamanan, Deploy-Vercel-Frontend]
+    if: always()
+    steps:
+      - name: Laporan Sukses
+        if: ${{ needs.Cek-Frontend.result == 'success' && needs.Cek-Backend.result == 'success' && needs.Cek-Keamanan.result == 'success' && (needs.Deploy-Vercel-Frontend.result == 'success' || needs.Deploy-Vercel-Frontend.result == 'skipped') }}
+        run: echo "KELAS KINGG! Pipeline aman, semua tes, linter, build, scan keamanan, dan deployment Vercel lolos!"
+
+      - name: Laporan Gagal
+        if: ${{ needs.Cek-Frontend.result != 'success' || needs.Cek-Backend.result != 'success' || needs.Cek-Keamanan.result != 'success' || (needs.Deploy-Vercel-Frontend.result != 'success' && needs.Deploy-Vercel-Frontend.result != 'skipped') }}
+        run: echo "Waduh bro, ada yang gagal nih (entah build, keamanan, atau deployment Vercel). Buruan cek terminal lu!"
